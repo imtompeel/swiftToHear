@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "swifttohear-87bbc"
+  },
+  "targets": {
+    "swifttohear-87bbc": {
+      "hosting": {
+        "swifttohear": [
+          "swifttohear"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

@@ -1,0 +1,7 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="6" fill="#334e68"/>
+  <path d="M16 8C18.2091 8 20 9.79086 20 12V16C20 18.2091 18.2091 20 16 20C13.7909 20 12 18.2091 12 16V12C12 9.79086 13.7909 8 16 8Z" fill="white"/>
+  <path d="M16 22C18.2091 22 20 23.7909 20 26" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <path d="M12 26C12 23.7909 13.7909 22 16 22" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <text x="16" y="15" text-anchor="middle" fill="#334e68" font-family="Arial, sans-serif" font-size="8" font-weight="bold">S</text>
+</svg> 

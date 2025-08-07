@@ -1,0 +1,873 @@
+{
+  "navigation": {
+    "home": "Home",
+    "practice": "Practice",
+    "comingSoon": "Coming Soon",
+    "siteName": "Swift to Hear"
+  },
+  "auth": {
+    "signUp": {
+      "title": "Create your account",
+      "subtitle": "Join Swift to Hear and start practising deep listening",
+      "displayName": "Display Name",
+      "displayNamePlaceholder": "Enter your name",
+      "email": "Email address",
+      "emailPlaceholder": "Enter your email",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm your password",
+      "submit": "Sign up",
+      "creating": "Creating account...",
+      "switchToSignIn": "Already have an account? Sign in",
+      "validation": {
+        "emailRequired": "Email is required",
+        "emailInvalid": "Please enter a valid email address",
+        "displayNameRequired": "Display name is required",
+        "displayNameTooShort": "Display name must be at least 2 characters",
+        "passwordRequired": "Password is required",
+        "passwordTooShort": "Password must be at least 6 characters",
+        "passwordsDoNotMatch": "Passwords do not match"
+      }
+    },
+    "signIn": {
+      "title": "Sign in to your account",
+      "subtitle": "Welcome back to Swift to Hear",
+      "email": "Email address",
+      "emailPlaceholder": "Enter your email",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "submit": "Sign in",
+      "signingIn": "Signing in...",
+      "switchToSignUp": "Don't have an account? Sign up"
+    },
+    "errors": {
+      "signUpFailed": "Failed to sign up",
+      "signInFailed": "Failed to sign in",
+      "signOutFailed": "Failed to sign out"
+    }
+  },
+  "landing": {
+    "hero": {
+      "title": "Swift to Hear",
+      "subtitle": "The body of Christ is called to speak the truth in love. But how can we speak in love if we have not first learned to listen?",
+      "description": "A Christadelphian community platform for practising the art of listening. Join us in recovering the spiritual discipline of attentive, compassionate listening through our three-part conversation practice."
+    },
+    "scripture": {
+      "title": "Called to Listen",
+      "verses": {
+        "james": {
+          "text": "Let every person be quick to hear, slow to speak, slow to anger.",
+          "reference": "James 1:19"
+        },
+        "proverbs18": {
+          "text": "If one gives an answer before he hears, it is his folly and shame.",
+          "reference": "Proverbs 18:13"
+        },
+        "corinthians": {
+          "text": "I could not address you as spiritual people, but as people of the flesh… For while there is jealousy and strife among you, are you not of the flesh?",
+          "reference": "1 Corinthians 3:1–3"
+        },
+        "timothy": {
+          "text": "The Lord's servant must not be quarrelsome but kind to everyone, able to teach, patiently enduring evil, correcting his opponents with gentleness.",
+          "reference": "2 Timothy 2:24–25"
+        },
+        "ecclesiastes": {
+          "text": "Guard your steps when you go to the house of God. To draw near to listen is better than to offer the sacrifice of fools, for they do not know that they are doing evil.",
+          "reference": "Ecclesiastes 5:1"
+        }
+      }
+    },
+    "introduction": {
+      "content": "It is easy to forget how deeply the Scriptures value listening. In our culture—and often in our ecclesial conversations—there is a quiet pressure to be the one who knows, who teaches, who speaks with confidence. But Scripture pushes us toward a different kind of wisdom: not the quick retort or the flawless argument, but the attentive ear."
+    },
+    "listeningDeficit": {
+      "title": "A listening deficit",
+      "content1": "The Proverbs warn of the folly of answering before listening. James reminds us that hearing must come before speaking, and that anger—often the fruit of defensive or unchecked speech—does not produce the righteousness of God. Paul, writing to Corinth, describes a church fractured by immaturity—strife, factions, jealousy—and marks these as symptoms of people still driven by the flesh rather than the Spirit.",
+      "content2": "It is not difficult to see parallels in our own community. We are bound together in the hope of the Kingdom and in a shared love for Scripture. But we also know the pain of fractured conversations—whether over doctrine, relationships, or ecclesial practice—where we speak past one another or fail to fully see one another."
+    },
+    "practising": {
+      "title": "Practising the art of listening",
+      "intro1": "If we are to become mature in Christ, we must recover the art of listening—not passive silence, but active, compassionate attention. The kind of listening that Jesus often invited through his poetic and enigmatic statements. His parables, questions, and open-ended encounters called others to listen more deeply—to themselves, to him, and to the movement of God in their lives. This kind of listening slows us down, draws us out, and opens a space where the Wisdom might speak.",
+      "intro2": "To that end, a small group of us are beginning to experiment with a simple practice designed to help us listen better and trust more deeply in the process of godly conversation. It centres around three roles:",
+      "roles": {
+        "speaker": {
+          "title": "Speaker",
+          "description": "One who shares from Scripture, experience, or conviction."
+        },
+        "listener": {
+          "title": "Listener", 
+          "description": "One who attends fully, without rebuttal or reaction, offering back what they have heard."
+        },
+        "scribe": {
+          "title": "Scribe",
+          "description": "One who records the unfolding insights and themes."
+        }
+      },
+      "rotation": "Crucially, these roles rotate. Everyone becomes a speaker, a listener, and a scribe after an allotted time. No one controls the outcome. Instead, we place faith in what can emerge when we listen together in love. As Proverbs 20:5 says, \"The purposes of a person's heart are deep waters, but one who has insight draws them out.\" This practice is a way of drawing out—not just others' words, but the meaning beneath them, even those meanings hidden from ourselves.",
+      "discovery": "As the conversation unfolds, it often leads us to discoveries none of us could have reached alone. As Paul reminds us in 1 Corinthians 13:12, \"For now we see through a glass, darkly; but then face to face: now I know in part; but then shall I know even as also I am known.\" Our understanding is always partial. But through mutual listening, we begin to uncover not only what we don't know, but what we don't know we don't know—the blind spots and assumptions that only another's voice can help illuminate.",
+      "faith": "This practice is not about asserting control over words or ideas, but about cultivating faith in the conversation itself—faith that when we \"submit to one another out of reverence for Christ\" (Ephesians 5:21), something deeper than individual insight can emerge. We begin, as 2 Timothy 2:24–25 teaches, to \"patiently endure,\" \"correct with gentleness,\" and leave room for \"God [to] perhaps grant them repentance leading to a knowledge of the truth.\""
+    },
+    "format": {
+      "title": "Why Use This Format?",
+      "expandButton": "Why Use This Format?",
+      "intro1": "The specific structure—Speaker, Listener, Scribe—has no direct precedent in Scripture, it is a newer technology. But many of our current practices are. The early church had no hymn books, Sunday schools, or digital tools. We use these because they help us live out the principles of Scripture.",
+      "intro2": "This listening format is just that—a tool to enact timeless values:",
+      "values": {
+        "humility": {
+          "title": "Humility",
+          "verse": "Do nothing from selfish ambition or conceit, but in humility count others more significant than yourselves.",
+          "reference": "Philippians 2:3"
+        },
+        "mutualSubmission": {
+          "title": "Mutual Submission",
+          "verse": "Submitting to one another out of reverence for Christ.",
+          "reference": "Ephesians 5:21"
+        },
+        "attentiveListening": {
+          "title": "Attentive Listening",
+          "verse": "Let every person be quick to hear, slow to speak, slow to anger.",
+          "reference": "James 1:19"
+        },
+        "drawingWisdom": {
+          "title": "Drawing Out Wisdom",
+          "verse": "The purposes of a person's heart are deep waters, but one who has insight draws them out.",
+          "reference": "Proverbs 20:5"
+        }
+      },
+      "pitfalls": {
+        "title": "It also helps us guard against common pitfalls:",
+        "items": {
+          "reactiveness": "Reactiveness and debate: The Listener doesn't reply, but reflects back what they heard.",
+          "dominance": "Dominance and status: The roles rotate—no one stays in charge.",
+          "losingInsight": "Losing insight: The Scribe helps capture what might otherwise be forgotten or overlooked."
+        }
+      },
+      "grounding": "This structure is a modern method, but by testing its spirit—discerning whether it aligns with godly wisdom—we find it grounded in Scripture. We are not seeking novelty for its own sake, but new ways to become what we are called to be: a people shaped by love, wisdom, and deep mutual care.",
+      "discernment": "Some may worry that careful listening opens us to harmful or misleading ideas. But to listen is not to agree. Adam's mistake was not listening to Eve—it was obeying against God's command. Throughout Scripture, God's people are called to discern, not dismiss; to test the spirit of what is said, not to fear hearing it. Listening creates the space for such discernment. Inquiry helps us hear more exactly what is being said—so often we react not to what was truly spoken, but to a misunderstanding. The practice of attentive listening slows us down and gives space for clarification, preventing unnecessary conflict and helping the body grow in truth and love."
+    },
+    "rootedInWord": {
+      "title": "Rooted in the Word",
+      "content": "We are grounding this approach in Scripture. We believe listening is not just a communication skill; it's a spiritual practice. It aligns with the gentleness and patience Paul urged in 2 Timothy. It creates the conditions where we may correct without quarrelling, and teach without pride. It is the soil in which love, patience, and mutual forbearance can grow."
+    },
+    "invitation": {
+      "title": "An invitation",
+      "description": "We are planning a pilot event to explore this listening practice together—open to all who want to try. Whether you're confident or curious, cautious or sceptical, you are welcome.",
+      "callToAction": "If you're interested in taking part, or helping us test and shape this for broader use, please get in touch.",
+      "form": {
+        "emailPlaceholder": "Enter your email address",
+        "submitButton": "Join Waiting List",
+        "submitting": "Joining...",
+        "involvementLevel": {
+          "keepUpdated": {
+            "title": "Keep me updated",
+            "description": "Notify me about events and developments"
+          },
+          "getInvolved": {
+            "title": "Get involved",
+            "description": "I want to help test and shape this practice"
+          }
+        },
+        "success": "Thank you for joining our waiting list! We'll be in touch soon.",
+        "privacy": "We'll only use your email to update you about this listening practice. You can unsubscribe at any time."
+      }
+    },
+    "footer": {
+      "copyright": "© 2025 Swift to Hear. All rights reserved.",
+      "finalQuote": {
+        "text": "Let us listen well—to each other, to the Word, and to the Spirit who speaks through our shared searching.",
+        "reference": ""
+      }
+    }
+  },
+  "admin": {
+    "title": "Admin Panel",
+    "login": {
+      "title": "Admin Login",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "loginButton": "Login",
+      "loggingIn": "Logging in...",
+      "error": "Invalid credentials. Please try again."
+    },
+    "dashboard": {
+      "welcome": "Welcome to the Admin Panel",
+      "logoutButton": "Logout",
+      "emailSignups": {
+        "title": "Email Signups",
+        "description": "All email addresses that have signed up for the mailing list.",
+        "count": "Total signups: {{count}}",
+        "table": {
+          "email": "Email",
+          "involvement": "Involvement Level",
+          "date": "Date Joined",
+          "status": "Status"
+        },
+        "involvementLevels": {
+          "keep-updated": "Keep Updated",
+          "get-involved": "Get Involved"
+        },
+        "statuses": {
+          "pending": "Pending",
+          "confirmed": "Confirmed",
+          "unsubscribed": "Unsubscribed"
+        },
+        "noSignups": "No email signups yet.",
+        "loadingError": "Error loading email signups. Please try again."
+      }
+    }
+  },
+  "practice": {
+    "sessionSetup": {
+      "title": "Three-User Practice Session",
+      "subtitle": "Practising the Art of Listening Together",
+      "joinSession": "Join Practice Session",
+      "threeParticipantsNeeded": "Three participants needed",
+      "waitingForParticipants": "Waiting for participants to join...",
+      "waitingForThird": "Waiting for third participant...",
+      "sessionFull": "Session is full (3 participants maximum)"
+    },
+    "roles": {
+      "assignment": {
+        "title": "Choose Your Role",
+        "description": "Select your starting role for this practice session. You'll experience all three roles as the session progresses.",
+        "speaker": "Speaker",
+        "listener": "Listener", 
+        "scribe": "Scribe",
+        "autoAssign": "Auto-assign roles"
+      },
+      "speaker": {
+        "title": "Speaker Role",
+        "description": "Share what's on your heart without interruption",
+        "guidance": {
+          "takeTime": "Take time to think",
+          "pausesWelcome": "Pauses are welcome - the group is with you",
+          "listenerReady": "The listener is ready when you are",
+          "shareHeart": "Share what's on your heart"
+        },
+        "complete": "I'm finished speaking"
+      },
+      "listener": {
+        "title": "Listener Role", 
+        "description": "Reflect back what you heard without adding your own thoughts",
+        "guidance": {
+          "listenWithout": "Listen without preparing your response",
+          "noticeImpulse": "Notice your impulse to respond",
+          "readyReflect": "Ready to reflect back what you heard?",
+          "whatHeard": "What did you hear?"
+        },
+        "reflectionStarters": {
+          "whatIHeard": "What I heard was...",
+          "whatSurprised": "What surprised me...",
+          "whatImportant": "What seemed important to you..."
+        },
+        "startReflection": "Start Reflection",
+        "completeReflection": "Complete Reflection"
+      },
+      "scribe": {
+        "title": "Scribe Role",
+        "description": "Capture key insights and help the group remember",
+        "guidance": {
+          "captureKey": "Capture key phrases, not everything",
+          "noticeThemes": "Notice themes emerging",
+          "whatInsights": "What insights are surfacing?"
+        },
+        "tools": {
+          "noteArea": "Note-taking area",
+          "quickPhrases": "Quick phrase capture",
+          "themeTag": "Add theme",
+          "captureInsight": "Capture Insight",
+          "generateSummary": "Generate Summary"
+        },
+        "quickButtons": {
+          "important": "Important",
+          "insight": "Insight", 
+          "question": "Question",
+          "theme": "Theme"
+        }
+      }
+    },
+    "preparation": {
+      "title": "Session Preparation",
+      "orientation": {
+        "title": "Role Orientation",
+        "speaker": "As the Speaker, you'll share what's on your heart",
+        "listener": "As the Listener, you'll reflect back what you hear",
+        "scribe": "As the Scribe, you'll capture key insights"
+      },
+      "practiceExercise": {
+        "title": "Quick Practice",
+        "speaker": "Take a moment to think about what you'd like to share",
+        "listener": "Practice reflecting back: 'What I heard was...'",
+        "scribe": "Practice capturing a key phrase from this instruction"
+      },
+      "techCheck": {
+        "title": "Technical Check",
+        "camera": "Camera working?",
+        "microphone": "Microphone working?",
+        "connection": "Connection quality good?",
+        "ready": "Ready to begin"
+      }
+    },
+    "session": {
+      "phases": {
+        "waiting": "Waiting for participants",
+        "preparation": "Preparing for session", 
+        "listening": "Listening in progress",
+        "transition": "Switching roles",
+        "reflection": "Session reflection",
+        "completed": "Session completed"
+      },
+      "rounds": {
+        "current": "Round {{current}} of 3",
+        "switching": "Switching roles...",
+        "nextRound": "Next Round",
+        "complete": "Complete Round"
+      },
+      "timing": {
+        "timeRemaining": "{{minutes}} minutes remaining",
+        "roundDuration": "{{minutes}} minute round",
+        "takeYourTime": "Take your time"
+      }
+    },
+    "reflection": {
+      "title": "Session Reflection",
+      "sharedDebrief": "What did we discover together?",
+      "personalInsights": "Personal reflections:",
+      "questions": {
+        "whatLearned": "What did you learn about listening?",
+        "whatSurprised": "What surprised you during this session?",
+        "whatWouldChange": "What would you change for next time?"
+      },
+      "nextSteps": {
+        "title": "Next Steps",
+        "scheduleAnother": "Schedule another session",
+        "inviteOthers": "Invite others to try this practice",
+        "shareExperience": "Share your experience"
+      }
+    },
+    "errors": {
+      "connectionPoor": "Connection quality is low",
+      "connectionHelp": "Try turning off video or moving closer to your router",
+      "participantLeft": "A participant has left the session",
+      "sessionError": "Session error occurred",
+      "tryAgain": "Please try again"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish",
+    "close": "Close",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "date": "Date",
+    "time": "Time",
+    "status": "Status"
+  },
+  "dialectic": {
+    "session": {
+      "title": "Dialectic Listening Session",
+      "description": "Experience deep listening through structured conversation with role-based guidance.",
+      "videoReady": "Video connection ready",
+      "sessionTitle": "Dialectic Session",
+      "round": "Round {{current}} of {{total}}",
+      "timeRemaining": "Time Remaining",
+      "videoActive": "Video Call Active",
+      "videoCall": "Video Call",
+      "defaultTopic": "What is alive in you right now?",
+      "startSession": "Start Session",
+      "switchingRoles": "Switching roles",
+      "transitionMessage": "Preparing for the next round... Take a moment to transition into your new role.",
+      "sessionComplete": "Session Complete",
+      "reflectionPrompt": "Take a moment to reflect on your practice together.",
+      "leaveSession": "Leave Session",
+      "completeRound": "Complete Round",
+      "loading": "Initialising session...",
+      "waitingForRoleAssignment": "Waiting for Role Assignment",
+      "sessionError": "Session Error",
+      "createNewSession": "Create New Session",
+      "sessionNotFound": "Session Not Found",
+      "sessionNotFoundDescription": "The session you're looking for doesn't exist or has ended.",
+      "sessionNotStarted": "Session Not Started",
+      "sessionNotStartedDescription": "This session hasn't started yet. Please wait for the host to begin.",
+      "returnToLobby": "Return to Lobby",
+      "helloCheckIn": {
+        "title": "Hello & Check-in",
+        "description": "Take a moment to introduce yourselves and share what's alive in you right now.",
+        "timeRemaining": "Time remaining",
+        "participants": "Participants",
+        "complete": "Complete Check-in",
+        "videoCall": "Video Call",
+        "guidelines": {
+          "title": "Check-in Guidelines",
+          "introduce": "Introduce yourself briefly",
+          "share": "Share what's alive in you right now",
+          "listen": "Listen attentively to others",
+          "respect": "Respect each person's sharing"
+        }
+      },
+      "scribeFeedback": {
+        "title": "Scribe Feedback",
+        "description": "{{scribe}} will share insights from Round {{round}}",
+        "timeRemaining": "Time remaining",
+        "notesTitle": "Scribe's Notes",
+        "complete": "Complete Feedback",
+        "videoCall": "Video Call",
+        "guidelines": {
+          "title": "Guidelines for the Scribe",
+          "share": "Share key insights and observations",
+          "highlight": "Highlight important themes that emerged",
+          "themes": "Note any patterns or connections",
+          "questions": "Share any questions that arose"
+        },
+        "listenerGuidelines": {
+          "title": "Guidelines for Everyone",
+          "listen": "Listen attentively to the scribe's feedback",
+          "reflect": "Reflect on how the insights resonate with you",
+          "ask": "Ask clarifying questions if needed",
+          "respect": "Respect the scribe's perspective and insights"
+        }
+      }
+    },
+    "wordCloud": {
+      "title": "Popular Topics",
+      "description": "Here are the most suggested topics for today's session (all anonymous). Click on any topic to select it, or continue to start the session.",
+      "noTopics": "No topics were suggested for this session.",
+      "continue": "Continue to Session",
+      "legend": "Showing {{displayed}} of {{total}} suggested topics"
+    },
+    "topicSelection": {
+      "title": "What Would You Like to Explore?",
+      "yourTopic": "Your Topic",
+      "topicPlaceholder": "Share what's alive in you right now, what you're wrestling with, or what you're curious about...",
+      "topicGuidance": "The best topics are personal, specific, and matter to you. What's beneath the surface?",
+      "inspiration": "Need inspiration? Try one of these:",
+      "yourChosenTopic": "Your Chosen Topic",
+      "confirmTopic": "Use This Topic",
+      "waitingForAgreement": "Waiting for others to agree",
+      "consensus": "Consensus: {{current}}/{{total}}",
+      "depthGuidance": {
+        "title": "Going Deeper",
+        "personal": "What makes this personally important to you?",
+        "stakes": "What's really at stake here?",
+        "edge": "Where is your growing edge in this?"
+      }
+    },
+    "samplePrompts": {
+      "whatIsAlive": "What is alive in you right now?",
+      "whatChallenge": "What challenge are you currently facing?",
+      "whatTransition": "What transition are you navigating?",
+      "whatRelationship": "What relationship is calling for your attention?",
+      "whatPurpose": "What questions about purpose or calling are you holding?",
+      "whatGrowth": "Where do you sense you're being invited to grow?"
+    },
+    "roles": {
+      "chooseRole": "Choose Your Role",
+      "speaker": {
+        "title": "Speaker",
+        "description": "Share what's alive in you with focused time and gentle guidance."
+      },
+      "listener": {
+        "title": "Listener", 
+        "description": "Practice deep listening with prompts for reflection and response."
+      },
+      "scribe": {
+        "title": "Scribe",
+        "description": "Capture insights, themes, and key moments as they emerge."
+      },
+      "observer": {
+        "title": "Observer",
+        "description": "Watch the listening dynamics and learn from the process.",
+        "temporary": {
+          "title": "Temporary Observer",
+          "description": "Wait for your turn to participate actively",
+          "badge": "Temporary"
+        },
+        "permanent": {
+          "title": "Permanent Observer", 
+          "description": "Observe the entire session without participating",
+          "badge": "Permanent"
+        }
+      }
+    },
+    "setup": {
+      "duration": {
+        "label": "Session Duration",
+        "description": "How long would you like your practice session to be?",
+        "options": {
+          "5": "5 minutes (Quick practice)",
+          "10": "10 minutes (Focused session)",
+          "15": "15 minutes (Standard session)",
+          "20": "20 minutes (Deep exploration)"
+        },
+        "custom": "Custom duration",
+        "customPlaceholder": "Enter minutes (3-60)",
+        "minutes": "minutes",
+        "minError": "Minimum session time is 3 minutes",
+        "maxError": "Maximum session time is 60 minutes"
+      }
+    },
+    "creation": {
+      "title": "Create Practice Session",
+      "description": "Set up a new dialectic listening session for your group",
+      "duration": {
+        "label": "Session Duration",
+        "description": "How long should your practice session be?",
+        "help": "Choose the duration that works best for your group. You can always adjust this for future sessions.",
+        "options": {
+          "5": "5 minutes (Quick practice)",
+          "10": "10 minutes (Focused session)",
+          "15": "15 minutes (Standard session)",
+          "20": "20 minutes (Deep exploration)"
+        },
+        "custom": "Custom duration",
+        "customPlaceholder": "Enter minutes (3-60)",
+        "minutes": "minutes",
+        "minError": "Minimum session time is 3 minutes",
+        "maxError": "Maximum session time is 60 minutes"
+      },
+      "topic": {
+        "label": "Session Topic",
+        "description": "What would you like to explore together?",
+        "help": "A good topic is personal, specific, and meaningful to your group. You can also set this during the session.",
+        "placeholder": "Enter your topic or choose from suggestions below...",
+        "suggestions": "Topic suggestions",
+        "optional": "(Optional - you can set this later)"
+      },
+      "sessionName": {
+        "label": "Session Name",
+        "description": "Give your session a memorable name",
+        "help": "This helps participants identify your session",
+        "placeholder": "Enter session name...",
+        "required": "Session name is required"
+      },
+      "hostRole": {
+        "label": "Your Role as Host",
+        "description": "Choose whether you want to participate actively or observe the session",
+        "participant": {
+          "title": "Active Participant",
+          "description": "Join the rotation and participate in all roles",
+          "badge": "Participant"
+        },
+        "observer": {
+          "title": "Permanent Observer",
+          "description": "Observe the session and manage the flow without participating",
+          "badge": "Observer"
+        }
+      },
+      "hostTopics": {
+        "label": "Session Topics",
+        "description": "Add 3-5 topics you're interested in exploring. These will be available for participants to vote on and will appear in the word cloud when the session starts.",
+        "placeholder": "Add a topic suggestion...",
+        "add": "Add",
+        "sampleTopics": "Quick Add Topics",
+        "currentSuggestions": "Your Topic Suggestions"
+      },
+      "preview": {
+        "title": "Session Preview",
+        "duration": "Duration: {{duration}} minutes",
+        "participants": "Expected: 3-4 participants",
+        "format": "Format: Role-based practice with rotation",
+        "hostRole": "Host role: {{role}}"
+      },
+      "create": "Create Session",
+      "creating": "Creating session...",
+      "shareLink": {
+        "title": "Session Created!",
+        "description": "Share this link with participants to join:",
+        "copy": "Copy Link",
+        "copied": "Link copied to clipboard!",
+        "qrCode": "QR Code for easy sharing"
+      }
+    },
+    "join": {
+      "title": "Join Practice Session",
+      "welcomeTitle": "Welcome to the Session!",
+      "welcomeDescription": "Choose your role and join the session. Once you're in the lobby, you can suggest topics and interact with other participants.",
+      "sessionInfo": "Session Information",
+      "noTopicSet": "Topic will be set during the session",
+      "currentParticipants": "Current Participants",
+      "chooseRole": "Choose Your Role",
+      "onlyObserverAvailable": "Only observer role is available - all primary roles are taken",
+      "waitingToStart": "Waiting for host to start session",
+      "sessionInProgress": "Session is currently in progress",
+      "sessionFull": "This session is full",
+      "sessionFullDescription": "This session has reached its maximum capacity.",
+      "sessionNotFound": "Session not found or has ended",
+      "sessionNotFoundDescription": "This session may have ended or the link may be incorrect.",
+      "joining": "Joining session...",
+      "joinSession": "Join Session",
+      "error": "Unable to join session. Please try again.",
+      "sessionStarted": "Session has started!",
+      "firstTimeWelcome": "Welcome to dialectic listening practice!",
+      "firstTimeDescription": "Welcome to dialectic listening practice! This is a structured way to practice deep listening and authentic sharing.",
+      "roleGuidance": "Each role offers a unique way to practice deep listening",
+      "roleGuidanceDescription": "Each role offers a unique way to practice deep listening. Choose the role that feels right for you in this moment.",
+      "roleTaken": "Taken",
+      "backToCreate": "Create New Session",
+      "duration": "Duration",
+      "minutes": "minutes",
+      "host": "Host",
+      "topic": "Topic",
+      "created": "Created",
+      "participantCount": "{{current}} of {{total}} participants",
+      "estimatedStartTime": "Estimated start time",
+      "sessionId": "Session ID"
+    },
+    "lobby": {
+      "title": "Session Lobby",
+      "waitingForParticipants": "Waiting for participants to join",
+      "participantList": "Participants",
+      "markAsReady": "I'm ready to begin",
+      "waitingForAllReady": "Waiting for all participants to be ready",
+      "startSession": "Start Session",
+      "confirmStart": "Are you ready to begin the practice session?",
+      "leaveSession": "Leave Session",
+      "hostLeaveWarning": "If you leave, the session will be cancelled for all participants",
+      "speakerTips": "As the speaker, you'll share what's alive in you around the topic",
+      "listenerTips": "As the listener, you'll practice deep, attentive listening",
+      "scribeTips": "As the scribe, you'll capture key insights and themes",
+      "observerTips": "As an observer, you'll learn by watching the listening process",
+      "testAudioVideo": "Test Audio & Video",
+      "guidelines": "Session Guidelines",
+      "firstTimeHere": "First time here? Here's what to expect...",
+      "shareSession": "Invite more participants",
+      "copyLink": "Copy session link",
+      "sessionPreview": {
+        "title": "Session Overview",
+        "totalTime": "{{duration}} minutes total",
+        "rounds": "{{rounds}} rounds of {{roundDuration}} minutes each",
+        "format": "Each participant will experience all roles"
+      },
+      "topicSuggestions": {
+        "title": "Topic Suggestions",
+        "description": "Add topics you'd like to explore together. All suggestions are anonymous and will appear in the word cloud when the session starts.",
+        "placeholder": "Suggest a topic to discuss...",
+        "add": "Add Suggestion",
+        "adding": "Adding...",
+        "sampleTopics": "Quick Add Topics",
+        "currentSuggestions": "Current Suggestions",
+        "noSuggestions": "No suggestions yet. Be the first to suggest a topic!",
+        "votes": "votes",
+        "vote": "Vote",
+        "voted": "Voted"
+      }
+    },
+    "preparation": {
+      "title": "Session Preparation",
+      "description": "Let's prepare you for an excellent dialectic listening practice",
+      "steps": {
+        "orientation": "Orientation",
+        "practice": "Practice",
+        "techCheck": "Tech Check",
+        "ready": "Ready"
+      },
+      "skipSteps": "Skip preparation steps",
+      "orientation": {
+        "speaker": {
+          "title": "Your Role as the Speaker",
+          "description": "In this role, you will share what's alive in you around the chosen topic. Take your time, pause when you need to, and speak from your heart.",
+          "tips": {
+            "noPerform": "There's no need to perform or have it all figured out",
+            "pausesWelcome": "Pauses and silence are welcome - use them to go deeper",
+            "listenerWitness": "The listener is here to witness, not to respond or fix",
+            "trustEmergence": "Trust what wants to emerge in this moment"
+          }
+        },
+        "listener": {
+          "title": "Your Role as the Listener",
+          "description": "As the listener, your job is to offer your full presence and attention without preparing responses or trying to help.",
+          "tips": {
+            "noAgenda": "Listen without agenda - let go of wanting to respond",
+            "noticeMind": "Notice when your mind wants to solve or advise",
+            "presenceGift": "Your presence itself is the gift you're offering",
+            "reflectBack": "You'll have a chance to reflect back what you heard"
+          }
+        },
+        "scribe": {
+          "title": "Your Role as the Scribe",
+          "description": "As the scribe, you will capture key insights and themes that emerge during the practice.",
+          "tips": {
+            "captureEssence": "Focus on capturing essence, not exact words",
+            "noticePatterns": "Notice patterns and themes as they unfold",
+            "helpReflection": "Your notes will help with the group reflection",
+            "trustIntuition": "Trust your intuition about what feels important"
+          }
+        },
+        "observer": {
+          "title": "Your Role as the Observer",
+          "description": "As the observer, you will witness the group dynamics and practice without participating directly.",
+          "tips": {
+            "watchQuality": "Notice the quality of listening and speaking",
+            "observeSupport": "Observe how the roles support each other",
+            "rhythmFlow": "Pay attention to the rhythm and flow",
+            "learnWatching": "Learn by watching the practice unfold"
+          }
+        },
+        "videoTitle": "60-second orientation video",
+        "videoSubtitle": "Role orientation video",
+        "keyPoints": "Key points to remember:",
+        "understand": "I understand my role"
+      },
+      "practice": {
+        "speaker": {
+          "title": "Speaker Practice Exercise",
+          "instruction": "Take 30 seconds to practice speaking from your heart without planning.",
+          "prompt": "Complete this sentence: \"Right now, what feels most alive in me is...\"",
+          "guidance": "Notice any impulse to edit or perfect your words. Just let whatever wants to emerge come through."
+        },
+        "listener": {
+          "title": "Listener Practice Exercise",
+          "instruction": "Practice reflecting back what you hear without adding your own interpretation.",
+          "prompt": "Listen to this sample and reflect back the essence of what you heard.",
+          "guidance": "Focus on what you actually heard rather than what you think about it. Start with \"What I heard was...\" or \"It sounds like...\""
+        },
+        "scribe": {
+          "title": "Scribe Practice Exercise",
+          "instruction": "Practice capturing key insights and themes without trying to record everything.",
+          "prompt": "Listen to this sample conversation and note the main themes that emerge.",
+          "guidance": "Look for patterns, emotions, and core insights rather than transcribing word-for-word."
+        },
+        "observer": {
+          "title": "Observer Practice Exercise",
+          "instruction": "Practice witnessing group dynamics and communication patterns.",
+          "prompt": "Watch this sample interaction and notice the quality of listening and speaking.",
+          "guidance": "Pay attention to pace, presence, and how the roles support each other."
+        },
+        "practicePrompt": "Your Practice Prompt:",
+        "guidanceLabel": "Guidance:",
+        "timeRemaining": "Practice time remaining",
+        "startPractice": "Start Practice",
+        "skipPractice": "Skip Practice",
+        "practiceComplete": "Practice Complete ✓"
+      },
+      "techCheck": {
+        "title": "Tech Setup Check",
+        "description": "Let's make sure your camera and microphone are working properly",
+        "cameraPreview": "Camera preview will appear here",
+        "checking": "Checking",
+        "working": "working",
+        "notAvailable": "not available",
+        "allReady": "✅ All systems ready! You're good to go.",
+        "someIssues": "⚠️ Some devices aren't working. You can still continue, but the experience may be limited.",
+        "checkAgain": "Check Again",
+        "continueAnyway": "Continue Anyway",
+        "continueSession": "Continue to Session",
+        "retry": "Retry"
+      },
+      "ready": {
+        "title": "You're Ready to Begin!",
+        "description": "All preparation steps completed. Ready to start your dialectic practice session?",
+        "startSession": "Start Practice Session"
+      }
+    },
+    "assistance": {
+      "speaker": {
+        "title": "Speaker",
+        "mainGuidance": "Take time to explore slowly through your ideas, leave gaps for the listener to reflect back",
+        "comfortPrompt": "Take time to think",
+        "pauseComfort": "Pauses are welcome",
+        "durationPrompt": "Consider pausing to let the listener reflect",
+        "continuousSpeaking": "Speaking: {{duration}}",
+        "timeRemaining": "Time remaining: {{time}}",
+        "youHaveTime": "You have time to think",
+        "listenerReady": "The listener is with you",
+        "completeSpeaking": "Complete Speaking",
+        "guidance": {
+          "title": "Speaker Guidance",
+          "speakSlowly": "Speak slowly and clearly",
+          "pauseBetween": "Pause between thoughts",
+          "allowSpace": "Allow space for reflection",
+          "shareGenuine": "Share your genuine thoughts"
+        },
+        "reminders": {
+          "title": "Gentle Reminders"
+        },
+        "transitioning": "Transitioning roles...",
+        "sessionFlowNote": "The host will advance the session when ready"
+      },
+      "listener": {
+        "title": "Listener",
+        "mainGuidance": "Offer your full presence and attention without preparing responses or trying to help",
+        "listeningGuidance": "Listen without preparing your response",
+        "impulseReminder": "Notice your impulse to respond",
+        "reflectionPrompt": "What did you hear?",
+        "startReflection": "Start Reflection",
+        "reflectionActive": "Reflection in progress",
+        "guidance": {
+          "title": "Listener Guidance",
+          "listenWithout": "Listen without preparing your response",
+          "noticeImpulse": "Notice your impulse to respond",
+          "offerPresence": "Try not to steer the conversation but inquire into the speaker",
+          "reflectBack": "Reflect back what you actually heard"
+        },
+        "currentFocus": {
+          "title": "Current Focus"
+        },
+        "reflectionStarters": {
+          "whatHeard": "What I heard was...",
+          "whatSurprised": "What surprised me...",
+          "whatImportant": "What seemed important to you..."
+        }
+      },
+      "scribe": {
+        "title": "Scribe",
+        "mainGuidance": "Capture key insights and themes that emerge during the practice",
+        "captureGuidance": "Capture insights and themes as they emerge",
+        "quickPhrases": "Quick phrase buttons",
+        "themeTagging": "Theme tagging",
+        "guidance": {
+          "title": "Scribe Guidance",
+          "captureInsights": "Capture key insights and themes",
+          "avoidTranscription": "Avoid transcribing word-for-word",
+          "lookForPatterns": "Look for patterns and emotions",
+          "noteEmerging": "Note what emerges naturally"
+        },
+        "tools": {
+          "notesPlaceholder": "Capture what you're hearing..."
+        },
+        "actions": {
+          "captureInsight": "Capture Insight"
+        }
+      },
+      "observer": {
+        "title": "Observer",
+        "mainGuidance": "Witness the group dynamics and learn the dialectic process before active participation",
+        "guidance": {
+          "title": "Observer Guidance",
+          "noticeDynamics": "Notice the listening dynamics between participants",
+          "observeRoles": "Observe how roles shape the conversation flow",
+          "identifyPatterns": "Identify patterns in communication and interaction",
+          "learnProcess": "Learn the dialectic process before participating"
+        },
+        "learningFocus": {
+          "title": "Learning Focus",
+          "groupFacilitation": "Understanding group facilitation techniques",
+          "communicationPatterns": "Observing communication patterns and dynamics",
+          "beforeParticipation": "Learning before active participation",
+          "culturalAccommodation": "Cultural or accessibility accommodation"
+        },
+        "currentFocus": {
+          "title": "Current Focus Areas",
+          "listeningDynamics": "Listening Dynamics",
+          "listeningDynamicsDesc": "Notice how participants listen and respond to each other",
+          "roleShaping": "Role Shaping",
+          "roleShapingDesc": "Observe how different roles influence the conversation",
+          "emergingPatterns": "Emerging Patterns",
+          "emergingPatternsDesc": "Identify recurring themes and communication patterns"
+        }
+      }
+    }
+  }
+}

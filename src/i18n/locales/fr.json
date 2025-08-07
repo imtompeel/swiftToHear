@@ -1,0 +1,202 @@
+{
+  "navigation": {
+    "home": "Accueil",
+    "comingSoon": "Bientôt disponible",
+    "siteName": "Prompt à Écouter"
+  },
+  "landing": {
+    "hero": {
+      "title": "Prompt à Écouter",
+      "subtitle": "Pratiquer l'Art d'Écouter",
+      "description": "Une plateforme communautaire christadelphienne pour pratiquer l'art d'écouter. Rejoignez-nous pour retrouver la discipline spirituelle d'une écoute attentive et compatissante à travers notre pratique de conversation en trois parties."
+    },
+    "scripture": {
+      "title": "Appelés à Écouter",
+      "verses": {
+        "james": {
+          "text": "Que tout homme soit prompt à écouter, lent à parler, lent à se mettre en colère.",
+          "reference": "Jacques 1:19"
+        },
+        "proverbs18": {
+          "text": "Celui qui répond avant d'avoir écouté fait un acte de folie et s'attire la confusion.",
+          "reference": "Proverbes 18:13"
+        },
+        "proverbs20": {
+          "text": "Les intentions dans le cœur de l'homme sont des eaux profondes, mais l'homme intelligent y puise.",
+          "reference": "Proverbes 20:5"
+        },
+        "timothy": {
+          "text": "Il faut que le serviteur du Seigneur ne soit pas querelleur, mais qu'il soit affable pour tous, propre à enseigner, doué de patience.",
+          "reference": "2 Timothée 2:24–25"
+        },
+        "ecclesiastes": {
+          "text": "Prends garde à ton pied, lorsque tu entres dans la maison de Dieu ; approche-toi pour écouter, plutôt que pour offrir le sacrifice des insensés.",
+          "reference": "Ecclésiaste 5:1"
+        }
+      }
+    },
+    "listeningDeficit": {
+      "title": "Un déficit d'écoute",
+      "content": "Nous vivons à une époque où tout le monde parle, mais peu écoutent vraiment. Les réseaux sociaux récompensent les réactions rapides plutôt que la réflexion réfléchie. Les débats se concentrent sur la victoire plutôt que sur la compréhension. Même dans nos communautés de foi, nous pouvons nous retrouver à parler sans nous écouter, défendant des positions plutôt qu'explorant la vérité ensemble. Ce n'est pas seulement un problème de communication—c'est spirituel. Quand nous n'écoutons pas bien, nous ratons l'opportunité d'aimer bien."
+    },
+    "practising": {
+      "title": "Pratiquer l'Art d'Écouter",
+      "intro": "Nous développons une pratique simple pour aider à retrouver cet art perdu. Elle implique trois personnes en conversation, chacune prenant un rôle spécifique :",
+      "roles": {
+        "speaker": {
+          "title": "L'Orateur",
+          "description": "partage ce qu'il a sur le cœur sans interruption"
+        },
+        "listener": {
+          "title": "L'Auditeur",
+          "description": "reflète ce qu'il a entendu, sans ajouter ses propres pensées"
+        },
+        "scribe": {
+          "title": "Le Scribe",
+          "description": "capture les idées clés et aide le groupe à se souvenir de ce qui a été partagé"
+        }
+      },
+      "rotation": "Les rôles tournent, pour que chacun expérimente parler, écouter et observer. Ce n'est pas de la thérapie ou du conseil—c'est une pratique d'attention, de patience et de soin.",
+      "updated": "Cette pratique crée un espace pour le type d'écoute qui permet aux gens d'être vraiment entendus. Elle ralentit notre impulsion à répondre et crée de l'espace pour une compréhension plus profonde. Il ne s'agit pas d'accord—il s'agit d'attention. Il ne s'agit pas de résoudre des problèmes—il s'agit de créer les conditions où la sagesse peut émerger et les relations peuvent s'approfondir."
+    },
+    "format": {
+      "title": "Pourquoi utiliser ce format ?",
+      "expandButton": "Pourquoi utiliser ce format ?",
+      "intro": "Ce format d'écoute est exactement cela—un outil pour pratiquer et intégrer des valeurs intemporelles :",
+      "values": {
+        "humility": {
+          "title": "Humilité",
+          "verse": "Ne faites rien par esprit de parti ou par vaine gloire, mais que l'humilité vous fasse regarder les autres comme étant au-dessus de vous-mêmes.",
+          "reference": "Philippiens 2:3"
+        },
+        "mutualSubmission": {
+          "title": "Soumission Mutuelle",
+          "verse": "Vous soumettant les uns aux autres dans la crainte de Christ.",
+          "reference": "Éphésiens 5:21"
+        },
+        "attentiveListening": {
+          "title": "Écoute Attentive",
+          "verse": "Que tout homme soit prompt à écouter, lent à parler, lent à se mettre en colère.",
+          "reference": "Jacques 1:19"
+        },
+        "drawingWisdom": {
+          "title": "Puiser la Sagesse",
+          "verse": "Les intentions dans le cœur de l'homme sont des eaux profondes, mais l'homme intelligent y puise.",
+          "reference": "Proverbes 20:5"
+        }
+      },
+      "pitfalls": {
+        "title": "Elle nous aide aussi à nous prémunir contre les pièges courants :",
+        "items": {
+          "reactiveness": "Réactivité et débat : L'Auditeur ne répond pas, mais reflète ce qu'il a entendu.",
+          "dominance": "Dominance et statut : Les rôles tournent—personne ne reste en charge.",
+          "losingInsight": "Perdre la perspicacité : Le Scribe aide à capturer ce qui pourrait autrement être oublié ou négligé."
+        }
+      },
+      "grounding": "Cette structure est une méthode moderne, mais en testant son esprit—discernant si elle s'aligne avec la sagesse divine—nous la trouvons fondée dans l'Écriture. Nous ne cherchons pas la nouveauté pour elle-même, mais de nouvelles façons de devenir ce que nous sommes appelés à être : un peuple façonné par l'amour, la sagesse et un soin mutuel profond.",
+      "discernment": "Certains peuvent s'inquiéter qu'une écoute attentive nous ouvre à des idées nuisibles ou trompeuses. Mais écouter n'est pas être d'accord. L'erreur d'Adam n'était pas d'écouter Ève—c'était d'obéir contre le commandement de Dieu. À travers l'Écriture, le peuple de Dieu est appelé à discerner, pas à rejeter ; à tester l'esprit de ce qui est dit, pas à craindre de l'entendre. L'écoute crée l'espace pour un tel discernement. L'enquête nous aide à entendre plus exactement ce qui est dit—si souvent nous réagissons non pas à ce qui a vraiment été dit, mais à un malentendu. La pratique de l'écoute attentive nous ralentit et donne de l'espace pour la clarification, prévenant les conflits inutiles et aidant le corps à grandir dans la vérité et l'amour."
+    },
+    "rootedInWord": {
+      "title": "Enraciné dans la Parole",
+      "content": "Nous fondons cette approche dans l'Écriture. Nous croyons qu'écouter n'est pas seulement une compétence de communication ; c'est une pratique spirituelle. Elle s'aligne avec la douceur et la patience que Paul a exhortées dans 2 Timothée. Elle crée les conditions où nous pouvons corriger sans quereller, et enseigner sans orgueil. C'est le sol dans lequel l'amour, la patience et la tolérance mutuelle peuvent grandir."
+    },
+    "invitation": {
+      "title": "Une invitation",
+      "description": "Nous planifions un événement pilote pour explorer cette pratique d'écoute ensemble—ouvert à tous ceux qui veulent essayer. Que vous soyez confiant ou curieux, prudent ou sceptique, vous êtes les bienvenus.",
+      "callToAction": "Si vous êtes intéressé à participer, ou à nous aider à tester et façonner cela pour un usage plus large, veuillez rejoindre notre liste d'attente.",
+      "form": {
+        "emailPlaceholder": "Entrez votre adresse e-mail",
+        "submitButton": "Rejoindre la Liste d'Attente",
+        "submitting": "Inscription...",
+        "involvementLevel": {
+          "keepUpdated": {
+            "title": "Tenez-moi au courant",
+            "description": "Notifiez-moi des événements et développements"
+          },
+          "getInvolved": {
+            "title": "M'impliquer",
+            "description": "Je veux aider à tester et façonner cette pratique"
+          }
+        },
+        "success": "Merci de rejoindre notre liste d'attente ! Nous vous contacterons bientôt.",
+        "privacy": "Nous n'utiliserons votre e-mail que pour vous tenir au courant de cette pratique d'écoute. Vous pouvez vous désabonner à tout moment."
+      }
+    },
+    "footer": {
+      "copyright": "© 2025 Prompt à Écouter. Tous droits réservés.",
+      "finalQuote": {
+        "text": "Ainsi donc, mes frères bien-aimés, que tout homme soit prompt à écouter, lent à parler, lent à se mettre en colère.",
+        "reference": "Jacques 1:19"
+      }
+    }
+  },
+  "admin": {
+    "title": "Panneau d'Administration",
+    "login": {
+      "title": "Connexion Administrateur",
+      "emailLabel": "E-mail",
+      "passwordLabel": "Mot de passe",
+      "loginButton": "Se connecter",
+      "loggingIn": "Connexion...",
+      "error": "Identifiants invalides. Veuillez réessayer."
+    },
+    "dashboard": {
+      "welcome": "Bienvenue dans le Panneau d'Administration",
+      "logoutButton": "Se déconnecter",
+      "emailSignups": {
+        "title": "Inscriptions E-mail",
+        "description": "Toutes les adresses e-mail qui se sont inscrites à la liste de diffusion.",
+        "count": "Total des inscriptions : {{count}}",
+        "table": {
+          "email": "E-mail",
+          "involvement": "Niveau d'Implication",
+          "date": "Date d'Inscription",
+          "status": "Statut"
+        },
+        "involvementLevels": {
+          "keep-updated": "Tenir au Courant",
+          "get-involved": "S'Impliquer"
+        },
+        "statuses": {
+          "pending": "En attente",
+          "confirmed": "Confirmé",
+          "unsubscribed": "Désabonné"
+        },
+        "noSignups": "Aucune inscription e-mail pour le moment.",
+        "loadingError": "Erreur lors du chargement des inscriptions e-mail. Veuillez réessayer."
+      }
+    }
+  },
+  "practice": {
+    "session": {
+      "title": "Session de Pratique à Trois Utilisateurs",
+      "subtitle": "Pratiquer l'Art d'Écouter Ensemble",
+      "joinSession": "Rejoindre la Session de Pratique",
+      "threeParticipantsNeeded": "Trois participants nécessaires",
+      "waitingForParticipants": "En attente de participants...",
+      "waitingForThird": "En attente du troisième participant...",
+      "sessionFull": "La session est pleine (maximum 3 participants)"
+    }
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "continue": "Continuer",
+    "back": "Retour",
+    "next": "Suivant",
+    "finish": "Terminer",
+    "close": "Fermer",
+    "save": "Sauvegarder",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "confirm": "Confirmer",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "name": "Nom",
+    "date": "Date",
+    "time": "Heure",
+    "status": "Statut"
+  }
+}

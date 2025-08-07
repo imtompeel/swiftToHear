@@ -1,0 +1,212 @@
+{
+  "navigation": {
+    "home": "Inicio",
+    "comingSoon": "Próximamente",
+    "siteName": "Pronto para Escuchar"
+  },
+  "landing": {
+    "hero": {
+      "title": "Pronto para Escuchar",
+      "subtitle": "Practicando el Arte de Escuchar",
+      "description": "Una plataforma comunitaria cristadelfiana para practicar el arte de escuchar. Únete a nosotros para recuperar la disciplina espiritual de escuchar con atención y compasión a través de nuestra práctica de conversación de tres partes."
+    },
+    "scripture": {
+      "title": "Llamados a Escuchar",
+      "verses": {
+        "james": {
+          "text": "Todo hombre sea pronto para oír, tardo para hablar, tardo para airarse.",
+          "reference": "Santiago 1:19"
+        },
+        "proverbs18": {
+          "text": "Al que responde palabra antes de oír, le es fatuidad y oprobio.",
+          "reference": "Proverbios 18:13"
+        },
+        "proverbs20": {
+          "text": "Como aguas profundas es el consejo en el corazón del hombre; mas el hombre entendido lo alcanzará.",
+          "reference": "Proverbios 20:5"
+        },
+        "timothy": {
+          "text": "Porque el siervo del Señor no debe ser contencioso, sino amable para con todos, apto para enseñar, sufrido.",
+          "reference": "2 Timoteo 2:24–25"
+        },
+        "ecclesiastes": {
+          "text": "Cuando fueres a la casa de Dios, guarda tu pie; y acércate más para oír que para ofrecer el sacrificio de los necios.",
+          "reference": "Eclesiastés 5:1"
+        }
+      }
+    },
+    "listeningDeficit": {
+      "title": "Un déficit de escucha",
+      "content": "Vivimos en una época donde todos hablan, pero pocos realmente escuchan. Las redes sociales recompensan las reacciones rápidas sobre la reflexión cuidadosa. Los debates se centran en ganar en lugar de entender. Incluso en nuestras comunidades de fe, podemos encontrarnos hablando sin escucharnos, defendiendo posiciones en lugar de explorar la verdad juntos. Esto no es solo un problema de comunicación—es espiritual. Cuando no escuchamos bien, perdemos la oportunidad de amar bien."
+    },
+    "practising": {
+      "title": "Practicando el Arte de Escuchar",
+      "intro": "Estamos desarrollando una práctica simple para ayudar a recuperar este arte perdido. Involucra a tres personas en conversación, cada una tomando un papel específico:",
+      "roles": {
+        "speaker": {
+          "title": "El Orador",
+          "description": "comparte lo que tiene en el corazón sin interrupción"
+        },
+        "listener": {
+          "title": "El Oyente",
+          "description": "refleja lo que escuchó, sin agregar sus propios pensamientos"
+        },
+        "scribe": {
+          "title": "El Escriba",
+          "description": "captura ideas clave y ayuda al grupo a recordar lo que se compartió"
+        }
+      },
+      "rotation": "Los roles rotan, para que todos experimenten hablar, escuchar y observar. Esto no es terapia o consejería—es una práctica de atención, paciencia y cuidado.",
+      "updated": "Esta práctica crea espacio para el tipo de escucha que permite que las personas sean verdaderamente escuchadas. Ralentiza nuestro impulso de responder y crea espacio para una comprensión más profunda. No se trata de estar de acuerdo—se trata de atención. No se trata de resolver problemas—se trata de crear las condiciones donde la sabiduría puede emerger y las relaciones pueden profundizarse."
+    },
+    "format": {
+      "title": "¿Por qué usar este formato?",
+      "expandButton": "¿Por qué usar este formato?",
+      "intro": "Este formato de escucha es exactamente eso—una herramienta para practicar e incorporar valores eternos:",
+      "values": {
+        "humility": {
+          "title": "Humildad",
+          "verse": "Nada hagáis por contienda o por vanagloria; antes bien con humildad, estimando cada uno a los demás como superiores a él mismo.",
+          "reference": "Filipenses 2:3"
+        },
+        "mutualSubmission": {
+          "title": "Sumisión Mutua",
+          "verse": "Someteos unos a otros en el temor de Dios.",
+          "reference": "Efesios 5:21"
+        },
+        "attentiveListening": {
+          "title": "Escucha Atenta",
+          "verse": "Todo hombre sea pronto para oír, tardo para hablar, tardo para airarse.",
+          "reference": "Santiago 1:19"
+        },
+        "drawingWisdom": {
+          "title": "Extraer Sabiduría",
+          "verse": "Como aguas profundas es el consejo en el corazón del hombre; mas el hombre entendido lo alcanzará.",
+          "reference": "Proverbios 20:5"
+        }
+      },
+      "pitfalls": {
+        "title": "También nos ayuda a protegernos contra trampas comunes:",
+        "items": {
+          "reactiveness": "Reactividad y debate: El Oyente no responde, sino que refleja lo que escuchó.",
+          "dominance": "Dominancia y estatus: Los roles rotan—nadie se queda a cargo.",
+          "losingInsight": "Perder perspicacia: El Escriba ayuda a capturar lo que de otra manera podría olvidarse o pasarse por alto."
+        }
+      },
+      "grounding": "Esta estructura es un método moderno, pero al probar su espíritu—discernir si se alinea con la sabiduría divina—encontramos que está fundamentada en las Escrituras. No buscamos novedad por sí misma, sino nuevas formas de convertirnos en lo que estamos llamados a ser: un pueblo formado por el amor, la sabiduría y el cuidado mutuo profundo.",
+      "discernment": "Algunos pueden preocuparse de que escuchar cuidadosamente nos abra a ideas dañinas o engañosas. Pero escuchar no es estar de acuerdo. El error de Adán no fue escuchar a Eva—fue obedecer contra el mandato de Dios. A lo largo de las Escrituras, el pueblo de Dios es llamado a discernir, no a descartar; a probar el espíritu de lo que se dice, no a temer escucharlo. Escuchar crea el espacio para tal discernimiento. La indagación nos ayuda a escuchar más exactamente lo que se está diciendo—tan a menudo reaccionamos no a lo que realmente se habló, sino a un malentendido. La práctica de escuchar atentamente nos ralentiza y da espacio para la clarificación, previniendo conflictos innecesarios y ayudando al cuerpo a crecer en verdad y amor."
+    },
+    "rootedInWord": {
+      "title": "Enraizado en la Palabra",
+      "content": "Estamos fundamentando este enfoque en las Escrituras. Creemos que escuchar no es solo una habilidad de comunicación; es una práctica espiritual. Se alinea con la gentileza y paciencia que Pablo instó en 2 Timoteo. Crea las condiciones donde podemos corregir sin pelear, y enseñar sin orgullo. Es el suelo en el que el amor, la paciencia y la tolerancia mutua pueden crecer."
+    },
+    "invitation": {
+      "title": "Una invitación",
+      "description": "Estamos planeando un evento piloto para explorar esta práctica de escucha juntos—abierto a todos los que quieran intentar. Ya sea que estés confiado o curioso, cauteloso o escéptico, eres bienvenido.",
+      "callToAction": "Si estás interesado en participar, o ayudarnos a probar y dar forma a esto para un uso más amplio, por favor únete a nuestra lista de espera.",
+      "form": {
+        "emailPlaceholder": "Ingresa tu dirección de correo electrónico",
+        "submitButton": "Unirse a Lista de Espera",
+        "submitting": "Uniéndose...",
+        "involvementLevel": {
+          "keepUpdated": {
+            "title": "Manténme actualizado",
+            "description": "Notifícame sobre eventos y desarrollos"
+          },
+          "getInvolved": {
+            "title": "Involucrarme",
+            "description": "Quiero ayudar a probar y dar forma a esta práctica"
+          }
+        },
+        "success": "¡Gracias por unirte a nuestra lista de espera! Nos pondremos en contacto pronto.",
+        "privacy": "Solo usaremos tu correo electrónico para actualizarte sobre esta práctica de escucha. Puedes darte de baja en cualquier momento."
+      }
+    },
+    "footer": {
+      "copyright": "© 2025 Pronto para Escuchar. Todos los derechos reservados.",
+      "finalQuote": {
+        "text": "Por esto, mis amados hermanos, todo hombre sea pronto para oír, tardo para hablar, tardo para airarse.",
+        "reference": "Santiago 1:19"
+      }
+    }
+  },
+  "admin": {
+    "title": "Panel de Administración",
+    "login": {
+      "title": "Inicio de Sesión de Administrador",
+      "emailLabel": "Correo Electrónico",
+      "passwordLabel": "Contraseña",
+      "loginButton": "Iniciar Sesión",
+      "loggingIn": "Iniciando sesión...",
+      "error": "Credenciales inválidas. Por favor intenta de nuevo."
+    },
+    "dashboard": {
+      "welcome": "Bienvenido al Panel de Administración",
+      "logoutButton": "Cerrar Sesión",
+      "emailSignups": {
+        "title": "Registros de Correo",
+        "description": "Todas las direcciones de correo electrónico que se han registrado en la lista de correo.",
+        "count": "Total de registros: {{count}}",
+        "table": {
+          "email": "Correo Electrónico",
+          "involvement": "Nivel de Participación",
+          "date": "Fecha de Registro",
+          "status": "Estado"
+        },
+        "involvementLevels": {
+          "keep-updated": "Mantener Actualizado",
+          "get-involved": "Involucrarse"
+        },
+        "statuses": {
+          "pending": "Pendiente",
+          "confirmed": "Confirmado",
+          "unsubscribed": "Dado de baja"
+        },
+        "noSignups": "Aún no hay registros de correo electrónico.",
+        "loadingError": "Error cargando registros de correo electrónico. Por favor intenta de nuevo."
+      }
+    }
+  },
+  "practice": {
+    "session": {
+      "title": "Sesión de Práctica de Tres Usuarios",
+      "subtitle": "Practicando el Arte de Escuchar Juntos",
+      "joinSession": "Unirse a Sesión de Práctica",
+      "threeParticipantsNeeded": "Se necesitan tres participantes",
+      "waitingForParticipants": "Esperando que se unan los participantes...",
+      "waitingForThird": "Esperando al tercer participante...",
+      "sessionFull": "La sesión está llena (máximo 3 participantes)"
+    },
+    "roles": {
+      "assignment": {
+        "title": "Elige tu Papel",
+        "description": "Selecciona tu papel inicial para esta sesión de práctica. Experimentarás los tres papeles a medida que progrese la sesión.",
+        "speaker": "Orador",
+        "listener": "Oyente",
+        "scribe": "Escriba",
+        "autoAssign": "Asignar papeles automáticamente"
+      }
+    }
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "continue": "Continuar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "finish": "Terminar",
+    "close": "Cerrar",
+    "save": "Guardar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "confirm": "Confirmar",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "name": "Nombre",
+    "date": "Fecha",
+    "time": "Hora",
+    "status": "Estado"
+  }
+}
