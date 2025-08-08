@@ -49,6 +49,32 @@ const Navigation: React.FC = () => {
               {t('navigation.comingSoon')}
             </span>
             
+            {/* Test Links - Only show in development */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="flex items-center space-x-2">
+                <Link 
+                  to="/test"
+                  className={`text-xs font-medium transition-colors ${
+                    location.pathname === '/test' 
+                      ? 'text-accent-700 dark:text-accent-400' 
+                      : 'text-secondary-500 dark:text-secondary-500 hover:text-secondary-700 dark:hover:text-secondary-300'
+                  }`}
+                >
+                  Test
+                </Link>
+                <Link 
+                  to="/test/groups"
+                  className={`text-xs font-medium transition-colors ${
+                    location.pathname === '/test/groups' 
+                      ? 'text-accent-700 dark:text-accent-400' 
+                      : 'text-secondary-500 dark:text-secondary-500 hover:text-secondary-700 dark:hover:text-secondary-300'
+                  }`}
+                >
+                  Group Test
+                </Link>
+              </div>
+            )}
+            
             {user ? (
               <div className="flex items-center space-x-3">
                 <span className="text-sm text-secondary-600 dark:text-secondary-400">

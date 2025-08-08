@@ -83,6 +83,12 @@ class TestAuthService {
       throw new Error(`Test user ${testUserId} not found`);
     }
 
+    // If we already have an authenticated user, return it to avoid rate limiting
+    if (this.currentUser && this.currentUser.uid) {
+      console.log('🟢 TEST AUTH - Using existing authenticated user:', this.currentUser.uid);
+      return this.currentUser;
+    }
+
     try {
       // Try to sign in with existing credentials
       const userCredential = await signInWithEmailAndPassword(

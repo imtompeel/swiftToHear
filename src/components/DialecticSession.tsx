@@ -13,6 +13,8 @@ import { TopicSelection } from './TopicSelection';
 import { ReflectionPhase } from './ReflectionPhase';
 import { HelloCheckIn } from './HelloCheckIn';
 import { ScribeFeedback } from './ScribeFeedback';
+import { SessionCompletion } from './SessionCompletion';
+import { FreeDialoguePhase } from './FreeDialoguePhase';
 import { HoverTimer } from './HoverTimer';
 import WordCloud from './WordCloud';
 
@@ -59,6 +61,9 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
     error: sessionError,
     getCurrentUserParticipant,
     completeRound,
+    continueRounds,
+    startFreeDialogue,
+    endSession,
     completeHelloCheckIn,
     completeScribeFeedback,
     isHost
@@ -122,20 +127,29 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
   const sessionDuration = session?.duration || 15 * 60 * 1000;
   
   // Calculate time remaining if not provided
-  const [sessionStartTime] = React.useState<number | null>(null);
   const [currentTimeRemaining, setCurrentTimeRemaining] = React.useState(timeRemaining || sessionDuration);
   const [showWordCloud, setShowWordCloud] = React.useState(true); // Show word cloud when session starts
+  const [sessionStartTime, setSessionStartTime] = React.useState<number | null>(null);
   
-  // Update timeRemaining from prop or calculate from session
+  // Update timeRemaining from prop
   React.useEffect(() => {
     if (timeRemaining !== undefined) {
       setCurrentTimeRemaining(timeRemaining);
-    } else if (sessionStartTime) {
-      const elapsed = Date.now() - sessionStartTime;
-      const remaining = Math.max(0, sessionDuration - elapsed);
-      setCurrentTimeRemaining(remaining);
     }
-  }, [timeRemaining, sessionStartTime, sessionDuration]);
+  }, [timeRemaining]);
+
+  // Initialise timer when session becomes active
+  React.useEffect(() => {
+    if (session?.currentPhase === 'listening' && !sessionStartTime) {
+      // Session just started, record the start time
+      setSessionStartTime(Date.now());
+      console.log('Session started, recording start time:', Date.now());
+    } else if (session?.currentPhase === 'completion' || session?.currentPhase === 'reflection') {
+      // Session ended, reset timer
+      setSessionStartTime(null);
+      setCurrentTimeRemaining(sessionDuration);
+    }
+  }, [session?.currentPhase, sessionStartTime, sessionDuration]);
 
   // Custom hooks for state management and role rotation
   const sessionState = useSessionState({
@@ -146,25 +160,46 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
     currentRound,
   });
 
-  // Countdown timer effect
+  // Countdown timer effect - only run during active session phases
   React.useEffect(() => {
-    if (!sessionState.sessionActive || currentTimeRemaining <= 0) {
+    // Only count down during active session phases
+    const isActivePhase = session?.currentPhase === 'listening' || 
+                         session?.currentPhase === 'hello-checkin' || 
+                         session?.currentPhase === 'transition' ||
+                         session?.currentPhase === 'free-dialogue';
+    
+    console.log('Timer effect triggered:', {
+      phase: session?.currentPhase,
+      isActivePhase,
+      sessionStartTime,
+      currentTimeRemaining: Math.floor(currentTimeRemaining / 1000)
+    });
+    
+    if (!isActivePhase || !sessionStartTime) {
+      console.log('Timer not running - inactive phase or no start time');
       return;
     }
 
     const timer = setInterval(() => {
-      setCurrentTimeRemaining(prev => {
-        const newTime = Math.max(0, prev - 1000);
-        if (newTime === 0) {
-          // Session time is up
-          console.log('Session time is up');
-        }
-        return newTime;
+      const elapsed = Date.now() - sessionStartTime;
+      const remaining = Math.max(0, sessionDuration - elapsed);
+      setCurrentTimeRemaining(remaining);
+      
+      // Debug logging (remove in production)
+      console.log('Timer tick:', {
+        elapsed: Math.floor(elapsed / 1000),
+        remaining: Math.floor(remaining / 1000),
+        phase: session?.currentPhase
       });
+      
+      if (remaining === 0) {
+        // Session time is up
+        console.log('Session time is up');
+      }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [sessionState.sessionActive, currentTimeRemaining]);
+  }, [session?.currentPhase, sessionStartTime, sessionDuration]);
 
   // Handle session start - record start time
 
@@ -350,7 +385,7 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
   };
 
   // Main session container with persistent video
-  if (session?.currentPhase === 'hello-checkin' || session?.currentPhase === 'listening' || session?.currentPhase === 'transition') {
+  if (session?.currentPhase === 'hello-checkin' || session?.currentPhase === 'listening' || session?.currentPhase === 'transition' || session?.currentPhase === 'completion' || session?.currentPhase === 'free-dialogue') {
     return (
       <div data-testid="dialectic-session" className="max-w-6xl mx-auto p-6">
         <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg overflow-hidden">
@@ -523,6 +558,25 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
                   participants={session?.participants || []}
                   isHost={isHost}
                   hideVideo={true} // Hide video since it's now in the persistent area
+                />
+              )}
+
+              {session?.currentPhase === 'completion' && (
+                <SessionCompletion
+                  currentRound={session?.currentRound || 1}
+                  totalRounds={roleRotation.getTotalRounds()}
+                  onContinueRounds={continueRounds}
+                  onStartFreeDialogue={startFreeDialogue}
+                  onEndSession={endSession}
+                  isHost={isHost}
+                />
+              )}
+
+              {session?.currentPhase === 'free-dialogue' && (
+                <FreeDialoguePhase
+                  onEndSession={endSession}
+                  isHost={isHost}
+                  participants={session?.participants || []}
                 />
               )}
             </div>

@@ -90,20 +90,7 @@
       "title": "Practising the art of listening",
       "intro1": "If we are to become mature in Christ, we must recover the art of listening—not passive silence, but active, compassionate attention. The kind of listening that Jesus often invited through his poetic and enigmatic statements. His parables, questions, and open-ended encounters called others to listen more deeply—to themselves, to him, and to the movement of God in their lives. This kind of listening slows us down, draws us out, and opens a space where the Wisdom might speak.",
       "intro2": "To that end, a small group of us are beginning to experiment with a simple practice designed to help us listen better and trust more deeply in the process of godly conversation. It centres around three roles:",
-      "roles": {
-        "speaker": {
-          "title": "Speaker",
-          "description": "One who shares from Scripture, experience, or conviction."
-        },
-        "listener": {
-          "title": "Listener", 
-          "description": "One who attends fully, without rebuttal or reaction, offering back what they have heard."
-        },
-        "scribe": {
-          "title": "Scribe",
-          "description": "One who records the unfolding insights and themes."
-        }
-      },
+
       "rotation": "Crucially, these roles rotate. Everyone becomes a speaker, a listener, and a scribe after an allotted time. No one controls the outcome. Instead, we place faith in what can emerge when we listen together in love. As Proverbs 20:5 says, \"The purposes of a person's heart are deep waters, but one who has insight draws them out.\" This practice is a way of drawing out—not just others' words, but the meaning beneath them, even those meanings hidden from ourselves.",
       "discovery": "As the conversation unfolds, it often leads us to discoveries none of us could have reached alone. As Paul reminds us in 1 Corinthians 13:12, \"For now we see through a glass, darkly; but then face to face: now I know in part; but then shall I know even as also I am known.\" Our understanding is always partial. But through mutual listening, we begin to uncover not only what we don't know, but what we don't know we don't know—the blind spots and assumptions that only another's voice can help illuminate.",
       "faith": "This practice is not about asserting control over words or ideas, but about cultivating faith in the conversation itself—faith that when we \"submit to one another out of reverence for Christ\" (Ephesians 5:21), something deeper than individual insight can emerge. We begin, as 2 Timothy 2:24–25 teaches, to \"patiently endure,\" \"correct with gentleness,\" and leave room for \"God [to] perhaps grant them repentance leading to a knowledge of the truth.\""
@@ -285,30 +272,17 @@
           "question": "Question",
           "theme": "Theme"
         }
+      },
+      "participant": {
+        "title": "Participant",
+        "description": "Active participant in the conversation"
+      },
+      "observer": {
+        "title": "Observer",
+        "description": "Observing the conversation flow"
       }
     },
-    "preparation": {
-      "title": "Session Preparation",
-      "orientation": {
-        "title": "Role Orientation",
-        "speaker": "As the Speaker, you'll share what's on your heart",
-        "listener": "As the Listener, you'll reflect back what you hear",
-        "scribe": "As the Scribe, you'll capture key insights"
-      },
-      "practiceExercise": {
-        "title": "Quick Practice",
-        "speaker": "Take a moment to think about what you'd like to share",
-        "listener": "Practice reflecting back: 'What I heard was...'",
-        "scribe": "Practice capturing a key phrase from this instruction"
-      },
-      "techCheck": {
-        "title": "Technical Check",
-        "camera": "Camera working?",
-        "microphone": "Microphone working?",
-        "connection": "Connection quality good?",
-        "ready": "Ready to begin"
-      }
-    },
+
     "session": {
       "phases": {
         "waiting": "Waiting for participants",
@@ -438,6 +412,48 @@
           "ask": "Ask clarifying questions if needed",
           "respect": "Respect the scribe's perspective and insights"
         }
+      },
+      "completion": {
+        "title": "Session Completion",
+        "completedRounds": "You've completed {{current}} of {{total}} rounds",
+        "whatNext": "What would you like to do next?",
+        "waitingForHost": "Waiting for the host to choose the next step...",
+        "continueRounds": {
+          "title": "Continue with Rounds",
+          "description": "Start another complete cycle of role rotations",
+          "button": "Continue Rounds"
+        },
+        "freeDialogue": {
+          "title": "Free-flowing Dialogue",
+          "description": "Switch to unstructured conversation",
+          "button": "Start Free Dialogue"
+        },
+        "endSession": {
+          "title": "End Session",
+          "description": "Complete the session and move to reflection",
+          "button": "End Session"
+        }
+      },
+      "freeDialogue": {
+        "title": "Free-flowing Dialogue",
+        "description": "Continue your conversation in an unstructured format. Share insights, explore topics, and practice deep listening together.",
+        "guidance": {
+          "title": "Dialogue Guidelines",
+          "shareInsights": "Share insights from your structured practice",
+          "exploreTopics": "Explore topics that emerged during the session",
+          "practiceListening": "Continue practising deep listening",
+          "bePresent": "Stay present and attentive to each other"
+        },
+        "participants": {
+          "title": "Active Participants"
+        },
+        "notes": {
+          "title": "Session Notes",
+          "description": "Capture any insights or observations from your free dialogue",
+          "placeholder": "Share any thoughts, insights, or observations from your conversation..."
+        },
+        "endSession": "End Session",
+        "hostControl": "The host will control when to end this phase"
       }
     },
     "wordCloud": {
@@ -501,23 +517,7 @@
         }
       }
     },
-    "setup": {
-      "duration": {
-        "label": "Session Duration",
-        "description": "How long would you like your practice session to be?",
-        "options": {
-          "5": "5 minutes (Quick practice)",
-          "10": "10 minutes (Focused session)",
-          "15": "15 minutes (Standard session)",
-          "20": "20 minutes (Deep exploration)"
-        },
-        "custom": "Custom duration",
-        "customPlaceholder": "Enter minutes (3-60)",
-        "minutes": "minutes",
-        "minError": "Minimum session time is 3 minutes",
-        "maxError": "Maximum session time is 60 minutes"
-      }
-    },
+
     "creation": {
       "title": "Create Practice Session",
       "description": "Set up a new dialectic listening session for your group",
@@ -579,7 +579,9 @@
         "duration": "Duration: {{duration}} minutes",
         "participants": "Expected: 3-4 participants",
         "format": "Format: Role-based practice with rotation",
-        "hostRole": "Host role: {{role}}"
+        "hostRole": "Host role: {{role}}",
+        "groupMode": "Group mode: {{mode}}",
+        "groupConfig": "Groups: {{size}} people, {{strategy}} observers"
       },
       "create": "Create Session",
       "creating": "Creating session...",
@@ -589,6 +591,47 @@
         "copy": "Copy Link",
         "copied": "Link copied to clipboard!",
         "qrCode": "QR Code for easy sharing"
+      },
+      "groupMode": {
+        "label": "Session Type",
+        "description": "Choose how participants will be organised during the session",
+        "single": {
+          "title": "Single Session",
+          "description": "All participants in one group (3-4 people)",
+          "badge": "Single Group"
+        },
+        "multi": {
+          "title": "Group Sessions",
+          "description": "Break into smaller groups (3-4 people per group)",
+          "badge": "Multiple Groups"
+        }
+      },
+      "groupConfig": {
+        "label": "Group Configuration",
+        "description": "Configure how participants will be grouped",
+        "groupSize": {
+          "label": "Group Size",
+          "3": "3 people per group",
+          "4": "4 people per group",
+          "mixed": "Mixed sizes",
+          "mixedDesc": "Balance between 3-4 people",
+          "people": "{{count}} people per group"
+        },
+        "autoAssign": {
+          "label": "Auto-assign Roles",
+          "description": "Automatically assign speaker, listener, scribe, and observer roles"
+        },
+        "observerStrategy": {
+          "label": "Observer Strategy",
+          "distribute": {
+            "title": "Distribute Observers",
+            "description": "Spread observers across all groups"
+          },
+          "central": {
+            "title": "Central Observers",
+            "description": "Keep observers in one group"
+          }
+        }
       }
     },
     "join": {
@@ -628,11 +671,9 @@
     "lobby": {
       "title": "Session Lobby",
       "waitingForParticipants": "Waiting for participants to join",
-      "participantList": "Participants",
       "markAsReady": "I'm ready to begin",
       "waitingForAllReady": "Waiting for all participants to be ready",
       "startSession": "Start Session",
-      "confirmStart": "Are you ready to begin the practice session?",
       "leaveSession": "Leave Session",
       "hostLeaveWarning": "If you leave, the session will be cancelled for all participants",
       "speakerTips": "As the speaker, you'll share what's alive in you around the topic",
@@ -662,6 +703,92 @@
         "votes": "votes",
         "vote": "Vote",
         "voted": "Voted"
+      },
+      "groupSession": {
+        "title": "Group Session Lobby",
+        "description": "Review group assignments and prepare for your session"
+      },
+      "sessionInfo": {
+        "title": "Session Information",
+        "name": "Session Name",
+        "participants": "Participants",
+        "mode": "Session Mode"
+      },
+      "participantStatus": {
+        "title": "Participant Status",
+        "ready": "{{count}} of {{total}} ready"
+      },
+      "actions": {
+        "title": "Actions",
+        "copyLink": "Copy Link",
+        "shuffleGroups": "Shuffle Groups",
+        "shuffling": "Shuffling...",
+        "ready": "I'm Ready",
+        "notReady": "Not Ready",
+        "startSession": "Start Session",
+        "leaveSession": "Leave Session",
+        "cancelSession": "Cancel Session"
+      },
+      "groupPreview": {
+        "title": "Group Assignment Preview",
+        "groupName": "Group {{name}}",
+        "participants": "participants"
+      },
+      "participantList": {
+        "title": "All Participants",
+        "you": "You"
+      },
+      "confirmStart": {
+        "title": "Start Session",
+        "description": "Are you ready to begin the group session? All participants will be moved to their assigned groups.",
+        "cancel": "Cancel",
+        "confirm": "Start Session"
+      },
+      "confirmLeave": {
+        "title": "Leave Session",
+        "description": "Are you sure you want to leave? This will cancel the session for all participants.",
+        "cancel": "Cancel",
+        "confirm": "Leave Session"
+      }
+    },
+    "dashboard": {
+      "title": "Group Management Dashboard",
+      "sessionInfo": {
+        "duration": "Duration",
+        "groups": "Groups",
+        "totalParticipants": "Total Participants"
+      },
+      "groupStatus": {
+        "active": "Active",
+        "paused": "Paused",
+        "completed": "Completed",
+        "waiting": "Waiting"
+      },
+      "actions": {
+        "startAll": "Start All",
+        "pauseAll": "Pause All",
+        "endAll": "End All"
+      },
+      "group": {
+        "title": "Group {{name}}",
+        "participants": "participants",
+        "phase": "Phase: {{phase}}",
+        "round": "Round {{current}} of {{total}}",
+        "progress": "Progress",
+        "actions": {
+          "monitor": "Monitor",
+          "start": "Start",
+          "pause": "Pause",
+          "resume": "Resume",
+          "end": "End"
+        }
+      },
+      "summary": {
+        "title": "Session Summary",
+        "activeGroups": "Active Groups",
+        "pausedGroups": "Paused Groups",
+        "completedGroups": "Completed Groups",
+        "totalParticipants": "Total Participants"
       }
     },
     "preparation": {

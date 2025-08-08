@@ -1,17 +1,17 @@
 import { renderHook, act } from '@testing-library/react';
 import { useSpeakingTimer } from '../useSpeakingTimer';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock timers
-jest.useFakeTimers();
+vi.useFakeTimers();
 
 describe('useSpeakingTimer', () => {
   beforeEach(() => {
-    jest.clearAllTimers();
+    vi.clearAllTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should initialize with default values', () => {
@@ -35,7 +35,7 @@ describe('useSpeakingTimer', () => {
     act(() => {
       // This would normally be triggered by Daily frame events
       // For testing, we'll simulate the state changes directly
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     expect(result.current.isSpeakerActive).toBe(true);
@@ -49,14 +49,14 @@ describe('useSpeakingTimer', () => {
 
     // Simulate 30 seconds of speaking
     act(() => {
-      jest.advanceTimersByTime(30000);
+      vi.advanceTimersByTime(30000);
     });
 
     expect(result.current.shouldShowTimer).toBe(false);
 
     // Simulate 40 seconds of speaking
     act(() => {
-      jest.advanceTimersByTime(10000);
+      vi.advanceTimersByTime(10000);
     });
 
     expect(result.current.shouldShowTimer).toBe(true);
@@ -70,7 +70,7 @@ describe('useSpeakingTimer', () => {
 
     // Simulate 65 seconds of speaking
     act(() => {
-      jest.advanceTimersByTime(65000);
+      vi.advanceTimersByTime(65000);
     });
 
     expect(result.current.formatDuration()).toBe('1:05');
@@ -84,14 +84,14 @@ describe('useSpeakingTimer', () => {
 
     // Simulate speaker speaking for 40 seconds
     act(() => {
-      jest.advanceTimersByTime(40000);
+      vi.advanceTimersByTime(40000);
     });
 
     expect(result.current.shouldShowTimer).toBe(true);
 
     // Simulate speaker stopping for 3 seconds
     act(() => {
-      jest.advanceTimersByTime(3000);
+      vi.advanceTimersByTime(3000);
     });
 
     expect(result.current.shouldShowTimer).toBe(false);
@@ -106,14 +106,14 @@ describe('useSpeakingTimer', () => {
 
     // Simulate speaker speaking for 40 seconds
     act(() => {
-      jest.advanceTimersByTime(40000);
+      vi.advanceTimersByTime(40000);
     });
 
     expect(result.current.shouldShowTimer).toBe(true);
 
     // Simulate listener speaking for 5 seconds
     act(() => {
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
     });
 
     expect(result.current.shouldShowTimer).toBe(false);

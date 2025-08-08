@@ -298,6 +298,63 @@ export const useSession = () => {
     }
   }, [session, isHost, currentUserId]);
 
+  // Continue with another round cycle (only host can call this)
+  const continueRounds = useCallback(async () => {
+    if (!session || !isHost) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const updatedSession = await FirestoreSessionService.continueRounds(session.sessionId, currentUserId);
+      if (updatedSession) {
+        setSession(updatedSession);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to continue rounds');
+    } finally {
+      setLoading(false);
+    }
+  }, [session, isHost, currentUserId]);
+
+  // Start free-flowing dialogue (only host can call this)
+  const startFreeDialogue = useCallback(async () => {
+    if (!session || !isHost) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const updatedSession = await FirestoreSessionService.startFreeDialogue(session.sessionId, currentUserId);
+      if (updatedSession) {
+        setSession(updatedSession);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to start free dialogue');
+    } finally {
+      setLoading(false);
+    }
+  }, [session, isHost, currentUserId]);
+
+  // End session and move to reflection (only host can call this)
+  const endSession = useCallback(async () => {
+    if (!session || !isHost) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const updatedSession = await FirestoreSessionService.endSession(session.sessionId, currentUserId);
+      if (updatedSession) {
+        setSession(updatedSession);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to end session');
+    } finally {
+      setLoading(false);
+    }
+  }, [session, isHost, currentUserId]);
+
   // Leave session
   const leaveSession = useCallback(async () => {
     if (!session) return;
@@ -365,6 +422,9 @@ export const useSession = () => {
     completeHelloCheckIn,
     completeScribeFeedback,
     completeRound,
+    continueRounds,
+    startFreeDialogue,
+    endSession,
     leaveSession,
     updateUserName,
     

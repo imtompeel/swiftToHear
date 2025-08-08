@@ -11,6 +11,7 @@ import { Auth } from './components/Auth';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { SessionTestPage } from './components/SessionTestPage';
 import { AdvancedSessionTestPage } from './components/AdvancedSessionTestPage';
+import { GroupSessionTestPage } from './components/GroupSessionTestPage';
 import Navigation from './components/Navigation';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
@@ -46,6 +47,7 @@ function App() {
               <Route path="/admin" element={<AdminPanel />} />
               <Route path="/test" element={<SessionTestPage />} />
               <Route path="/test/advanced" element={<AdvancedSessionTestPage />} />
+              <Route path="/test/groups" element={<GroupSessionTestPage />} />
             </Routes>
           </div>
         </Router>

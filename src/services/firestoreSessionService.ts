@@ -27,8 +27,9 @@ export interface SessionData {
   minParticipants: number;
   maxParticipants: number;
   topicSuggestions: TopicSuggestion[];
-  currentPhase?: 'topic-selection' | 'hello-checkin' | 'listening' | 'transition' | 'reflection' | 'completed' | undefined;
+  currentPhase?: 'topic-selection' | 'hello-checkin' | 'listening' | 'transition' | 'reflection' | 'completion' | 'free-dialogue' | 'completed' | undefined;
   phaseStartTime?: Timestamp;
+  currentRound?: number;
 }
 
 export interface TopicSuggestion {
@@ -209,6 +210,7 @@ export class FirestoreSessionService {
       await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
         status: 'active',
         currentPhase: 'hello-checkin',
+        currentRound: 1,
         phaseStartTime: serverTimestamp()
       });
 
@@ -280,29 +282,119 @@ export class FirestoreSessionService {
         throw new Error('Only the host can complete rounds');
       }
 
-      // Rotate roles for all participants
-      const roleOrder = ['speaker', 'listener', 'scribe', 'observer'];
-      const updatedParticipants = session.participants.map(participant => {
-        const currentRoleIndex = roleOrder.indexOf(participant.role);
-        const nextRoleIndex = (currentRoleIndex + 1) % roleOrder.length;
-        return {
-          ...participant,
-          role: roleOrder[nextRoleIndex]
-        };
-      });
+      // Get current round (default to 1 if not set)
+      const currentRound = session.currentRound || 1;
+      
+      // Check if this was the final round (3 or 4 rounds depending on participants)
+      const participantCount = session.participants.length;
+      const totalRounds = participantCount === 3 ? 3 : 4;
+      
+      if (currentRound >= totalRounds) {
+        // Move to completion phase instead of transition
+        await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
+          currentPhase: 'completion',
+          phaseStartTime: serverTimestamp()
+        });
+      } else {
+        // Rotate roles for all participants
+        const roleOrder = ['speaker', 'listener', 'scribe', 'observer'];
+        const updatedParticipants = session.participants.map(participant => {
+          const currentRoleIndex = roleOrder.indexOf(participant.role);
+          const nextRoleIndex = (currentRoleIndex + 1) % roleOrder.length;
+          return {
+            ...participant,
+            role: roleOrder[nextRoleIndex]
+          };
+        });
 
+        await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
+          participants: updatedParticipants,
+          currentPhase: 'transition',
+          currentRound: currentRound + 1,
+          phaseStartTime: serverTimestamp()
+        });
+      }
+
+      const updatedSession = await this.getSession(sessionId);
+      return updatedSession;
+    } catch (error) {
+      console.error('Error completing round:', error);
+      return null;
+    }
+  }
+
+  // Continue with another round cycle (only host can call this)
+  static async continueRounds(sessionId: string, hostId: string): Promise<SessionData | null> {
+    try {
+      const session = await this.getSession(sessionId);
+      if (!session) return null;
+
+      // Verify the caller is the host
+      if (session.hostId !== hostId) {
+        throw new Error('Only the host can continue rounds');
+      }
+
+      // Reset to listening phase to start new round cycle
       await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
-        participants: updatedParticipants,
-        currentPhase: 'transition',
+        currentPhase: 'listening',
+        currentRound: 1,
         phaseStartTime: serverTimestamp()
       });
 
-      return {
-        ...session,
-        participants: updatedParticipants
-      };
+      const updatedSession = await this.getSession(sessionId);
+      return updatedSession;
     } catch (error) {
-      console.error('Error completing round:', error);
+      console.error('Error continuing rounds:', error);
+      return null;
+    }
+  }
+
+  // Start free-flowing dialogue (only host can call this)
+  static async startFreeDialogue(sessionId: string, hostId: string): Promise<SessionData | null> {
+    try {
+      const session = await this.getSession(sessionId);
+      if (!session) return null;
+
+      // Verify the caller is the host
+      if (session.hostId !== hostId) {
+        throw new Error('Only the host can start free dialogue');
+      }
+
+      // Move to free dialogue phase
+      await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
+        currentPhase: 'free-dialogue',
+        phaseStartTime: serverTimestamp()
+      });
+
+      const updatedSession = await this.getSession(sessionId);
+      return updatedSession;
+    } catch (error) {
+      console.error('Error starting free dialogue:', error);
+      return null;
+    }
+  }
+
+  // End session and move to reflection (only host can call this)
+  static async endSession(sessionId: string, hostId: string): Promise<SessionData | null> {
+    try {
+      const session = await this.getSession(sessionId);
+      if (!session) return null;
+
+      // Verify the caller is the host
+      if (session.hostId !== hostId) {
+        throw new Error('Only the host can end the session');
+      }
+
+      // Move to reflection phase
+      await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
+        currentPhase: 'reflection',
+        phaseStartTime: serverTimestamp()
+      });
+
+      const updatedSession = await this.getSession(sessionId);
+      return updatedSession;
+    } catch (error) {
+      console.error('Error ending session:', error);
       return null;
     }
   }

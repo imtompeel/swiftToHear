@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { useTheme } from '../contexts/ThemeContext';
+import { GroupConfiguration } from '../types/groupSession';
 
 interface SessionCreationProps {
   onSessionCreate: (sessionData: SessionData) => Promise<void>;
@@ -17,6 +18,8 @@ interface SessionData {
   participants: any[];
   status: 'waiting';
   topicSuggestions: TopicSuggestion[];
+  groupMode?: 'single' | 'multi';
+  groupConfiguration?: GroupConfiguration;
 }
 
 interface TopicSuggestion {
@@ -43,6 +46,15 @@ const SessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) =>
   const [sessionCreated, setSessionCreated] = useState(false);
   const [sessionLink, setSessionLink] = useState('');
   const [hostRole, setHostRole] = useState<'participant' | 'observer-permanent'>('participant');
+  
+  // Group session state
+  const [groupMode, setGroupMode] = useState<'single' | 'multi'>('single');
+  const [groupConfiguration, setGroupConfiguration] = useState<GroupConfiguration>({
+    groupSize: 4,
+    autoAssignRoles: true,
+    groupRotation: 'balanced',
+    observerStrategy: 'distribute'
+  });
 
   const durationOptions = [
     { value: 5 * 60 * 1000, label: '5', description: t('dialectic.creation.duration.options.5') },
@@ -160,7 +172,9 @@ const SessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) =>
         createdAt: new Date(),
         participants: [],
         status: 'waiting',
-        topicSuggestions: hostSuggestions
+        topicSuggestions: hostSuggestions,
+        groupMode: groupMode,
+        groupConfiguration: groupMode === 'multi' ? groupConfiguration : undefined
       };
 
       // Call the parent's onSessionCreate and wait for it to complete
@@ -487,6 +501,161 @@ const SessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) =>
           </div>
         </div>
 
+        {/* Group Mode Selection */}
+        <div className="space-y-4">
+          <div>
+            <label className="block text-lg font-medium text-primary-900 dark:text-primary-100 mb-2">
+              {t('dialectic.creation.groupMode.label')}
+            </label>
+            <p className="text-secondary-600 dark:text-secondary-400 mb-4">
+              {t('dialectic.creation.groupMode.description')}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              onClick={() => setGroupMode('single')}
+              className={`p-4 rounded-lg border-2 text-left transition-colors ${
+                groupMode === 'single'
+                  ? 'border-accent-500 bg-accent-50 dark:bg-accent-900'
+                  : 'border-secondary-200 dark:border-secondary-600 hover:border-secondary-300 dark:hover:border-secondary-500'
+              }`}
+              data-testid="group-mode-single"
+            >
+              <div className="flex items-center mb-2">
+                <span className="text-2xl mr-3">👥</span>
+                <div>
+                  <div className="font-semibold text-primary-900 dark:text-primary-100">
+                    {t('dialectic.creation.groupMode.single.title')}
+                  </div>
+                  <div className="text-xs text-accent-600 dark:text-accent-400">
+                    {t('dialectic.creation.groupMode.single.badge')}
+                  </div>
+                </div>
+              </div>
+              <div className="text-sm text-secondary-600 dark:text-secondary-400">
+                {t('dialectic.creation.groupMode.single.description')}
+              </div>
+            </button>
+
+            <button
+              onClick={() => setGroupMode('multi')}
+              className={`p-4 rounded-lg border-2 text-left transition-colors ${
+                groupMode === 'multi'
+                  ? 'border-accent-500 bg-accent-50 dark:bg-accent-900'
+                  : 'border-secondary-200 dark:border-secondary-600 hover:border-secondary-300 dark:hover:border-secondary-500'
+              }`}
+              data-testid="group-mode-multi"
+            >
+              <div className="flex items-center mb-2">
+                <span className="text-2xl mr-3">🔀</span>
+                <div>
+                  <div className="font-semibold text-primary-900 dark:text-primary-100">
+                    {t('dialectic.creation.groupMode.multi.title')}
+                  </div>
+                  <div className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                    {t('dialectic.creation.groupMode.multi.badge')}
+                  </div>
+                </div>
+              </div>
+              <div className="text-sm text-secondary-600 dark:text-secondary-400">
+                {t('dialectic.creation.groupMode.multi.description')}
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Group Configuration - Only show for multi-group mode */}
+        {groupMode === 'multi' && (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-lg font-medium text-primary-900 dark:text-primary-100 mb-2">
+                {t('dialectic.creation.groupConfig.label')}
+              </label>
+              <p className="text-secondary-600 dark:text-secondary-400 mb-4">
+                {t('dialectic.creation.groupConfig.description')}
+              </p>
+            </div>
+
+            {/* Group Size Selection */}
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-primary-900 dark:text-primary-100">
+                {t('dialectic.creation.groupConfig.groupSize.label')}
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                {[3, 4, 'mixed'].map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => setGroupConfiguration(prev => ({ ...prev, groupSize: size as 3 | 4 | 'mixed' }))}
+                    className={`p-3 rounded-lg border-2 text-center transition-colors ${
+                      groupConfiguration.groupSize === size
+                        ? 'border-accent-500 bg-accent-50 dark:bg-accent-900'
+                        : 'border-secondary-200 dark:border-secondary-600 hover:border-secondary-300 dark:hover:border-secondary-500'
+                    }`}
+                  >
+                    <div className="font-semibold text-primary-900 dark:text-primary-100">
+                      {size === 'mixed' ? t('dialectic.creation.groupConfig.groupSize.mixed') : size}
+                    </div>
+                    <div className="text-xs text-secondary-600 dark:text-secondary-400">
+                      {size === 'mixed' 
+                        ? t('dialectic.creation.groupConfig.groupSize.mixedDesc')
+                        : t('dialectic.creation.groupConfig.groupSize.people', { count: size })
+                      }
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Auto-assign Roles */}
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-primary-900 dark:text-primary-100">
+                {t('dialectic.creation.groupConfig.autoAssign.label')}
+              </label>
+              <div className="flex items-center space-x-4">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={groupConfiguration.autoAssignRoles}
+                    onChange={(e) => setGroupConfiguration(prev => ({ ...prev, autoAssignRoles: e.target.checked }))}
+                    className="mr-2"
+                  />
+                  <span className="text-sm text-secondary-600 dark:text-secondary-400">
+                    {t('dialectic.creation.groupConfig.autoAssign.description')}
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            {/* Observer Strategy */}
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-primary-900 dark:text-primary-100">
+                {t('dialectic.creation.groupConfig.observerStrategy.label')}
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {['distribute', 'central'].map((strategy) => (
+                  <button
+                    key={strategy}
+                    onClick={() => setGroupConfiguration(prev => ({ ...prev, observerStrategy: strategy as 'distribute' | 'central' }))}
+                    className={`p-3 rounded-lg border-2 text-left transition-colors ${
+                      groupConfiguration.observerStrategy === strategy
+                        ? 'border-accent-500 bg-accent-50 dark:bg-accent-900'
+                        : 'border-secondary-200 dark:border-secondary-600 hover:border-secondary-300 dark:hover:border-secondary-500'
+                    }`}
+                  >
+                    <div className="font-semibold text-primary-900 dark:text-primary-100">
+                      {t(`dialectic.creation.groupConfig.observerStrategy.${strategy}.title`)}
+                    </div>
+                    <div className="text-xs text-secondary-600 dark:text-secondary-400">
+                      {t(`dialectic.creation.groupConfig.observerStrategy.${strategy}.description`)}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Session Preview */}
         <div className="bg-secondary-50 dark:bg-secondary-800 rounded-lg p-4 space-y-2" data-testid="session-preview">
           <h3 className="font-medium text-primary-900 dark:text-primary-100">
@@ -497,6 +666,15 @@ const SessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) =>
             <p>{t('dialectic.creation.preview.participants')}</p>
             <p>{t('dialectic.creation.preview.format')}</p>
             <p>{t('dialectic.creation.preview.hostRole', { role: hostRole === 'participant' ? t('dialectic.creation.hostRole.participant.title') : t('dialectic.creation.hostRole.observer.title') })}</p>
+            <p>{t('dialectic.creation.preview.groupMode', { mode: groupMode === 'single' ? t('dialectic.creation.groupMode.single.title') : t('dialectic.creation.groupMode.multi.title') })}</p>
+            {groupMode === 'multi' && (
+              <p>{t('dialectic.creation.preview.groupConfig', { 
+                size: groupConfiguration.groupSize === 'mixed' 
+                  ? t('dialectic.creation.groupConfig.groupSize.mixed')
+                  : groupConfiguration.groupSize.toString(),
+                strategy: t(`dialectic.creation.groupConfig.observerStrategy.${groupConfiguration.observerStrategy}.title`)
+              })}</p>
+            )}
           </div>
         </div>
 

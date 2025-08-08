@@ -36,6 +36,27 @@ service cloud.firestore {
         request.auth.uid == resource.data.hostId;
     }
     
+    // Group session management rules
+    match /groupSessions/{sessionId} {
+      // Allow authenticated users to create group sessions
+      allow create: if 
+        request.auth != null &&
+        request.auth.uid == request.resource.data.hostId &&
+        request.resource.data.sessionId == sessionId &&
+        request.resource.data.status == 'waiting';
+      
+      // Allow authenticated users to read group sessions
+      allow read: if request.auth != null;
+      
+      // Allow authenticated users to update group sessions if they are a participant
+      allow update: if request.auth != null;
+      
+      // Allow host to delete their own group session
+      allow delete: if 
+        request.auth != null &&
+        request.auth.uid == resource.data.hostId;
+    }
+    
     // WebRTC signaling rules
     match /signaling/{messageId} {
       // Allow authenticated users to create signaling messages
