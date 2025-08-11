@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useTranslation } from '../hooks/useTranslation';
 import { testAuthService, TestUser } from '../services/testAuthService';
 import { FirestoreGroupSessionService, GroupSessionCreateData } from '../services/firestoreGroupSessionService';
 import { GroupAssignmentService } from '../services/groupAssignmentService';
-import { GroupSessionData, GroupData, GroupConfiguration } from '../types/groupSession';
+import { GroupData, GroupConfiguration } from '../types/groupSession';
 import { GroupSessionLobby } from './GroupSessionLobby';
 import { GroupSession } from './GroupSession';
 import { GroupManagementDashboard } from './GroupManagementDashboard';
@@ -16,7 +15,7 @@ interface TestGroupSession {
     id: string;
     name: string;
     role: string;
-    status: 'waiting' | 'ready' | 'active';
+    status: 'ready' | 'not-ready' | 'connecting';
   }>;
   status: 'waiting' | 'active' | 'completed';
   groupMode: 'single' | 'multi';
@@ -33,7 +32,6 @@ interface TestGroupSession {
 }
 
 export const GroupSessionTestPage: React.FC = () => {
-  const { t } = useTranslation();
   const [testUsers] = useState<TestUser[]>(testAuthService.getTestUsers());
   
   const [currentUser, setCurrentUser] = useState<TestUser | null>(null);
@@ -51,7 +49,6 @@ export const GroupSessionTestPage: React.FC = () => {
   
   const automationInterval = useRef<NodeJS.Timeout | null>(null);
   const testStartTime = useRef<Date | null>(null);
-  const lastActiveView = useRef<'setup' | 'lobby' | 'dashboard' | 'group-session'>('setup');
   const automationModeRef = useRef(false); // Use ref for immediate access
   const testSessionRef = useRef<TestGroupSession | null>(null); // Use ref for current session state
 
@@ -180,7 +177,7 @@ export const GroupSessionTestPage: React.FC = () => {
           id: p.id,
           name: p.name,
           role: p.role || '',
-          status: 'ready' // Mark all participants as ready for testing
+          status: 'ready' as const // Mark all participants as ready for testing
         })),
         status: createdSession.status,
         groupMode: createdSession.groupMode,
@@ -300,8 +297,8 @@ export const GroupSessionTestPage: React.FC = () => {
             ...group,
             status: 'active' as const,
             currentPhase: 'hello-checkin' as const,
-            roundNumber: 1, // Ensure round number is set correctly
-            startTime: new Date()
+            roundNumber: 1 // Ensure round number is set correctly
+            // Note: startTime is not needed for test environment
           }));
           
           return {
@@ -326,7 +323,7 @@ export const GroupSessionTestPage: React.FC = () => {
     const elapsed = testStartTime.current ? Date.now() - testStartTime.current.getTime() : 0;
     
     // Check if all groups are in the same phase
-    const allGroupsInPhase = (phase: string) => testSessionRef.current.groups.every(g => g.currentPhase === phase);
+    const allGroupsInPhase = (phase: string) => testSessionRef.current?.groups.every(g => g.currentPhase === phase) || false;
     
     // Phase transitions based on elapsed time
     if (elapsed > testConfig.phaseDurations.helloCheckIn && allGroupsInPhase('hello-checkin')) {
@@ -401,7 +398,7 @@ export const GroupSessionTestPage: React.FC = () => {
         if (!prev) return prev;
         
         const currentRound = prev.groups[0]?.roundNumber || 1;
-        const totalRounds = prev.groups[0]?.participants.length === 3 ? 3 : 4;
+        const totalRounds = prev.groups[0]?.participants.length === 2 ? 2 : prev.groups[0]?.participants.length === 3 ? 3 : 4;
         
         if (currentRound >= totalRounds) {
           // Session complete
@@ -434,7 +431,7 @@ export const GroupSessionTestPage: React.FC = () => {
       });
       
       const currentRound = testSession?.groups[0]?.roundNumber || 1;
-      const totalRounds = testSession?.groups[0]?.participants.length === 3 ? 3 : 4;
+      const totalRounds = testSession?.groups[0]?.participants.length === 2 ? 2 : testSession?.groups[0]?.participants.length === 3 ? 3 : 4;
       
       if (currentRound >= totalRounds) {
         addTestResult('Session Complete', 'pass', `All ${totalRounds} rounds completed`);
@@ -457,9 +454,13 @@ export const GroupSessionTestPage: React.FC = () => {
       if (sessionParticipant) {
         // Sign in using the test auth service
         const user = await testAuthService.signInAsTestUser(userId);
-        setCurrentUser(sessionParticipant);
-        addTestResult('User Switch', 'pass', `Switched to user: ${sessionParticipant.name} - UID: ${user.uid}`);
-        return;
+        // Find the original TestUser to set as current user
+        const originalTestUser = testUsers.find(u => u.id === userId);
+        if (originalTestUser) {
+          setCurrentUser(originalTestUser);
+          addTestResult('User Switch', 'pass', `Switched to user: ${sessionParticipant.name} - UID: ${user.uid}`);
+          return;
+        }
       }
       
       addTestResult('User Switch', 'fail', `User ${userId} not found in session`);
@@ -770,7 +771,14 @@ export const GroupSessionTestPage: React.FC = () => {
                     <div className="grid grid-cols-2 gap-4">
                       {(() => {
                         const participants = generateTestParticipants(testConfig.participantCount);
-                        const groups = GroupAssignmentService.assignGroups(participants, {
+                        // Convert TestUser[] to Participant[] for group assignment
+                        const participantData = participants.map(p => ({
+                          id: p.id,
+                          name: p.name,
+                          role: p.role || '',
+                          status: 'ready' as const
+                        }));
+                        const groups = GroupAssignmentService.assignGroups(participantData, {
                           groupSize: testConfig.groupSize,
                           autoAssignRoles: testConfig.autoAssignRoles,
                           groupRotation: testConfig.groupRotation,
@@ -804,7 +812,7 @@ export const GroupSessionTestPage: React.FC = () => {
                   sessionId: testSession.sessionId,
                   sessionName: testSession.sessionName,
                   participants: testSession.participants,
-                  groupMode: testSession.groupMode,
+                  // groupMode removed - now automatic
                   groupConfiguration: testSession.groupConfiguration
                 }}
                 currentUserId={currentUser?.id || ''}
@@ -816,7 +824,7 @@ export const GroupSessionTestPage: React.FC = () => {
                   setTestSession(prev => prev ? {
                     ...prev,
                     participants: prev.participants.map(p => 
-                      p.id === userId ? { ...p, status: isReady ? 'ready' : 'waiting' } : p
+                      p.id === userId ? { ...p, status: isReady ? 'ready' : 'not-ready' } : p
                     )
                   } : null);
                 }}
@@ -855,8 +863,8 @@ export const GroupSessionTestPage: React.FC = () => {
                             ? { 
                                 ...group, 
                                 status: 'active' as const, 
-                                currentPhase: 'hello-checkin' as const,
-                                startTime: new Date()
+                                currentPhase: 'hello-checkin' as const
+                                // Note: startTime is not needed for test environment
                               }
                             : group
                         )
@@ -892,8 +900,8 @@ export const GroupSessionTestPage: React.FC = () => {
                           return {
                             ...group,
                             status: 'active' as const,
-                            currentPhase: 'hello-checkin' as const,
-                            startTime: new Date()
+                            currentPhase: 'hello-checkin' as const
+                            // Note: startTime is not needed for test environment
                           };
                         }
                         return group;

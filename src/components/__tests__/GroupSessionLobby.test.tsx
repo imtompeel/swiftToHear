@@ -16,11 +16,13 @@ describe('GroupSessionLobby', () => {
   const mockSession = {
     sessionId: 'test-session-123',
     sessionName: 'Test Group Session',
+    hostId: '1', // Add hostId property
     participants: [
       { id: '1', name: 'Alice', role: 'speaker', status: 'ready' as const },
       { id: '2', name: 'Bob', role: 'listener', status: 'ready' as const },
       { id: '3', name: 'Charlie', role: 'scribe', status: 'ready' as const },
       { id: '4', name: 'Diana', role: 'observer', status: 'ready' as const },
+      { id: '5', name: 'Eve', role: 'speaker', status: 'ready' as const }, // Add 5th participant
     ],
     groupMode: 'multi' as const,
     groupConfiguration: {
@@ -63,7 +65,7 @@ describe('GroupSessionLobby', () => {
     render(<GroupSessionLobby {...mockProps} />);
     
     expect(screen.getByText('Test Group Session')).toBeInTheDocument();
-    expect(screen.getByText('4')).toBeInTheDocument(); // participant count
+    expect(screen.getByText('4')).toBeInTheDocument(); // participant count (excluding host)
   });
 
   it('shows group preview for multi-group mode', () => {
@@ -80,6 +82,7 @@ describe('GroupSessionLobby', () => {
     expect(screen.getByText('Bob')).toBeInTheDocument();
     expect(screen.getByText('Charlie')).toBeInTheDocument();
     expect(screen.getByText('Diana')).toBeInTheDocument();
+    expect(screen.getByText('Eve')).toBeInTheDocument();
   });
 
   it('shows start session button for host when participants are ready', () => {

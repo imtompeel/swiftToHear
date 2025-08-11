@@ -24,10 +24,10 @@ service cloud.firestore {
         request.resource.data.sessionId == sessionId &&
         request.resource.data.status == 'waiting';
       
-      // Allow authenticated users to read sessions
+      // Allow authenticated users (including anonymous) to read sessions
       allow read: if request.auth != null;
       
-      // Allow authenticated users to update sessions if they are a participant
+      // Allow authenticated users (including anonymous) to update sessions if they are a participant
       allow update: if request.auth != null;
       
       // Allow host to delete their own session

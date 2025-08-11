@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from '../hooks/useTranslation';
-import { GroupData, GroupStatus, GroupProgress } from '../types/groupSession';
+import { GroupData, GroupProgress } from '../types/groupSession';
 
 interface GroupManagementDashboardProps {
   session: {
@@ -59,7 +59,7 @@ export const GroupManagementDashboard: React.FC<GroupManagementDashboardProps> =
   };
 
   const getGroupProgress = (group: GroupData): GroupProgress => {
-    const totalRounds = group.participants.length === 3 ? 3 : 4;
+            const totalRounds = group.participants.length === 2 ? 2 : group.participants.length === 3 ? 3 : 4;
     
     // Calculate completed rounds based on current phase and round number
     let completedRounds = 0;

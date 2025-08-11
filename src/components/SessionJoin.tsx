@@ -164,17 +164,33 @@ const SessionJoin: React.FC<SessionJoinProps> = ({
   }
 
   // Calculate available roles - handle both temporary and permanent observers
-  const baseRoles = ['speaker', 'listener', 'scribe'];
-  const observerRoles = ['observer-temporary', 'observer-permanent'];
+  const totalParticipants = session.participants.length + 1; // +1 for the current user joining
   
+  // For 2-person sessions, only speaker and listener roles are available (no scribe)
+  const baseRoles = totalParticipants === 2 ? ['speaker', 'listener'] : ['speaker', 'listener', 'scribe'];
+
   // Check if any observer role is taken
   const hasObserver = session.participants.some(p => 
     p.role === 'observer' || p.role === 'observer-temporary' || p.role === 'observer-permanent'
   );
   
+  // Get available base roles (speaker, listener, scribe)
+  const availableBaseRoles = baseRoles.filter(role => !session.participants.some(p => p.role === role));
+  
+  // Observer roles are only available if:
+  // 1. No observer exists yet, AND
+  // 2. Either: 3+ participants (for permanent observer) OR 4+ participants (for temporary observer) OR all base roles are taken
+  const shouldShowPermanentObserver = !hasObserver && (totalParticipants >= 3 || availableBaseRoles.length === 0);
+  const shouldShowTemporaryObserver = !hasObserver && (totalParticipants >= 4 || availableBaseRoles.length === 0);
+  
+  const availableObserverRoles = [
+    ...(shouldShowPermanentObserver ? ['observer-permanent'] : []),
+    ...(shouldShowTemporaryObserver ? ['observer-temporary'] : [])
+  ];
+  
   const availableRoles = [
-    ...baseRoles.filter(role => !session.participants.some(p => p.role === role)),
-    ...(hasObserver ? [] : observerRoles)
+    ...availableBaseRoles,
+    ...availableObserverRoles
   ];
 
   // Session is full
@@ -272,7 +288,10 @@ const SessionJoin: React.FC<SessionJoinProps> = ({
         <div className="bg-white dark:bg-secondary-800 rounded-lg border border-secondary-200 dark:border-secondary-700 p-4 space-y-3">
           <div className="flex justify-between items-center text-sm" data-testid="participant-count">
             <span className="text-secondary-600 dark:text-secondary-400">
-              {t('dialectic.join.participantCount', { current: session.participants.length, total: 4 })}
+              {t('dialectic.join.participantCount', { 
+                current: session.participants.filter(p => p.id !== session.hostId).length, 
+                total: 4 
+              })}
             </span>
           </div>
           
@@ -326,16 +345,19 @@ const SessionJoin: React.FC<SessionJoinProps> = ({
           {roles.map((role) => {
             const isAvailable = availableRoles.includes(role.id);
             const isSelected = selectedRole === role.id;
+            const isScribeDisabled = role.id === 'scribe' && totalParticipants < 3;
+            const isTemporaryObserverDisabled = role.id === 'observer-temporary' && totalParticipants < 4;
+            const isPermanentObserverDisabled = role.id === 'observer-permanent' && totalParticipants < 3;
             
             return (
               <button
                 key={role.id}
-                onClick={() => isAvailable && handleRoleSelect(role.id)}
-                disabled={!isAvailable}
+                onClick={() => isAvailable && !isScribeDisabled && !isTemporaryObserverDisabled && !isPermanentObserverDisabled && handleRoleSelect(role.id)}
+                disabled={!isAvailable || isScribeDisabled || isTemporaryObserverDisabled || isPermanentObserverDisabled}
                 className={`p-4 rounded-lg border-2 text-left transition-colors ${
                   isSelected 
                     ? 'border-accent-500 bg-accent-50 dark:bg-accent-900' 
-                    : isAvailable 
+                    : isAvailable && !isScribeDisabled && !isTemporaryObserverDisabled && !isPermanentObserverDisabled
                       ? 'border-secondary-200 dark:border-secondary-600 hover:border-secondary-300 dark:hover:border-secondary-500' 
                       : 'border-secondary-100 dark:border-secondary-700 bg-secondary-50 dark:bg-secondary-800 opacity-50 cursor-not-allowed'
                 }`}
@@ -361,7 +383,10 @@ const SessionJoin: React.FC<SessionJoinProps> = ({
                 </div>
                 {!isAvailable && (
                   <div className="text-xs text-secondary-500 dark:text-secondary-400 mt-2">
-                    {t('dialectic.join.roleTaken')}
+                    {role.id === 'scribe' && totalParticipants < 3 ? 'Only available in 3+ person sessions' :
+                     role.id === 'observer-temporary' && totalParticipants < 4 ? 'Only available in 4+ person sessions' :
+                     role.id === 'observer-permanent' && totalParticipants < 3 ? 'Only available in 3+ person sessions' :
+                     t('dialectic.join.roleTaken')}
                   </div>
                 )}
               </button>

@@ -90,7 +90,7 @@ describe('SessionLobby Component', () => {
       const sessionInfo = screen.getByTestId('session-lobby-info');
       expect(sessionInfo).toBeInTheDocument();
       expect(screen.getByText('Community Deep Listening')).toBeInTheDocument();
-      expect(sessionInfo).toHaveTextContent(/15 minutes/i);
+      expect(sessionInfo).toHaveTextContent(/55 minutes/i);
       expect(screen.getByText('What transitions are we navigating right now?')).toBeInTheDocument();
     });
 
@@ -152,7 +152,7 @@ describe('SessionLobby Component', () => {
       
       expect(screen.getByTestId('waiting-for-participants')).toBeInTheDocument();
       expect(screen.getByText('dialectic.lobby.waitingForParticipants')).toBeInTheDocument();
-      expect(screen.getByText('2 of 3 participants joined')).toBeInTheDocument();
+      expect(screen.getByText('1 participant joined')).toBeInTheDocument();
     });
 
     it('should update when participants join or leave', () => {
@@ -287,7 +287,7 @@ describe('SessionLobby Component', () => {
       fireEvent.click(startButton);
       
       // The real component shows a confirmation dialog instead of calling directly
-      expect(screen.getByText('dialectic.lobby.confirmStart')).toBeInTheDocument();
+      expect(screen.getByText('dialectic.lobby.confirmStart.title')).toBeInTheDocument();
     });
 
     it('should show confirmation dialog for session start', async () => {
@@ -296,7 +296,7 @@ describe('SessionLobby Component', () => {
       const startButton = screen.getByTestId('start-session-button');
       fireEvent.click(startButton);
       
-      expect(screen.getByText('dialectic.lobby.confirmStart')).toBeInTheDocument();
+      expect(screen.getByText('dialectic.lobby.confirmStart.title')).toBeInTheDocument();
       expect(screen.getByTestId('confirm-start-button')).toBeInTheDocument();
       
       const confirmButton = screen.getByTestId('confirm-start-button');

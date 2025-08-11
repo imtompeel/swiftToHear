@@ -21,7 +21,7 @@ const LandingPage: React.FC = () => {
       await addEmailSignup(email, involvementLevel);
       setIsSubmitted(true);
     } catch (err) {
-      setError('Failed to join waiting list. Please try again.');
+      setError(t('landing.invitation.errors.joinFailed'));
       console.error('Error adding email:', err);
     } finally {
       setIsLoading(false);
@@ -166,7 +166,7 @@ const LandingPage: React.FC = () => {
               onClick={() => setIsFormatExpanded(!isFormatExpanded)}
               className="text-accent-700 dark:text-accent-400 hover:text-accent-800 dark:hover:text-accent-300 font-medium mb-4 flex items-center gap-2 transition-colors"
             >
-              <span>{isFormatExpanded ? 'Show less' : 'Read more about this format'}</span>
+              <span>{isFormatExpanded ? t('landing.format.showLess') : t('landing.format.showMore')}</span>
               <svg 
                 className={`w-4 h-4 transition-transform ${isFormatExpanded ? 'rotate-180' : ''}`} 
                 fill="none" 
@@ -207,9 +207,9 @@ const LandingPage: React.FC = () => {
                 </p>
                 
                 <ul className="list-disc list-inside space-y-2 text-secondary-700 dark:text-secondary-300">
-                  <li><strong>Reactiveness and debate:</strong> {t('landing.format.pitfalls.items.reactiveness')}</li>
-                  <li><strong>Dominance and status:</strong> {t('landing.format.pitfalls.items.dominance')}</li>
-                  <li><strong>Losing insight:</strong> {t('landing.format.pitfalls.items.losingInsight')}</li>
+                  <li><strong>{t('landing.format.pitfalls.labels.reactiveness')}</strong> {t('landing.format.pitfalls.items.reactiveness')}</li>
+                  <li><strong>{t('landing.format.pitfalls.labels.dominance')}</strong> {t('landing.format.pitfalls.items.dominance')}</li>
+                  <li><strong>{t('landing.format.pitfalls.labels.losingInsight')}</strong> {t('landing.format.pitfalls.items.losingInsight')}</li>
                 </ul>
                 
                 <p className="text-lg text-secondary-700 dark:text-secondary-300 leading-relaxed">

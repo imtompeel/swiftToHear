@@ -6,6 +6,8 @@ A platform for the Christadelphian community to practice the art of listening th
 
 - **Landing Page**: Beautiful, responsive design explaining the dialectic practice
 - **Video Call Interface**: Ready for WebRTC implementation
+- **In-Person Sessions**: QR code-based sessions perfect for use with Zoom, Google Meet, or any video platform
+- **Hybrid Support**: Works seamlessly with external video conferencing software
 - **Modern Tech Stack**: React 19, TypeScript, Tailwind CSS
 
 ## Getting Started

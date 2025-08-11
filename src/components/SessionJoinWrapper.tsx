@@ -19,6 +19,11 @@ const SessionJoinWrapper: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
   const [joinLoading, setJoinLoading] = useState(false);
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Load session data only when user is authenticated
   useEffect(() => {
     if (sessionId && user && !authLoading) {

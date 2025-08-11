@@ -1,24 +1,27 @@
 import React from 'react';
 import { useTranslation } from '../hooks/useTranslation';
+import { SessionContext, SessionParticipant } from '../types/sessionContext';
 
 interface ReflectionPhaseProps {
-  totalRounds?: number;
-  onScheduleNext?: () => void;
-  sessionDuration?: number;
-  participantCount?: number;
+  session: SessionContext;
+  currentUserId: string;
+  currentUserName: string;
+  participants: SessionParticipant[];
+  onComplete: () => void;
 }
 
 export const ReflectionPhase: React.FC<ReflectionPhaseProps> = ({
-  totalRounds,
-  onScheduleNext,
-  sessionDuration,
-  participantCount,
+  session: _session,
+  currentUserId: _currentUserId,
+  currentUserName: _currentUserName,
+  participants: _participants,
+  onComplete
 }) => {
   const { t } = useTranslation();
 
   const handleScheduleNext = () => {
-    if (onScheduleNext) {
-      onScheduleNext();
+    if (onComplete) {
+      onComplete();
     }
   };
 

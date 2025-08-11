@@ -3,15 +3,20 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './components/LandingPage';
 
 import AdminPanel from './components/AdminPanel';
+import AdminGuide from './components/AdminGuide';
+import SafetyGuidelines from './components/SafetyGuidelines';
 import { DialecticSession } from './components/DialecticSession';
 import { SessionCreationWrapper } from './components/SessionCreationWrapper';
 import { SessionJoinWrapper } from './components/SessionJoinWrapper';
 import { SessionLobbyWrapper } from './components/SessionLobbyWrapper';
+import { InPersonSessionWrapper } from './components/InPersonSessionWrapper';
+import { MobileParticipantWrapper } from './components/MobileParticipantWrapper';
 import { Auth } from './components/Auth';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { SessionTestPage } from './components/SessionTestPage';
 import { AdvancedSessionTestPage } from './components/AdvancedSessionTestPage';
 import { GroupSessionTestPage } from './components/GroupSessionTestPage';
+import { InPersonDemo } from './components/InPersonDemo';
 import Navigation from './components/Navigation';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
@@ -44,10 +49,24 @@ function App() {
                   <SessionLobbyWrapper />
                 </ProtectedRoute>
               } />
+              
+              {/* In-Person Session Routes */}
+              <Route path="/in-person/host/:sessionId" element={
+                <ProtectedRoute>
+                  <InPersonSessionWrapper />
+                </ProtectedRoute>
+              } />
+              <Route path="/in-person/join/:sessionId" element={
+                <MobileParticipantWrapper />
+              } />
+              
               <Route path="/admin" element={<AdminPanel />} />
+              <Route path="/admin/guide" element={<AdminGuide />} />
+              <Route path="/admin/safety" element={<SafetyGuidelines />} />
               <Route path="/test" element={<SessionTestPage />} />
               <Route path="/test/advanced" element={<AdvancedSessionTestPage />} />
               <Route path="/test/groups" element={<GroupSessionTestPage />} />
+              <Route path="/test/in-person" element={<InPersonDemo />} />
             </Routes>
           </div>
         </Router>

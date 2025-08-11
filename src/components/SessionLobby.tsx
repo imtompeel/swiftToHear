@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { useTheme } from '../contexts/ThemeContext';
-import { TopicSuggestion } from '../services/firestoreSessionService';
+import { SessionData } from '../services/firestoreSessionService';
+import { FivePersonGroupingChoice } from './FivePersonGroupingChoice';
 
 interface SessionLobbyProps {
   session: SessionData;
   currentUserId: string;
   isHost: boolean;
-  onStartSession: (sessionId: string) => void;
+  onStartSession: (sessionId: string, fivePersonChoice?: 'split' | 'together') => void;
   onLeaveSession: (userId: string) => void;
   onUpdateReadyState: (userId: string, isReady: boolean) => void;
   onUpdateParticipantRole: (userId: string, role: string) => void;
@@ -16,29 +17,7 @@ interface SessionLobbyProps {
   onVoteForTopic?: (suggestionId: string) => void;
 }
 
-interface SessionData {
-  sessionId: string;
-  sessionName: string;
-  duration: number;
-  topic: string;
-  hostId: string;
-  hostName: string;
-  hostRole?: 'participant' | 'observer-permanent';
-  createdAt: Date;
-  participants: Participant[];
-  status: 'waiting' | 'active' | 'completed';
-  minParticipants: number;
-  maxParticipants: number;
-  topicSuggestions?: TopicSuggestion[];
-}
 
-interface Participant {
-  id: string;
-  name: string;
-  role: string;
-  status: 'ready' | 'not-ready' | 'connecting';
-  connectionStatus?: 'good' | 'poor' | 'disconnected';
-}
 
 const SessionLobby: React.FC<SessionLobbyProps> = ({
   session,
@@ -57,6 +36,7 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
   const [isReady, setIsReady] = useState(false);
   const [showStartConfirmation, setShowStartConfirmation] = useState(false);
   const [showHostLeaveConfirmation, setShowHostLeaveConfirmation] = useState(false);
+  const [showFivePersonChoice, setShowFivePersonChoice] = useState(false);
   const [, setSelectedRole] = useState<string>('');
   
   // Topic suggestion state
@@ -68,7 +48,10 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
   const hasRole = currentParticipant?.role && currentParticipant.role !== '';
 
   // Get available roles - handle both temporary and permanent observers
-  const baseRoles = ['speaker', 'listener', 'scribe'];
+  const totalParticipants = session.participants.length + (session.hostRole === 'participant' ? 1 : 0);
+  
+  // For 2-person sessions, only speaker and listener roles are available (no scribe)
+  const baseRoles = totalParticipants === 2 ? ['speaker', 'listener'] : ['speaker', 'listener', 'scribe'];
   const observerRoles = ['observer-temporary', 'observer-permanent'];
   
   // Check if any observer role is taken (including host if they're an observer)
@@ -134,7 +117,28 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
   const confirmStartSession = () => {
     setShowStartConfirmation(false);
     onModalStateChange?.(false);
-    onStartSession(session.sessionId);
+    
+    // Check if we have exactly 5 participants and need to show the choice
+    const totalParticipants = session.participants.length + (session.hostRole === 'participant' ? 1 : 0);
+    
+    if (totalParticipants === 5) {
+      setShowFivePersonChoice(true);
+      onModalStateChange?.(true);
+    } else {
+      onStartSession(session.sessionId);
+    }
+  };
+
+  const handleFivePersonChoice = (choice: 'split' | 'together') => {
+    setShowFivePersonChoice(false);
+    onModalStateChange?.(false);
+    // Pass the choice to the start session function
+    onStartSession(session.sessionId, choice);
+  };
+
+  const handleFivePersonChoiceCancel = () => {
+    setShowFivePersonChoice(false);
+    onModalStateChange?.(false);
   };
 
   const handleLeaveSession = () => {
@@ -164,6 +168,18 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
 
   const formatDuration = (milliseconds: number) => {
     return Math.floor(milliseconds / 60000);
+  };
+
+  // Calculate total session time including check-in and feedback periods
+  const calculateTotalSessionTime = (roundLengthMinutes: number) => {
+    // For a typical session with 3 rounds:
+    // - 3 rounds × round length
+    // - 2 minutes total check-in time
+    // - 3 × 2.5 minutes feedback time
+    const totalRoundTime = roundLengthMinutes * 3;
+    const totalCheckInTime = 2; // minutes total
+    const totalFeedbackTime = 2.5 * 3; // 2.5 minutes per round × 3 rounds
+    return Math.round(totalRoundTime + totalCheckInTime + totalFeedbackTime);
   };
 
   // Topic suggestion handlers
@@ -239,6 +255,59 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
         </h1>
       </div>
 
+      {/* Host Controls - Moved to top */}
+      {isHost && (
+        <div className="space-y-4" data-testid="host-controls">
+          <div className="text-center">
+            <button
+              onClick={handleStartSession}
+              disabled={!canStartSession}
+              className="px-8 py-3 bg-accent-500 text-white rounded-lg hover:bg-accent-600 disabled:bg-secondary-300 disabled:cursor-not-allowed transition-colors"
+              data-testid="start-session-button"
+            >
+              {t('dialectic.lobby.startSession')}
+            </button>
+            
+            {!allNonHostParticipantsReady && nonHostParticipants.length > 0 && (
+              <p className="text-sm text-secondary-600 dark:text-secondary-400 mt-2">
+                Waiting for {nonHostParticipants.length - readyNonHostParticipants.length} more participant{nonHostParticipants.length - readyNonHostParticipants.length === 1 ? '' : 's'} to be ready
+              </p>
+            )}
+          </div>
+
+          {/* Session Sharing */}
+          <div className="bg-secondary-50 dark:bg-secondary-800 rounded-lg p-4 space-y-3">
+            <h4 className="font-medium text-primary-900 dark:text-primary-100">
+              {t('dialectic.lobby.shareSession')}
+            </h4>
+            
+            <div className="flex items-center space-x-3">
+              <div 
+                className="flex-1 text-sm px-3 py-2 rounded border break-all font-mono"
+                style={{
+                  backgroundColor: `${theme === 'dark' ? '#1f2937' : '#f9fafb'} !important`,
+                  color: `${theme === 'dark' ? '#f3f4f6' : '#111827'} !important`
+                }}
+              >
+                {`${window.location.origin}/practice/join/${session.sessionId}`}
+              </div>
+              <button
+                onClick={copySessionLink}
+                className="px-4 py-2 bg-accent-500 text-white rounded hover:bg-accent-600 transition-colors"
+                data-testid="copy-session-link"
+              >
+                {t('dialectic.lobby.copyLink')}
+              </button>
+            </div>
+            
+            <div className="text-center" data-testid="session-qr-code">
+              <p className="text-sm text-secondary-500 dark:text-secondary-400">QR Code for easy sharing</p>
+              {/* QR code component could be added here */}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Ready State Toggle - Only for non-hosts */}
       {!isHost && (
         <div className="text-center space-y-4" data-testid="ready-state-toggle">
@@ -268,7 +337,7 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
           <div>
             <span className="font-medium text-primary-700 dark:text-primary-300">Duration:</span>
-            <span className="ml-2 text-secondary-600 dark:text-secondary-400">{formatDuration(session.duration)} minutes</span>
+            <span className="ml-2 text-secondary-600 dark:text-secondary-400">{calculateTotalSessionTime(formatDuration(session.duration))} minutes</span>
           </div>
           
           <div>
@@ -282,6 +351,85 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Role Selection - Moved up, only show if auto-assign is disabled */}
+      {!session.groupConfiguration?.autoAssignRoles && (
+        <div className="space-y-4" data-testid="role-selection">
+          <h3 className="text-lg font-medium text-primary-900 dark:text-primary-100">
+            {hasRole ? 'Change Your Role' : 'Choose Your Role'}
+          </h3>
+          
+          {hasRole && currentParticipant?.role && (
+            <div className="text-sm text-secondary-600 dark:text-secondary-400">
+              Current role: <span className="font-medium text-primary-700 dark:text-primary-300">
+                {t(`dialectic.roles.${currentParticipant.role}.title`)}
+              </span>
+            </div>
+          )}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {['speaker', 'listener', 'scribe', 'observer'].map((role) => {
+                const isCurrentRole = currentParticipant?.role === role;
+                const isAvailable = availableRoles.includes(role);
+                const totalParticipants = session.participants.length + (session.hostRole === 'participant' ? 1 : 0);
+                const isScribeDisabled = role === 'scribe' && totalParticipants < 3;
+                
+                return (
+                  <button
+                    key={role}
+                    onClick={() => handleRoleSelect(role)}
+                    disabled={!isAvailable || isScribeDisabled}
+                    className={`p-4 rounded-lg border-2 text-left transition-colors ${
+                      isCurrentRole 
+                        ? 'border-accent-500 bg-accent-50 dark:bg-accent-900' 
+                        : isAvailable && !isScribeDisabled
+                          ? 'border-secondary-200 dark:border-secondary-600 hover:border-secondary-300 dark:hover:border-secondary-500'
+                          : 'border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 opacity-50 cursor-not-allowed'
+                    }`}
+                    data-testid={`role-select-${role}`}
+                  >
+                  <div className="text-2xl mb-2">
+                    {role === 'speaker' && '🗣️'}
+                    {role === 'listener' && '👂'}
+                    {role === 'scribe' && '✍️'}
+                    {role === 'observer' && '👁️'}
+                  </div>
+                  <div className="font-semibold text-primary-900 dark:text-primary-100 mb-1">
+                    {t(`dialectic.roles.${role}.title`)}
+                  </div>
+                  <div className="text-sm text-secondary-600 dark:text-secondary-400">
+                    {t(`dialectic.roles.${role}.description`)}
+                  </div>
+                </button>
+              );
+              })}
+            </div>
+            
+            {/* Debug info for role selection */}
+            {availableRoles.length === 0 && (
+              <div className="text-sm text-red-600 dark:text-red-400">
+                No roles available. This might be a bug. Available roles: {['speaker', 'listener', 'scribe', 'observer'].join(', ')}
+              </div>
+            )}
+          </div>
+      )}
+
+      {/* Auto-assign roles message */}
+      {session.groupConfiguration?.autoAssignRoles && (
+        <div className="bg-blue-50 dark:bg-blue-900 rounded-lg p-4 space-y-2" data-testid="auto-assign-message">
+          <div className="flex items-center">
+            <span className="text-2xl mr-3">🤖</span>
+            <div>
+              <p className="text-blue-800 dark:text-blue-200 font-medium">
+                Roles will be automatically assigned
+              </p>
+              <p className="text-blue-700 dark:text-blue-300 text-sm">
+                Your role will be assigned when the session starts
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Topic Suggestions Section */}
       <div className="space-y-4" data-testid="topic-suggestions-section">
@@ -434,125 +582,26 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
             {t('dialectic.lobby.waitingForParticipants')}
           </p>
           <p className="text-blue-700 text-sm">
-            {session.participants.length} of {session.minParticipants} participants joined
+            {(() => {
+              // Count non-host participants
+              const nonHostParticipants = session.participants.filter(p => p.id !== session.hostId);
+              const participantCount = nonHostParticipants.length;
+              return `${participantCount} participant${participantCount === 1 ? '' : 's'} joined`;
+            })()}
+            {session.minParticipants > 2 && (
+              <span> • Need at least {session.minParticipants} to start</span>
+            )}
           </p>
         </div>
       )}
 
-      {/* Role Selection */}
-      <div className="space-y-4" data-testid="role-selection">
-        <h3 className="text-lg font-medium text-primary-900 dark:text-primary-100">
-          {hasRole ? 'Change Your Role' : 'Choose Your Role'}
-        </h3>
-        
-        {hasRole && currentParticipant?.role && (
-          <div className="text-sm text-secondary-600 dark:text-secondary-400">
-            Current role: <span className="font-medium text-primary-700 dark:text-primary-300">
-              {t(`dialectic.roles.${currentParticipant.role}.title`)}
-            </span>
-          </div>
-        )}
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {['speaker', 'listener', 'scribe', 'observer'].map((role) => {
-              const isCurrentRole = currentParticipant?.role === role;
-              const isAvailable = availableRoles.includes(role);
-              
-              return (
-                <button
-                  key={role}
-                  onClick={() => handleRoleSelect(role)}
-                  disabled={!isAvailable}
-                  className={`p-4 rounded-lg border-2 text-left transition-colors ${
-                    isCurrentRole 
-                      ? 'border-accent-500 bg-accent-50 dark:bg-accent-900' 
-                      : isAvailable
-                        ? 'border-secondary-200 dark:border-secondary-600 hover:border-secondary-300 dark:hover:border-secondary-500'
-                        : 'border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 opacity-50 cursor-not-allowed'
-                  }`}
-                  data-testid={`role-select-${role}`}
-                >
-                <div className="text-2xl mb-2">
-                  {role === 'speaker' && '🗣️'}
-                  {role === 'listener' && '👂'}
-                  {role === 'scribe' && '✍️'}
-                  {role === 'observer' && '👁️'}
-                </div>
-                <div className="font-semibold text-primary-900 dark:text-primary-100 mb-1">
-                  {t(`dialectic.roles.${role}.title`)}
-                </div>
-                <div className="text-sm text-secondary-600 dark:text-secondary-400">
-                  {t(`dialectic.roles.${role}.description`)}
-                </div>
-              </button>
-            );
-            })}
-          </div>
-          
-          {/* Debug info for role selection */}
-          {availableRoles.length === 0 && (
-            <div className="text-sm text-red-600 dark:text-red-400">
-              No roles available. This might be a bug. Available roles: {['speaker', 'listener', 'scribe', 'observer'].join(', ')}
-            </div>
-          )}
-        </div>
 
 
 
 
 
-      {/* Host Controls */}
-      {isHost && (
-        <div className="space-y-4" data-testid="host-controls">
-          <div className="text-center">
-            <button
-              onClick={handleStartSession}
-              disabled={!canStartSession}
-              className="px-8 py-3 bg-accent-500 text-white rounded-lg hover:bg-accent-600 disabled:bg-secondary-300 disabled:cursor-not-allowed transition-colors"
-              data-testid="start-session-button"
-            >
-              {t('dialectic.lobby.startSession')}
-            </button>
-            
-            {!allNonHostParticipantsReady && nonHostParticipants.length > 0 && (
-              <p className="text-sm text-secondary-600 dark:text-secondary-400 mt-2">
-                Waiting for {nonHostParticipants.length - readyNonHostParticipants.length} more participant{nonHostParticipants.length - readyNonHostParticipants.length === 1 ? '' : 's'} to be ready
-              </p>
-            )}
-          </div>
 
-          {/* Session Sharing */}
-          <div className="bg-secondary-50 dark:bg-secondary-800 rounded-lg p-4 space-y-3">
-            <h4 className="font-medium text-primary-900 dark:text-primary-100">
-              {t('dialectic.lobby.shareSession')}
-            </h4>
-            
-            <div className="flex items-center space-x-3">
-              <div 
-                className="flex-1 text-sm px-3 py-2 rounded border break-all font-mono"
-                style={{
-                  backgroundColor: `${theme === 'dark' ? '#1f2937' : '#f9fafb'} !important`,
-                  color: `${theme === 'dark' ? '#f3f4f6' : '#111827'} !important`
-                }}
-              >
-                {`${window.location.origin}/practice/join/${session.sessionId}`}
-              </div>
-              <button
-                onClick={copySessionLink}
-                className="px-4 py-2 bg-accent-500 text-white rounded hover:bg-accent-600 transition-colors"
-                data-testid="copy-session-link"
-              >
-                {t('dialectic.lobby.copyLink')}
-              </button>
-            </div>
-            
-            <div className="text-center" data-testid="session-qr-code">
-              <p className="text-sm text-secondary-500 dark:text-secondary-400">QR Code for easy sharing</p>
-              {/* QR code component could be added here */}
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Preparation Tips */}
       <div className="space-y-4">
@@ -575,8 +624,8 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
             {t('dialectic.lobby.sessionPreview.title')}
           </h4>
           <div className="text-sm text-secondary-600 dark:text-secondary-400 space-y-1">
-            <p>{t('dialectic.lobby.sessionPreview.totalTime', { duration: formatDuration(session.duration) })}</p>
-            <p>{t('dialectic.lobby.sessionPreview.rounds', { rounds: 3, roundDuration: 5 })}</p>
+            <p>{t('dialectic.lobby.sessionPreview.totalTime', { duration: calculateTotalSessionTime(formatDuration(session.duration)) })}</p>
+            <p>{t('dialectic.lobby.sessionPreview.rounds', { rounds: 3, roundDuration: formatDuration(session.duration) })}</p>
             <p>{t('dialectic.lobby.sessionPreview.format')}</p>
           </div>
         </div>
@@ -605,7 +654,7 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
 
       {/* Duration Breakdown */}
       <div className="text-center text-sm text-secondary-600 dark:text-secondary-400" data-testid="duration-breakdown">
-        {t('dialectic.lobby.sessionPreview.rounds', { rounds: 3, roundDuration: 5 })}
+        {t('dialectic.lobby.sessionPreview.rounds', { rounds: 3, roundDuration: formatDuration(session.duration) })}
       </div>
 
       {/* Leave Session */}
@@ -629,10 +678,10 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-secondary-800 rounded-lg p-6 max-w-md mx-4 space-y-4">
             <h3 className="text-lg font-medium text-primary-900 dark:text-primary-100">
-              {t('dialectic.lobby.confirmStart')}
+              {t('dialectic.lobby.confirmStart.title')}
             </h3>
             <p className="text-secondary-600 dark:text-secondary-400">
-              Are you ready to begin the practice session? This will start the timer and begin the first round.
+              {t('dialectic.lobby.confirmStart.description')}
             </p>
             <div className="flex space-x-3">
               <button
@@ -640,13 +689,13 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
                 className="flex-1 px-4 py-2 bg-accent-500 text-white rounded hover:bg-accent-600 transition-colors"
                 data-testid="confirm-start-button"
               >
-                Start Session
+                {t('dialectic.lobby.confirmStart.confirm')}
               </button>
               <button
                 onClick={() => setShowStartConfirmation(false)}
                 className="flex-1 px-4 py-2 bg-secondary-200 text-secondary-700 rounded hover:bg-secondary-300 transition-colors"
               >
-                Cancel
+                {t('dialectic.lobby.confirmStart.cancel')}
               </button>
             </div>
           </div>
@@ -679,6 +728,14 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Five Person Choice Modal */}
+      {showFivePersonChoice && (
+        <FivePersonGroupingChoice
+          onChoice={handleFivePersonChoice}
+          onCancel={handleFivePersonChoiceCancel}
+        />
       )}
 
       {/* Status announcements for screen readers */}

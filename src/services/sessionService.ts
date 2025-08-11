@@ -70,7 +70,9 @@ export class SessionService {
         // Convert createdAt string back to Date object
         parsedSession.createdAt = new Date(parsedSession.createdAt);
         session = parsedSession;
-        sessions.set(sessionId, session);
+        if (session) {
+          sessions.set(sessionId, session);
+        }
       }
     }
     

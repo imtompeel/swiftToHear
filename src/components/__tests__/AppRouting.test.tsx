@@ -1,13 +1,13 @@
 // ===== CENTRALIZED TEST IMPORTS =====
 import {
   // Testing utilities
-  render, screen, fireEvent, waitFor, describe, it, expect, vi,
-  // Mock data and utilities
-  testUtils, setupTests
+  render, screen, fireEvent, waitFor, describe, it, expect, 
+  setupTests
 } from './setup';
 
-import { BrowserRouter as Router, MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import App from '../../App';
+import React from 'react';
 
 describe('App Routing for Session Management', () => {
   // Use centralized setup
@@ -70,7 +70,7 @@ describe('App Routing for Session Management', () => {
 
   describe('Session Flow Navigation', () => {
     it('should navigate from creation to lobby after session created', async () => {
-      const { container } = render(
+      render(
         <MemoryRouter initialEntries={['/practice/create']}>
           <App />
         </MemoryRouter>

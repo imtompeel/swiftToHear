@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { SessionLobby } from './SessionLobby';
 import { useSession } from '../hooks/useSession';
 import { useAuth } from '../contexts/AuthContext';
-import { SessionService } from '../services/sessionService';
+
 
 const SessionLobbyWrapper: React.FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -27,6 +27,11 @@ const SessionLobbyWrapper: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Load session data only when user is authenticated
   useEffect(() => {
@@ -107,15 +112,15 @@ const SessionLobbyWrapper: React.FC = () => {
     console.log('Modal state changed:', isModalOpen);
   }, [isModalOpen]);
 
-  const handleStartSession = async (sessionId: string) => {
+  const handleStartSession = async (_sessionId: string, fivePersonChoice?: 'split' | 'together') => {
     try {
-      await startSession();
+      await startSession(fivePersonChoice);
     } catch (err) {
       console.error('Failed to start session:', err);
     }
   };
 
-  const handleLeaveSession = async (userId: string) => {
+  const handleLeaveSession = async (_userId: string) => {
     try {
       await leaveSession();
     } catch (err) {
@@ -123,7 +128,7 @@ const SessionLobbyWrapper: React.FC = () => {
     }
   };
 
-  const handleUpdateReadyState = async (userId: string, isReady: boolean) => {
+  const handleUpdateReadyState = async (_userId: string, isReady: boolean) => {
     try {
       await updateReadyState(isReady);
     } catch (err) {
@@ -131,7 +136,7 @@ const SessionLobbyWrapper: React.FC = () => {
     }
   };
 
-  const handleUpdateParticipantRole = async (userId: string, role: string) => {
+  const handleUpdateParticipantRole = async (_userId: string, role: string) => {
     try {
       await updateParticipantRole(role);
     } catch (err) {
@@ -157,7 +162,7 @@ const SessionLobbyWrapper: React.FC = () => {
 
   // Memoize the SessionLobby props to prevent unnecessary re-renders
   const sessionLobbyProps = useMemo(() => ({
-    session,
+    session: session!, // We know session is not null here due to the null check below
     currentUserId,
     isHost,
     onStartSession: handleStartSession,

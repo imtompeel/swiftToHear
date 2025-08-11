@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
-import { useTheme } from '../contexts/ThemeContext';
 import { GroupData, Participant, GroupConfiguration } from '../types/groupSession';
 import { GroupAssignmentService } from '../services/groupAssignmentService';
 
@@ -9,7 +8,6 @@ interface GroupSessionLobbyProps {
     sessionId: string;
     sessionName: string;
     participants: Participant[];
-    groupMode: 'single' | 'multi';
     groupConfiguration?: GroupConfiguration;
   };
   currentUserId: string;
@@ -28,11 +26,8 @@ export const GroupSessionLobby: React.FC<GroupSessionLobbyProps> = ({
   onStartSession,
   onLeaveSession,
   onUpdateReadyState,
-  onUpdateParticipantRole,
-  onModalStateChange,
 }) => {
   const { t } = useTranslation();
-  const { theme } = useTheme();
   const [isReady, setIsReady] = useState(false);
   const [showStartConfirmation, setShowStartConfirmation] = useState(false);
   const [showHostLeaveConfirmation, setShowHostLeaveConfirmation] = useState(false);
@@ -41,14 +36,11 @@ export const GroupSessionLobby: React.FC<GroupSessionLobbyProps> = ({
 
   // Generate groups when component mounts or participants change
   React.useEffect(() => {
-    if (session.groupMode === 'multi' && session.groupConfiguration) {
-      const generatedGroups = GroupAssignmentService.assignGroups(
-        session.participants,
-        session.groupConfiguration
-      );
-      setGroups(generatedGroups);
-    } else {
-      // Single group mode
+    // Use automatic session type detection based on participant count
+    const participantCount = session.participants.length;
+    
+    if (participantCount <= 4) {
+      // Single group for 2-4 participants
       setGroups([{
         groupId: 'group-1',
         participants: session.participants,
@@ -57,12 +49,19 @@ export const GroupSessionLobby: React.FC<GroupSessionLobbyProps> = ({
         roundNumber: 1,
         scribeNotes: {}
       }]);
+    } else {
+      // Multiple groups for 5+ participants
+      if (session.groupConfiguration) {
+        const generatedGroups = GroupAssignmentService.assignGroups(
+          session.participants,
+          session.groupConfiguration
+        );
+        setGroups(generatedGroups);
+      }
     }
-  }, [session.participants, session.groupMode, session.groupConfiguration]);
+  }, [session.participants, session.groupConfiguration]);
 
-  // Get current participant
-  const currentParticipant = session.participants.find(p => p.id === currentUserId);
-  const hasRole = currentParticipant?.role && currentParticipant.role !== '';
+
 
   const readyParticipants = session.participants.filter(p => p.status === 'ready');
   const readyNonHostParticipants = session.participants.filter(p => p.status === 'ready' && p.id !== currentUserId);
@@ -70,11 +69,6 @@ export const GroupSessionLobby: React.FC<GroupSessionLobbyProps> = ({
   const allNonHostParticipantsReady = readyNonHostParticipants.length === nonHostParticipants.length && nonHostParticipants.length > 0;
   const canStartSession = isHost && (allNonHostParticipantsReady || session.participants.length === 1);
 
-  const handleRoleSelect = (role: string) => {
-    if (currentParticipant && !hasRole) {
-      onUpdateParticipantRole(currentUserId, role);
-    }
-  };
 
   const handleReadyToggle = () => {
     setIsReady(!isReady);
@@ -104,7 +98,8 @@ export const GroupSessionLobby: React.FC<GroupSessionLobbyProps> = ({
   };
 
   const handleShuffleGroups = () => {
-    if (session.groupMode === 'multi' && session.groupConfiguration) {
+    // Only allow shuffling for multiple groups (5+ participants)
+    if (session.participants.length > 4 && session.groupConfiguration) {
       setIsShuffling(true);
       // Simulate shuffling delay
       setTimeout(() => {
@@ -123,10 +118,6 @@ export const GroupSessionLobby: React.FC<GroupSessionLobbyProps> = ({
     } catch (error) {
       console.error('Failed to copy link:', error);
     }
-  };
-
-  const formatDuration = (milliseconds: number) => {
-    return Math.floor(milliseconds / 60000);
   };
 
   return (
@@ -150,8 +141,8 @@ export const GroupSessionLobby: React.FC<GroupSessionLobbyProps> = ({
             </h3>
             <div className="space-y-2 text-sm text-secondary-600 dark:text-secondary-400">
               <p><strong>{t('dialectic.lobby.sessionInfo.name')}:</strong> {session.sessionName}</p>
-              <p><strong>{t('dialectic.lobby.sessionInfo.participants')}:</strong> {session.participants.length}</p>
-              <p><strong>{t('dialectic.lobby.sessionInfo.mode')}:</strong> {session.groupMode === 'single' ? t('dialectic.creation.groupMode.single.title') : t('dialectic.creation.groupMode.multi.title')}</p>
+              <p><strong>{t('dialectic.lobby.sessionInfo.participants')}:</strong> {session.participants.filter(p => p.id !== session.hostId).length}</p>
+              <p><strong>{t('dialectic.lobby.sessionInfo.mode')}:</strong> {t('dialectic.creation.sessionType.adaptive.title')}</p>
             </div>
           </div>
 
@@ -161,12 +152,15 @@ export const GroupSessionLobby: React.FC<GroupSessionLobbyProps> = ({
             </h3>
             <div className="space-y-2 text-sm">
               <p className="text-secondary-600 dark:text-secondary-400">
-                {t('dialectic.lobby.participantStatus.ready', { count: readyParticipants.length, total: session.participants.length })}
+                {t('dialectic.lobby.participantStatus.ready', { 
+                  count: readyParticipants.filter(p => p.id !== session.hostId).length, 
+                  total: session.participants.filter(p => p.id !== session.hostId).length 
+                })}
               </p>
               <div className="w-full bg-secondary-200 dark:bg-secondary-600 rounded-full h-2">
                 <div 
                   className="bg-green-500 h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${(readyParticipants.length / session.participants.length) * 100}%` }}
+                  style={{ width: `${(readyParticipants.filter(p => p.id !== session.hostId).length / Math.max(session.participants.filter(p => p.id !== session.hostId).length, 1)) * 100}%` }}
                 ></div>
               </div>
             </div>
@@ -183,7 +177,7 @@ export const GroupSessionLobby: React.FC<GroupSessionLobbyProps> = ({
               >
                 {t('dialectic.lobby.actions.copyLink')}
               </button>
-              {isHost && session.groupMode === 'multi' && (
+              {isHost && session.participants.length > 4 && (
                 <button
                   onClick={handleShuffleGroups}
                   disabled={isShuffling}
@@ -198,7 +192,7 @@ export const GroupSessionLobby: React.FC<GroupSessionLobbyProps> = ({
       </div>
 
       {/* Group Assignment Preview */}
-      {session.groupMode === 'multi' && (
+      {session.participants.length > 4 && (
         <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-6">
           <h2 className="text-xl font-semibold text-primary-900 dark:text-primary-100 mb-4">
             {t('dialectic.lobby.groupPreview.title')}

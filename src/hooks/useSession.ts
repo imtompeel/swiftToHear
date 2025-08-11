@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { FirestoreSessionService, SessionData, JoinData } from '../services/firestoreSessionService';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -11,7 +11,6 @@ export const useSession = () => {
   const previousSessionRef = useRef<string>('');
 
   const { user } = useAuth();
-  const params = useParams();
   const navigate = useNavigate();
 
   // Get current user info from auth context
@@ -89,8 +88,35 @@ export const useSession = () => {
     }
   }, [currentUserId]);
 
+  // Set up real-time listener for session updates
+  const setupRealTimeListener = useCallback((sessionId: string) => {
+    console.log('useSession: Setting up real-time listener for session:', sessionId);
+    
+    const unsubscribe = FirestoreSessionService.listenToSession(sessionId, (updatedSession) => {
+      if (updatedSession) {
+        console.log('useSession: Received real-time session update:', {
+          currentPhase: updatedSession.currentPhase,
+          currentRound: updatedSession.currentRound,
+          participants: updatedSession.participants?.length || 0
+        });
+        
+        // Update session data
+        setSession(updatedSession);
+        
+        // Check if current user is host
+        if (currentUserId) {
+          setIsHost(updatedSession.hostId === currentUserId);
+        }
+      } else {
+        console.log('useSession: Session not found or deleted');
+      }
+    });
+
+    return unsubscribe;
+  }, [currentUserId]);
+
   // Create session
-  const createSession = useCallback(async (sessionData: Omit<SessionData, 'sessionId' | 'createdAt' | 'participants' | 'status'>) => {
+  const createSession = useCallback(async (sessionData: Omit<SessionData, 'sessionId' | 'createdAt' | 'participants' | 'status'>, options?: { skipNavigation?: boolean }) => {
     try {
       setLoading(true);
       setError(null);
@@ -104,8 +130,10 @@ export const useSession = () => {
       setSession(newSession);
       setIsHost(true);
       
-      // Navigate to lobby
-      navigate(`/practice/lobby/${newSession.sessionId}`);
+      // Only navigate to lobby if not skipping navigation (for in-person sessions)
+      if (!options?.skipNavigation) {
+        navigate(`/practice/lobby/${newSession.sessionId}`);
+      }
       
       return newSession;
     } catch (err) {
@@ -117,7 +145,7 @@ export const useSession = () => {
   }, [currentUserId, currentUserName, navigate]);
 
   // Join session
-  const joinSession = useCallback(async (joinData: JoinData) => {
+  const joinSession = useCallback(async (joinData: JoinData, options?: { skipNavigation?: boolean }) => {
     try {
       setLoading(true);
       setError(null);
@@ -131,8 +159,10 @@ export const useSession = () => {
       
       setSession(updatedSession);
       
-      // Navigate to lobby
-      navigate(`/practice/lobby/${joinData.sessionId}`);
+      // Only navigate to lobby if not skipping navigation (for in-person sessions)
+      if (!options?.skipNavigation) {
+        navigate(`/practice/lobby/${joinData.sessionId}`);
+      }
       
       return updatedSession;
     } catch (err) {
@@ -218,14 +248,14 @@ export const useSession = () => {
   }, [session, currentUserId]);
 
   // Start session
-  const startSession = useCallback(async () => {
+  const startSession = useCallback(async (fivePersonChoice?: 'split' | 'together') => {
     if (!session || !isHost) return;
     
     try {
       setLoading(true);
       setError(null);
       
-      const updatedSession = await FirestoreSessionService.startSession(session.sessionId);
+      const updatedSession = await FirestoreSessionService.startSession(session.sessionId, fivePersonChoice);
       if (updatedSession) {
         setSession(updatedSession);
         
@@ -412,6 +442,7 @@ export const useSession = () => {
     // Actions
     loadSession,
     pollSession,
+    setupRealTimeListener,
     createSession,
     joinSession,
     updateReadyState,

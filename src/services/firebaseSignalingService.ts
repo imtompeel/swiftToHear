@@ -1,18 +1,15 @@
 import { 
   collection, 
-  doc, 
   addDoc, 
   onSnapshot, 
   query, 
   where, 
   orderBy, 
   limit, 
-  deleteDoc,
-  serverTimestamp,
   Timestamp 
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import { WebRTCMessage } from './webrtcService';
+// import { WebRTCMessage } from './webrtcService';
 
 export interface SignalingMessage {
   id?: string;

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
 
 interface SignUpProps {
   onSuccess?: () => void;
@@ -10,7 +9,6 @@ interface SignUpProps {
 
 const SignUp: React.FC<SignUpProps> = ({ onSuccess, onSwitchToSignIn }) => {
   const { t } = useTranslation();
-  const { theme } = useTheme();
   const { signUp, error, clearError } = useAuth();
   
   const [email, setEmail] = useState('');

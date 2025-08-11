@@ -9,7 +9,8 @@ import {
   where, 
   getDocs,
   serverTimestamp,
-  Timestamp
+  Timestamp,
+  onSnapshot
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
@@ -27,9 +28,22 @@ export interface SessionData {
   minParticipants: number;
   maxParticipants: number;
   topicSuggestions: TopicSuggestion[];
+  sessionType?: 'video' | 'in-person' | 'hybrid';
   currentPhase?: 'topic-selection' | 'hello-checkin' | 'listening' | 'transition' | 'reflection' | 'completion' | 'free-dialogue' | 'completed' | undefined;
   phaseStartTime?: Timestamp;
   currentRound?: number;
+  fivePersonChoice?: 'split' | 'together';
+  groupConfiguration?: {
+    autoAssignRoles: boolean;
+  };
+  scribeNotes?: string; // Notes from the current scribe
+  accumulatedScribeNotes?: string; // All scribe notes accumulated across rounds
+  safetyTimeout?: {
+    isActive: boolean;
+    requestedBy: string | null;
+    requestedByUserName: string | null;
+    startTime: Timestamp | null;
+  };
 }
 
 export interface TopicSuggestion {
@@ -48,13 +62,14 @@ export interface Participant {
   role: string;
   status: 'ready' | 'not-ready' | 'connecting';
   connectionStatus?: 'good' | 'poor' | 'disconnected';
+  handRaised?: boolean;
 }
 
 export interface JoinData {
   sessionId: string;
   userId: string;
   userName: string;
-  role: string;
+  role?: string; // Optional when auto-assign is enabled
 }
 
 export class FirestoreSessionService {
@@ -99,36 +114,137 @@ export class FirestoreSessionService {
     }
   }
 
+  // Listen to session updates in real-time
+  static listenToSession(sessionId: string, callback: (session: SessionData | null) => void): () => void {
+    try {
+      const docRef = doc(db, this.COLLECTION_NAME, sessionId);
+      
+      const unsubscribe = onSnapshot(docRef, (doc) => {
+        if (doc.exists()) {
+          const sessionData = doc.data() as SessionData;
+          callback(sessionData);
+        } else {
+          callback(null);
+        }
+      }, (error) => {
+        console.error('Error listening to session:', error);
+        callback(null);
+      });
+
+      return unsubscribe;
+    } catch (error) {
+      console.error('Error setting up session listener:', error);
+      return () => {}; // Return empty function if setup fails
+    }
+  }
+
   // Join a session
   static async joinSession(joinData: JoinData): Promise<SessionData | null> {
     try {
       const session = await this.getSession(joinData.sessionId);
       if (!session) return null;
 
-      // Check if role is available
-      const availableRoles = this.getAvailableRoles(session);
-      if (!availableRoles.includes(joinData.role)) {
-        throw new Error('Role not available');
+      // Check if session is full
+      if (session.sessionType === 'in-person') {
+        // For in-person sessions, exclude the host from participant count
+        const mobileParticipants = session.participants.filter(p => p.id !== session.hostId);
+        if (mobileParticipants.length >= session.maxParticipants) {
+          throw new Error('Session is full');
+        }
+      } else {
+        // For video/hybrid sessions, include host in participant count
+        if (session.participants.length >= session.maxParticipants) {
+          throw new Error('Session is full');
+        }
       }
 
-      // Add participant
-      const participant: Participant = {
-        id: joinData.userId,
-        name: joinData.userName,
-        role: joinData.role,
-        status: 'not-ready'
-      };
+      // For in-person sessions, handle participant limits and observer assignment
+      if (session.sessionType === 'in-person') {
+        const mobileParticipants = session.participants.filter(p => p.id !== session.hostId);
+        const participantCount = mobileParticipants.length;
+        let assignedRole = joinData.role || '';
 
-      const updatedParticipants = [...session.participants, participant];
-      
-      await updateDoc(doc(db, this.COLLECTION_NAME, joinData.sessionId), {
-        participants: updatedParticipants
-      });
+        // First 3 participants get active roles (speaker, listener, scribe)
+        if (participantCount < 3) {
+          if (!assignedRole) {
+            // Auto-assign active roles for first 3 participants
+            const activeRoles = ['speaker', 'listener', 'scribe'];
+            assignedRole = activeRoles[participantCount];
+          }
+        } else {
+          // 4th participant onwards becomes observer
+          assignedRole = 'observer';
+        }
 
-      return {
-        ...session,
-        participants: updatedParticipants
-      };
+        const participant: Participant = {
+          id: joinData.userId,
+          name: joinData.userName,
+          role: assignedRole,
+          status: 'not-ready'
+        };
+
+        const updatedParticipants = [...session.participants, participant];
+        
+        await updateDoc(doc(db, this.COLLECTION_NAME, joinData.sessionId), {
+          participants: updatedParticipants
+        });
+
+        return {
+          ...session,
+          participants: updatedParticipants
+        };
+      }
+
+      // For video/hybrid sessions, use existing logic
+      if (session.groupConfiguration?.autoAssignRoles) {
+        // Add participant without role (will be assigned later)
+        const participant: Participant = {
+          id: joinData.userId,
+          name: joinData.userName,
+          role: '', // Empty role - will be auto-assigned when session starts
+          status: 'not-ready'
+        };
+
+        const updatedParticipants = [...session.participants, participant];
+        
+        await updateDoc(doc(db, this.COLLECTION_NAME, joinData.sessionId), {
+          participants: updatedParticipants
+        });
+
+        return {
+          ...session,
+          participants: updatedParticipants
+        };
+      } else {
+        // Manual role assignment - check if role is available
+        if (!joinData.role) {
+          throw new Error('Role is required when auto-assign is disabled');
+        }
+        
+        const availableRoles = this.getAvailableRoles(session);
+        if (!availableRoles.includes(joinData.role)) {
+          throw new Error('Role not available');
+        }
+
+        // Add participant with specified role
+        const participant: Participant = {
+          id: joinData.userId,
+          name: joinData.userName,
+          role: joinData.role,
+          status: 'not-ready'
+        };
+
+        const updatedParticipants = [...session.participants, participant];
+        
+        await updateDoc(doc(db, this.COLLECTION_NAME, joinData.sessionId), {
+          participants: updatedParticipants
+        });
+
+        return {
+          ...session,
+          participants: updatedParticipants
+        };
+      }
     } catch (error) {
       console.error('Error joining session:', error);
       throw error;
@@ -205,17 +321,39 @@ export class FirestoreSessionService {
   }
 
   // Start session
-  static async startSession(sessionId: string): Promise<SessionData | null> {
+  static async startSession(sessionId: string, fivePersonChoice?: 'split' | 'together'): Promise<SessionData | null> {
     try {
-      await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
-        status: 'active',
-        currentPhase: 'hello-checkin',
-        currentRound: 1,
-        phaseStartTime: serverTimestamp()
-      });
-
+      // Get the current session to check participant count
       const session = await this.getSession(sessionId);
-      return session;
+      if (!session) return null;
+
+      // Auto-assign roles if enabled
+      if (session.groupConfiguration?.autoAssignRoles) {
+        await this.autoAssignRoles(sessionId, session);
+      }
+
+      // Handle 5-person case with choice
+      if (session.participants.length === 5 && fivePersonChoice) {
+        // Store the choice in the session for later use
+        await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
+          status: 'active',
+          currentPhase: 'hello-checkin',
+          currentRound: 1,
+          phaseStartTime: serverTimestamp(),
+          fivePersonChoice: fivePersonChoice
+        });
+      } else {
+        // Normal session start
+        await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
+          status: 'active',
+          currentPhase: 'hello-checkin',
+          currentRound: 1,
+          phaseStartTime: serverTimestamp()
+        });
+      }
+
+      const updatedSession = await this.getSession(sessionId);
+      return updatedSession;
     } catch (error) {
       console.error('Error starting session:', error);
       return null;
@@ -285,9 +423,17 @@ export class FirestoreSessionService {
       // Get current round (default to 1 if not set)
       const currentRound = session.currentRound || 1;
       
-      // Check if this was the final round (3 or 4 rounds depending on participants)
+      // Check if this was the final round (calculate based on participant count)
       const participantCount = session.participants.length;
-      const totalRounds = participantCount === 3 ? 3 : 4;
+      let totalRounds: number;
+      
+      if (participantCount === 2) {
+        totalRounds = 2; // 2-person sessions: speaker ↔ listener
+      } else if (participantCount === 3) {
+        totalRounds = 3; // 3-person sessions: speaker → listener → scribe
+      } else {
+        totalRounds = 4; // 4+ person sessions: speaker → listener → scribe → observer
+      }
       
       if (currentRound >= totalRounds) {
         // Move to completion phase instead of transition
@@ -296,16 +442,38 @@ export class FirestoreSessionService {
           phaseStartTime: serverTimestamp()
         });
       } else {
-        // Rotate roles for all participants
-        const roleOrder = ['speaker', 'listener', 'scribe', 'observer'];
-        const updatedParticipants = session.participants.map(participant => {
-          const currentRoleIndex = roleOrder.indexOf(participant.role);
-          const nextRoleIndex = (currentRoleIndex + 1) % roleOrder.length;
-          return {
+        // Rotate roles for all participants based on participant count
+        let updatedParticipants;
+        
+        if (participantCount === 2) {
+          // 2-person rotation: speaker ↔ listener
+          updatedParticipants = session.participants.map(participant => ({
             ...participant,
-            role: roleOrder[nextRoleIndex]
-          };
-        });
+            role: participant.role === 'speaker' ? 'listener' : 'speaker'
+          }));
+        } else if (participantCount === 3) {
+          // 3-person rotation: speaker → listener → scribe
+          const roleOrder = ['speaker', 'listener', 'scribe'];
+          updatedParticipants = session.participants.map(participant => {
+            const currentRoleIndex = roleOrder.indexOf(participant.role);
+            const nextRoleIndex = (currentRoleIndex + 1) % roleOrder.length;
+            return {
+              ...participant,
+              role: roleOrder[nextRoleIndex]
+            };
+          });
+        } else {
+          // 4+ person rotation: speaker → listener → scribe → observer
+          const roleOrder = ['speaker', 'listener', 'scribe', 'observer'];
+          updatedParticipants = session.participants.map(participant => {
+            const currentRoleIndex = roleOrder.indexOf(participant.role);
+            const nextRoleIndex = (currentRoleIndex + 1) % roleOrder.length;
+            return {
+              ...participant,
+              role: roleOrder[nextRoleIndex]
+            };
+          });
+        }
 
         await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
           participants: updatedParticipants,
@@ -319,6 +487,37 @@ export class FirestoreSessionService {
       return updatedSession;
     } catch (error) {
       console.error('Error completing round:', error);
+      return null;
+    }
+  }
+
+  // Continue with another round cycle for in-person sessions (only host can call this)
+  static async continueInPersonRounds(sessionId: string, hostId: string): Promise<SessionData | null> {
+    try {
+      const session = await this.getSession(sessionId);
+      if (!session) return null;
+
+      // Verify the caller is the host
+      if (session.hostId !== hostId) {
+        throw new Error('Only the host can continue rounds');
+      }
+
+      // For in-person sessions, accumulate current notes first, then rotate roles
+      console.log('FirestoreSessionService.continueInPersonRounds: Accumulating current notes before role rotation');
+      await this.accumulateScribeNotes(sessionId);
+      
+      console.log('FirestoreSessionService.continueInPersonRounds: Rotating roles for new round set');      
+      // Reset to round 1
+      await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
+        currentPhase: 'round',
+        currentRound: 1,
+        phaseStartTime: serverTimestamp()
+      });
+
+      const finalSession = await this.getSession(sessionId);
+      return finalSession;
+    } catch (error) {
+      console.error('Error continuing in-person rounds:', error);
       return null;
     }
   }
@@ -443,6 +642,49 @@ export class FirestoreSessionService {
     return allRoles.filter(role => !takenRoles.includes(role));
   }
 
+  // Auto-assign roles to participants
+  static async autoAssignRoles(sessionId: string, session: SessionData): Promise<void> {
+    try {
+      const participantCount = session.participants.length;
+      const totalParticipants = participantCount + (session.hostRole === 'participant' ? 1 : 0);
+      
+      // Define available roles based on participant count
+      let availableRoles: string[];
+      if (totalParticipants === 2) {
+        availableRoles = ['speaker', 'listener'];
+      } else if (totalParticipants === 3) {
+        availableRoles = ['speaker', 'listener', 'scribe'];
+      } else if (totalParticipants === 4) {
+        availableRoles = ['speaker', 'listener', 'scribe', 'observer'];
+      } else {
+        // For 5+ participants, use a mix of roles
+        availableRoles = ['speaker', 'listener', 'scribe', 'observer'];
+      }
+
+      // Create a copy of participants to assign roles
+      const participantsToUpdate = [...session.participants];
+      
+      // Assign roles to participants who don't have roles yet
+      let roleIndex = 0;
+      for (let i = 0; i < participantsToUpdate.length; i++) {
+        if (!participantsToUpdate[i].role || participantsToUpdate[i].role === '') {
+          participantsToUpdate[i].role = availableRoles[roleIndex % availableRoles.length];
+          roleIndex++;
+        }
+      }
+
+      // Update the session with assigned roles
+      await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
+        participants: participantsToUpdate
+      });
+
+      console.log('Auto-assigned roles:', participantsToUpdate.map(p => `${p.name}: ${p.role}`));
+    } catch (error) {
+      console.error('Error auto-assigning roles:', error);
+      throw error;
+    }
+  }
+
   // Get all sessions for a user
   static async getUserSessions(userId: string): Promise<SessionData[]> {
     try {
@@ -564,6 +806,272 @@ export class FirestoreSessionService {
       await deleteDoc(doc(db, this.COLLECTION_NAME, sessionId));
     } catch (error) {
       console.error('Error deleting session:', error);
+      throw error;
+    }
+  }
+
+  // Update session phase and round (for in-person sessions)
+  static async updateSessionPhase(sessionId: string, phase: string, round?: number): Promise<SessionData | null> {
+    try {
+      const updateData: any = {
+        currentPhase: phase,
+        phaseStartTime: serverTimestamp()
+      };
+      
+      if (round !== undefined) {
+        updateData.currentRound = round;
+      }
+      
+      await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), updateData);
+      
+      return await this.getSession(sessionId);
+    } catch (error) {
+      console.error('Error updating session phase:', error);
+      throw error;
+    }
+  }
+
+  // Update scribe notes for in-person sessions (only updates current round's notes)
+  static async updateScribeNotes(sessionId: string, notes: string): Promise<SessionData | null> {
+    try {
+      console.log('FirestoreSessionService.updateScribeNotes: Updating current round scribe notes for session', sessionId);
+      
+      // Only update the current round's notes, don't accumulate here
+      await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
+        scribeNotes: notes // Current round's notes only
+      });
+
+      return await this.getSession(sessionId);
+    } catch (error) {
+      console.error('Error updating scribe notes:', error);
+      throw error;
+    }
+  }
+
+  // Signal raised hand from listener to speaker
+  static async signalRaisedHand(sessionId: string, listenerId: string, isRaised: boolean): Promise<SessionData | null> {
+    try {
+      console.log('FirestoreSessionService.signalRaisedHand: Signaling raised hand for session', sessionId, 'listener:', listenerId, 'raised:', isRaised);
+      
+      const session = await this.getSession(sessionId);
+      if (!session) {
+        throw new Error('Session not found');
+      }
+
+      // Update the participant's raised hand status
+      const updatedParticipants = session.participants.map(participant => {
+        if (participant.id === listenerId) {
+          return {
+            ...participant,
+            handRaised: isRaised
+          };
+        }
+        return participant;
+      });
+
+      await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
+        participants: updatedParticipants
+      });
+
+      return await this.getSession(sessionId);
+    } catch (error) {
+      console.error('Error signaling raised hand:', error);
+      throw error;
+    }
+  }
+
+  // Accumulate scribe notes when moving to a new round
+  static async accumulateScribeNotes(sessionId: string): Promise<SessionData | null> {
+    try {
+      console.log('FirestoreSessionService.accumulateScribeNotes: Accumulating scribe notes for session', sessionId);
+      
+      const session = await this.getSession(sessionId);
+      if (!session) {
+        throw new Error('Session not found');
+      }
+
+      // Only accumulate if there are current notes to add
+      if (session.scribeNotes && session.scribeNotes.trim()) {
+        const existingAccumulatedNotes = session.accumulatedScribeNotes || '';
+        const newAccumulatedNotes = existingAccumulatedNotes 
+          ? `${existingAccumulatedNotes}\n\n--- Round ${session.currentRound || 1} ---\n${session.scribeNotes}`
+          : `--- Round ${session.currentRound || 1} ---\n${session.scribeNotes}`;
+
+        await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
+          accumulatedScribeNotes: newAccumulatedNotes // All accumulated notes
+        });
+      }
+
+      return await this.getSession(sessionId);
+    } catch (error) {
+      console.error('Error accumulating scribe notes:', error);
+      throw error;
+    }
+  }
+
+  // Request a safety timeout
+  static async requestSafetyTimeout(sessionId: string, userId: string, userName: string): Promise<SessionData | null> {
+    try {
+      const docRef = doc(db, this.COLLECTION_NAME, sessionId);
+      const docSnap = await getDoc(docRef);
+      
+      if (!docSnap.exists()) {
+        return null;
+      }
+      
+      // Update the session with timeout information
+      await updateDoc(docRef, {
+        safetyTimeout: {
+          isActive: true,
+          requestedBy: userId,
+          requestedByUserName: userName,
+          startTime: serverTimestamp()
+        }
+      });
+      
+      // Return updated session
+      const updatedDocSnap = await getDoc(docRef);
+      return updatedDocSnap.exists() ? updatedDocSnap.data() as SessionData : null;
+      
+    } catch (error) {
+      console.error('Error requesting safety timeout:', error);
+      return null;
+    }
+  }
+
+  // End a safety timeout
+  static async endSafetyTimeout(sessionId: string): Promise<SessionData | null> {
+    try {
+      const docRef = doc(db, this.COLLECTION_NAME, sessionId);
+      const docSnap = await getDoc(docRef);
+      
+      if (!docSnap.exists()) {
+        return null;
+      }
+      
+      // Clear the timeout information
+      await updateDoc(docRef, {
+        safetyTimeout: {
+          isActive: false,
+          requestedBy: null,
+          requestedByUserName: null,
+          startTime: null
+        }
+      });
+      
+      // Return updated session
+      const updatedDocSnap = await getDoc(docRef);
+      return updatedDocSnap.exists() ? updatedDocSnap.data() as SessionData : null;
+      
+    } catch (error) {
+      console.error('Error ending safety timeout:', error);
+      return null;
+    }
+  }
+
+  // Rotate roles for in-person sessions
+  static async rotateRoles(sessionId: string): Promise<SessionData | null> {
+    try {
+      console.log('FirestoreSessionService.rotateRoles: Starting role rotation for session', sessionId);
+      
+      const session = await this.getSession(sessionId);
+      if (!session) {
+        console.log('FirestoreSessionService.rotateRoles: Session not found');
+        return null;
+      }
+
+      const participants = session.participants || [];
+      console.log('FirestoreSessionService.rotateRoles: All participants:', participants.map(p => ({ id: p.id, name: p.name, role: p.role })));
+      
+      if (participants.length < 2) {
+        console.log('FirestoreSessionService.rotateRoles: Not enough participants to rotate (need at least 2)');
+        return session; // Need at least 2 participants to rotate
+      }
+
+      // Get participants with roles (excluding observers)
+      const roleParticipants = participants.filter(p => p.role && p.role !== 'observer');
+      console.log('FirestoreSessionService.rotateRoles: Role participants:', roleParticipants.map(p => ({ id: p.id, name: p.name, role: p.role })));
+      
+      if (roleParticipants.length < 2) {
+        console.log('FirestoreSessionService.rotateRoles: Not enough role participants to rotate (need at least 2)');
+        return session;
+      }
+
+      // Create a copy of participants to modify
+      const updatedParticipants = [...participants];
+
+      // Rotate roles based on number of participants
+      if (roleParticipants.length === 2) {
+        console.log('FirestoreSessionService.rotateRoles: Performing 2-person rotation');
+        // Two-person rotation: speaker ↔ listener
+        const speaker = roleParticipants.find(p => p.role === 'speaker');
+        const listener = roleParticipants.find(p => p.role === 'listener');
+        
+        console.log('FirestoreSessionService.rotateRoles: Found speaker:', speaker?.name, 'listener:', listener?.name);
+        
+        if (speaker && listener) {
+          const speakerIndex = updatedParticipants.findIndex(p => p.id === speaker.id);
+          const listenerIndex = updatedParticipants.findIndex(p => p.id === listener.id);
+          
+          console.log('FirestoreSessionService.rotateRoles: Speaker index:', speakerIndex, 'Listener index:', listenerIndex);
+          
+          if (speakerIndex !== -1 && listenerIndex !== -1) {
+            updatedParticipants[speakerIndex] = { ...speaker, role: 'listener' };
+            updatedParticipants[listenerIndex] = { ...listener, role: 'speaker' };
+            console.log('FirestoreSessionService.rotateRoles: Roles swapped successfully');
+          }
+        }
+      } else if (roleParticipants.length === 3) {
+        console.log('FirestoreSessionService.rotateRoles: Performing 3-person rotation');
+        // Three-person rotation: speaker → listener → scribe → speaker
+        const speaker = roleParticipants.find(p => p.role === 'speaker');
+        const listener = roleParticipants.find(p => p.role === 'listener');
+        const scribe = roleParticipants.find(p => p.role === 'scribe');
+        
+        console.log('FirestoreSessionService.rotateRoles: Found speaker:', speaker?.name, 'listener:', listener?.name, 'scribe:', scribe?.name);
+        
+        if (speaker && listener && scribe) {
+          const speakerIndex = updatedParticipants.findIndex(p => p.id === speaker.id);
+          const listenerIndex = updatedParticipants.findIndex(p => p.id === listener.id);
+          const scribeIndex = updatedParticipants.findIndex(p => p.id === scribe.id);
+          
+          console.log('FirestoreSessionService.rotateRoles: Indices - Speaker:', speakerIndex, 'Listener:', listenerIndex, 'Scribe:', scribeIndex);
+          
+          if (speakerIndex !== -1 && listenerIndex !== -1 && scribeIndex !== -1) {
+            updatedParticipants[speakerIndex] = { ...speaker, role: 'listener' };
+            updatedParticipants[listenerIndex] = { ...listener, role: 'scribe' };
+            updatedParticipants[scribeIndex] = { ...scribe, role: 'speaker' };
+            console.log('FirestoreSessionService.rotateRoles: 3-person rotation completed successfully');
+            
+            // Accumulate the current scribe's notes before rotating roles
+            console.log('FirestoreSessionService.rotateRoles: Accumulating current scribe notes before role rotation');
+            await this.accumulateScribeNotes(sessionId);
+            
+            // Pass accumulated scribe notes to the new scribe (the previous listener)
+            // This happens when moving to a new round, not during scribe feedback
+            if (session.accumulatedScribeNotes) {
+              console.log('FirestoreSessionService.rotateRoles: Passing accumulated scribe notes to new scribe:', listener.name);
+              // The accumulated notes will be available to the new scribe
+            }
+          }
+        }
+      }
+
+      console.log('FirestoreSessionService.rotateRoles: Updated participants before saving:', updatedParticipants.map(p => ({ id: p.id, name: p.name, role: p.role })));
+      
+      // Update the session with new participant roles
+      await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
+        participants: updatedParticipants
+      });
+
+      console.log('FirestoreSessionService.rotateRoles: Roles updated in Firestore successfully');
+      
+      const finalSession = await this.getSession(sessionId);
+      console.log('FirestoreSessionService.rotateRoles: Final session participants:', finalSession?.participants?.map(p => ({ id: p.id, name: p.name, role: p.role })));
+      
+      return finalSession;
+    } catch (error) {
+      console.error('Error rotating roles:', error);
       throw error;
     }
   }

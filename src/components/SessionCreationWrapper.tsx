@@ -1,26 +1,43 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SessionCreation } from './SessionCreation';
 import { useSession } from '../hooks/useSession';
 import { useAuth } from '../contexts/AuthContext';
+
 
 const SessionCreationWrapper: React.FC = () => {
   const { createSession, error, clearError } = useSession();
   const { user, loading: authLoading } = useAuth();
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const handleSessionCreate = async (sessionData: any) => {
     try {
-      await createSession({
+      // Create an adaptive session that can switch between single and multi-group modes
+      // Start with a regular session that can be upgraded to group mode if needed
+      const skipNavigation = sessionData.sessionType === 'in-person';
+      
+      const createdSession = await createSession({
         sessionName: sessionData.sessionName,
         duration: sessionData.duration,
         topic: sessionData.topic,
-        hostId: sessionData.hostId,
-        hostName: sessionData.hostName,
-        minParticipants: 2,
-        maxParticipants: 4,
-        topicSuggestions: sessionData.topicSuggestions || []
-      });
+        hostId: user?.uid || '',
+        hostName: user?.displayName || user?.email || 'Anonymous',
+        minParticipants: sessionData.minParticipants,
+        maxParticipants: sessionData.maxParticipants,
+        topicSuggestions: sessionData.topicSuggestions || [],
+        sessionType: sessionData.sessionType || 'video',
+        groupConfiguration: {
+          autoAssignRoles: false // Allow manual role selection for in-person sessions
+        }
+      }, { skipNavigation });
+      
+      return createdSession;
     } catch (err) {
       console.error('Failed to create session:', err);
+      throw err;
     }
   };
 

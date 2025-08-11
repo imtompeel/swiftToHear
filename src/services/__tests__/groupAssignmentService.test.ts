@@ -1,5 +1,6 @@
+import { describe, it, expect } from 'vitest';
 import { GroupAssignmentService } from '../groupAssignmentService';
-import { Participant, GroupConfiguration } from '../../types/groupSession';
+import { GroupData, Participant, GroupConfiguration } from '../../types/groupSession';
 
 describe('GroupAssignmentService', () => {
   const mockParticipants: Participant[] = [
@@ -13,7 +14,118 @@ describe('GroupAssignmentService', () => {
     { id: '8', name: 'Henry', role: '', status: 'ready' },
   ];
 
-  describe('assignGroups', () => {
+  const config: GroupConfiguration = {
+    groupSize: 'mixed',
+    autoAssignRoles: true,
+    groupRotation: 'balanced',
+    observerStrategy: 'distribute'
+  };
+
+  describe('assignGroups - Edge Cases', () => {
+    it('should throw error for 1 participant', () => {
+      const singleParticipant = mockParticipants.slice(0, 1);
+      
+      expect(() => {
+        GroupAssignmentService.assignGroups(singleParticipant, config);
+      }).toThrow('Cannot create session with only 1 participant');
+    });
+
+    it('should create 2-person group with speaker and listener only (no scribe)', () => {
+      const twoParticipants = mockParticipants.slice(0, 2);
+      
+      const groups = GroupAssignmentService.assignGroups(twoParticipants, config);
+      
+      expect(groups).toHaveLength(1);
+      expect(groups[0].participants).toHaveLength(2);
+      expect(groups[0].groupId).toBe('group-1');
+      
+      // Check roles - should only have speaker and listener
+      const roles = groups[0].participants.map(p => p.role);
+      expect(roles).toContain('speaker');
+      expect(roles).toContain('listener');
+      expect(roles).not.toContain('scribe');
+      expect(roles).not.toContain('observer');
+    });
+
+    it('should create 3-person group with speaker, listener, and scribe', () => {
+      const threeParticipants = mockParticipants.slice(0, 3);
+      
+      const groups = GroupAssignmentService.assignGroups(threeParticipants, config);
+      
+      expect(groups).toHaveLength(1);
+      expect(groups[0].participants).toHaveLength(3);
+      expect(groups[0].groupId).toBe('group-1');
+      
+      // Check roles - should have speaker, listener, and scribe
+      const roles = groups[0].participants.map(p => p.role);
+      expect(roles).toContain('speaker');
+      expect(roles).toContain('listener');
+      expect(roles).toContain('scribe');
+    });
+
+    it('should create 4-person group with speaker, listener, scribe, and observer', () => {
+      const fourParticipants = mockParticipants.slice(0, 4);
+      
+      const groups = GroupAssignmentService.assignGroups(fourParticipants, config);
+      
+      expect(groups).toHaveLength(1);
+      expect(groups[0].participants).toHaveLength(4);
+      expect(groups[0].groupId).toBe('group-1');
+      
+      // Check roles - should have all four roles
+      const roles = groups[0].participants.map(p => p.role);
+      expect(roles).toContain('speaker');
+      expect(roles).toContain('listener');
+      expect(roles).toContain('scribe');
+      expect(roles).toContain('observer');
+    });
+
+    it('should create 2+3 split for 5 participants by default', () => {
+      const fiveParticipants = mockParticipants.slice(0, 5);
+      
+      const groups = GroupAssignmentService.assignGroups(fiveParticipants, config);
+      
+      expect(groups).toHaveLength(2);
+      expect(groups[0].participants).toHaveLength(2);
+      expect(groups[1].participants).toHaveLength(3);
+      expect(groups[0].groupId).toBe('group-1');
+      expect(groups[1].groupId).toBe('group-2');
+    });
+
+    it('should create 2+3 split for 5 participants when choice is "split"', () => {
+      const fiveParticipants = mockParticipants.slice(0, 5);
+      
+      const groups = GroupAssignmentService.assignGroups(fiveParticipants, config, 'split');
+      
+      expect(groups).toHaveLength(2);
+      expect(groups[0].participants).toHaveLength(2);
+      expect(groups[1].participants).toHaveLength(3);
+      expect(groups[0].groupId).toBe('group-1');
+      expect(groups[1].groupId).toBe('group-2');
+    });
+
+    it('should create single 5-person group with 2 observers when choice is "together"', () => {
+      const fiveParticipants = mockParticipants.slice(0, 5);
+      
+      const groups = GroupAssignmentService.assignGroups(fiveParticipants, config, 'together');
+      
+      expect(groups).toHaveLength(1);
+      expect(groups[0].participants).toHaveLength(5);
+      expect(groups[0].groupId).toBe('group-1');
+      
+      // Check that first 3 have active roles, last 2 are observers
+      const roles = groups[0].participants.map(p => p.role);
+      const activeRoles = roles.slice(0, 3);
+      const observerRoles = roles.slice(3);
+      
+      expect(activeRoles).toContain('speaker');
+      expect(activeRoles).toContain('listener');
+      expect(activeRoles).toContain('scribe');
+      expect(observerRoles.every(role => role === 'observer')).toBe(true);
+    });
+  });
+
+  describe('assignGroups - Standard Cases', () => {
     it('should create single group for 4 or fewer participants', () => {
       const smallGroup = mockParticipants.slice(0, 4);
       const config: GroupConfiguration = {
@@ -47,7 +159,7 @@ describe('GroupAssignmentService', () => {
 
     it('should respect group size preference of 3', () => {
       const config: GroupConfiguration = {
-        groupSize: 3,
+        groupSize: 3 as const,
         autoAssignRoles: true,
         groupRotation: 'balanced',
         observerStrategy: 'distribute'
@@ -147,17 +259,17 @@ describe('GroupAssignmentService', () => {
 
   describe('balanceRoles', () => {
     it('should balance roles across groups', () => {
-      const groups = [
+      const groups: GroupData[] = [
         {
           groupId: 'group-1',
           participants: [
             { id: '1', name: 'Alice', role: 'speaker', status: 'ready' },
-            { id: '2', name: 'Bob', role: 'speaker', status: 'ready' },
-            { id: '3', name: 'Charlie', role: 'speaker', status: 'ready' },
-            { id: '4', name: 'Diana', role: 'speaker', status: 'ready' }
+            { id: '2', name: 'Bob', role: 'listener', status: 'ready' },
+            { id: '3', name: 'Carol', role: 'scribe', status: 'ready' },
+            { id: '4', name: 'David', role: 'observer', status: 'ready' }
           ],
-          status: 'waiting' as const,
-          currentPhase: 'waiting',
+          status: 'waiting',
+          currentPhase: 'hello-checkin',
           roundNumber: 1,
           scribeNotes: {}
         }
@@ -175,14 +287,14 @@ describe('GroupAssignmentService', () => {
 
   describe('shuffleGroups', () => {
     it('should shuffle participants while maintaining group sizes', () => {
-      const groups = [
+      const groups: GroupData[] = [
         {
           groupId: 'group-1',
           participants: [
             { id: '1', name: 'Alice', role: 'speaker', status: 'ready' },
             { id: '2', name: 'Bob', role: 'listener', status: 'ready' }
           ],
-          status: 'waiting' as const,
+          status: 'waiting',
           currentPhase: 'waiting',
           roundNumber: 1,
           scribeNotes: {}
@@ -193,7 +305,7 @@ describe('GroupAssignmentService', () => {
             { id: '3', name: 'Charlie', role: 'scribe', status: 'ready' },
             { id: '4', name: 'Diana', role: 'observer', status: 'ready' }
           ],
-          status: 'waiting' as const,
+          status: 'waiting',
           currentPhase: 'waiting',
           roundNumber: 1,
           scribeNotes: {}

@@ -149,6 +149,18 @@ const AdminPanel: React.FC = () => {
               </p>
             </div>
             <div className="flex items-center space-x-4">
+              <Link
+                to="/admin/guide"
+                className="bg-accent-500 hover:bg-accent-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 mr-2"
+              >
+                Platform Guide
+              </Link>
+              <Link
+                to="/admin/safety"
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+              >
+                Safety Guidelines
+              </Link>
               <span className="text-sm text-secondary-600 dark:text-secondary-400">
                 Signed in as {user.email}
               </span>
@@ -219,6 +231,56 @@ const AdminPanel: React.FC = () => {
                     </div>
                   </Link>
 
+                  {/* Platform Guide Card */}
+                  <Link 
+                    to="/admin/guide"
+                    className="relative group bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 p-6 rounded-lg border border-green-200 dark:border-green-700 hover:shadow-md transition-all duration-200 hover:scale-105"
+                  >
+                    <div>
+                      <span className="rounded-lg inline-flex p-3 bg-green-600 dark:bg-green-500 text-white ring-4 ring-white dark:ring-secondary-800">
+                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                      </span>
+                    </div>
+                    <div className="mt-8">
+                      <h3 className="text-lg font-medium text-secondary-900 dark:text-secondary-100 group-hover:text-green-600 dark:group-hover:text-green-400">
+                        Platform Guide
+                      </h3>
+                      <p className="mt-2 text-sm text-secondary-500 dark:text-secondary-400">
+                        Comprehensive instructions and best practices for using the Swift to Hear platform effectively.
+                      </p>
+                      <span className="mt-4 text-sm font-medium text-green-600 dark:text-green-400 group-hover:text-green-500">
+                        View Guide →
+                      </span>
+                    </div>
+                  </Link>
+
+                  {/* Safety Guidelines Card */}
+                  <Link 
+                    to="/admin/safety"
+                    className="relative group bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900 dark:to-rose-900 p-6 rounded-lg border border-red-200 dark:border-red-700 hover:shadow-md transition-all duration-200 hover:scale-105"
+                  >
+                    <div>
+                      <span className="rounded-lg inline-flex p-3 bg-red-600 dark:bg-red-500 text-white ring-4 ring-white dark:ring-secondary-800">
+                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                      </span>
+                    </div>
+                    <div className="mt-8">
+                      <h3 className="text-lg font-medium text-secondary-900 dark:text-secondary-100 group-hover:text-red-600 dark:group-hover:text-red-400">
+                        Safety Guidelines
+                      </h3>
+                      <p className="mt-2 text-sm text-secondary-500 dark:text-secondary-400">
+                        Essential safety protocols and distress response guidelines for trauma-informed sessions.
+                      </p>
+                      <span className="mt-4 text-sm font-medium text-red-600 dark:text-red-400 group-hover:text-red-500">
+                        View Guidelines →
+                      </span>
+                    </div>
+                  </Link>
+
                   {/* Future Features Placeholder */}
                   <div className="relative bg-secondary-50 dark:bg-secondary-700 p-6 rounded-lg border border-secondary-200 dark:border-secondary-600 opacity-50">
                     <div>
@@ -241,27 +303,7 @@ const AdminPanel: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="relative bg-secondary-50 dark:bg-secondary-700 p-6 rounded-lg border border-secondary-200 dark:border-secondary-600 opacity-50">
-                    <div>
-                      <span className="rounded-lg inline-flex p-3 bg-secondary-400 dark:bg-secondary-600 text-white ring-4 ring-white dark:ring-secondary-800">
-                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                      </span>
-                    </div>
-                    <div className="mt-8">
-                      <h3 className="text-lg font-medium text-secondary-500 dark:text-secondary-400">
-                        Session Management
-                      </h3>
-                      <p className="mt-2 text-sm text-secondary-400 dark:text-secondary-500">
-                        Create, schedule, and manage practice sessions with custom topics.
-                      </p>
-                      <span className="mt-4 text-sm font-medium text-secondary-400 dark:text-secondary-500">
-                        Coming Soon
-                      </span>
-                    </div>
-                  </div>
+
 
                 </div>
               </div>

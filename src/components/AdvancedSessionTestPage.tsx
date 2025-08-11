@@ -1,8 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useTranslation } from '../hooks/useTranslation';
-import { SessionCreation } from './SessionCreation';
-import { SessionLobby } from './SessionLobby';
-import { DialecticSession } from './DialecticSession';
 
 interface TestWindow {
   id: string;
@@ -14,7 +10,7 @@ interface TestWindow {
 }
 
 export const AdvancedSessionTestPage: React.FC = () => {
-  const { t } = useTranslation();
+
   const [testWindows, setTestWindows] = useState<TestWindow[]>([
     { id: 'host', name: 'Alice (Host)', url: '', isOpen: false, isHost: true },
     { id: 'participant1', name: 'Bob', url: '', isOpen: false },
@@ -26,7 +22,7 @@ export const AdvancedSessionTestPage: React.FC = () => {
   const [testPhase, setTestPhase] = useState<'setup' | 'session-created' | 'lobby' | 'session'>('setup');
   const [testResults, setTestResults] = useState<Array<{ test: string; status: 'pass' | 'fail'; message: string; timestamp: Date }>>([]);
   const [automationMode, setAutomationMode] = useState(false);
-  const [sessionData, setSessionData] = useState<any>(null);
+  const [, setSessionData] = useState<any>(null);
   
   const automationInterval = useRef<NodeJS.Timeout | null>(null);
   const testStartTime = useRef<Date | null>(null);
@@ -196,13 +192,6 @@ export const AdvancedSessionTestPage: React.FC = () => {
     setSessionData(null);
     setTestWindows(prev => prev.map(w => ({ ...w, url: '', isOpen: false })));
     testStartTime.current = null;
-  };
-
-  // Handle session creation
-  const handleSessionCreated = (sessionData: any) => {
-    setSessionData(sessionData);
-    setTestPhase('lobby');
-    addTestResult('Session Data', 'pass', 'Session data received from creation component');
   };
 
   // Cleanup on unmount

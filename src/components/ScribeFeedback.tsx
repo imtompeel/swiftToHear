@@ -2,42 +2,37 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { VideoCall } from './VideoCall';
 import { HoverTimer } from './HoverTimer';
+import { SessionContext, SessionParticipant } from '../types/sessionContext';
 
 interface ScribeFeedbackProps {
-  scribeName: string;
-  roundNumber: number;
-  onComplete: () => void;
-  duration: number; // in milliseconds
-  notes?: string; // Optional notes from the scribe
-  sessionId: string;
+  session: SessionContext;
   currentUserId: string;
   currentUserName: string;
-  participants: Array<{
-    id: string;
-    name: string;
-    role: string;
-    status: 'ready' | 'not-ready' | 'connecting';
-  }>;
+  participants: SessionParticipant[];
+  videoCall: any;
+  onComplete: () => void;
   isHost?: boolean;
-  hideVideo?: boolean;
+  notes?: string; // Optional notes from the scribe
 }
 
 export const ScribeFeedback: React.FC<ScribeFeedbackProps> = ({
-  scribeName,
-  roundNumber,
-  onComplete,
-  duration = 2.5 * 60 * 1000, // 2.5 minutes default
-  notes,
-  sessionId,
+  session,
   currentUserId,
   currentUserName,
   participants,
+  videoCall: _videoCall,
+  onComplete,
   isHost = false,
-  hideVideo = false
+  notes
 }) => {
   const { t } = useTranslation();
+  const duration = 2.5 * 60 * 1000; // 2.5 minutes default
   const [timeRemaining, setTimeRemaining] = useState(duration);
   const [, setIsComplete] = useState(false);
+
+  // Extract data from session context
+  const roundNumber = session.currentRound || 1;
+  const scribeName = participants.find(p => p.role === 'scribe')?.name || 'Scribe';
 
   // Countdown timer
   useEffect(() => {
@@ -56,34 +51,32 @@ export const ScribeFeedback: React.FC<ScribeFeedbackProps> = ({
 
 
   return (
-    <div data-testid="scribe-feedback" className="max-w-7xl mx-auto p-6">
-      <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
-        {/* Video Section - only show if not hidden */}
-        {!hideVideo && (
-          <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-6 h-fit">
-            <h2 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-4">
-              {t('dialectic.session.scribeFeedback.videoCall')}
-            </h2>
-            <VideoCall
-              sessionId={sessionId}
-              currentUserId={currentUserId}
-              currentUserName={currentUserName}
-              participants={participants}
-              isActive={true}
-              className="h-96"
-            />
-          </div>
-        )}
+    <div data-testid="scribe-feedback" className="max-w-7xl mx-auto p-4 sm:p-6">
+      <div className="grid grid-cols-1 lg:grid-cols-1 gap-4 sm:gap-6 lg:gap-8">
+        {/* Video Section */}
+        <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-4 sm:p-6 h-fit">
+          <h2 className="text-lg sm:text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-3 sm:mb-4">
+            {t('dialectic.session.scribeFeedback.videoCall')}
+          </h2>
+          <VideoCall
+            sessionId={session.sessionId}
+            currentUserId={currentUserId}
+            currentUserName={currentUserName}
+            participants={participants}
+            isActive={true}
+            className="h-64 sm:h-80 md:h-96"
+          />
+        </div>
 
         {/* Content Section */}
-        <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-8">
-          <div className="text-center mb-8">
-            <div className="flex justify-between items-start mb-4">
+        <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-6 sm:p-8">
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4">
               <div className="flex-1">
-                <h1 className="text-3xl font-bold text-secondary-900 dark:text-secondary-100 mb-2">
+                <h1 className="text-2xl sm:text-3xl font-bold text-secondary-900 dark:text-secondary-100 mb-2">
                   {t('dialectic.session.scribeFeedback.title')}
                 </h1>
-                <p className="text-lg text-secondary-600 dark:text-secondary-400">
+                <p className="text-base sm:text-lg text-secondary-600 dark:text-secondary-400">
                   {t('dialectic.session.scribeFeedback.description', { 
                     scribe: scribeName, 
                     round: roundNumber 
@@ -94,19 +87,19 @@ export const ScribeFeedback: React.FC<ScribeFeedbackProps> = ({
               {/* Hover Timer */}
               <HoverTimer 
                 timeRemaining={timeRemaining}
-                className="ml-4"
+                className="mt-4 sm:mt-0 sm:ml-4"
               />
             </div>
           </div>
 
         {/* Scribe's Notes (if available) */}
         {notes && (
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-4">
+          <div className="mb-6 sm:mb-8">
+            <h2 className="text-lg sm:text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-3 sm:mb-4">
               {t('dialectic.session.scribeFeedback.notesTitle')}
             </h2>
-            <div className="bg-secondary-50 dark:bg-secondary-700 rounded-lg p-4">
-              <p className="text-secondary-800 dark:text-secondary-200 whitespace-pre-wrap">
+            <div className="bg-secondary-50 dark:bg-secondary-700 rounded-lg p-3 sm:p-4">
+              <p className="text-secondary-800 dark:text-secondary-200 whitespace-pre-wrap text-sm sm:text-base">
                 {notes}
               </p>
             </div>
@@ -114,12 +107,12 @@ export const ScribeFeedback: React.FC<ScribeFeedbackProps> = ({
         )}
 
         {/* Guidelines for Scribe */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-4">
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-lg sm:text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-3 sm:mb-4">
             {t('dialectic.session.scribeFeedback.guidelines.title')}
           </h2>
-          <div className="bg-blue-50 dark:bg-blue-900 rounded-lg p-6">
-            <ul className="space-y-3 text-sm text-blue-800 dark:text-blue-200">
+          <div className="bg-blue-50 dark:bg-blue-900 rounded-lg p-4 sm:p-6">
+            <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm text-blue-800 dark:text-blue-200">
               <li>• {t('dialectic.session.scribeFeedback.guidelines.share')}</li>
               <li>• {t('dialectic.session.scribeFeedback.guidelines.highlight')}</li>
               <li>• {t('dialectic.session.scribeFeedback.guidelines.themes')}</li>
@@ -129,12 +122,12 @@ export const ScribeFeedback: React.FC<ScribeFeedbackProps> = ({
         </div>
 
         {/* Guidelines for Listeners */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-4">
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-lg sm:text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-3 sm:mb-4">
             {t('dialectic.session.scribeFeedback.listenerGuidelines.title')}
           </h2>
-          <div className="bg-green-50 dark:bg-green-900 rounded-lg p-6">
-            <ul className="space-y-3 text-sm text-green-800 dark:text-green-200">
+          <div className="bg-green-50 dark:bg-green-900 rounded-lg p-4 sm:p-6">
+            <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm text-green-800 dark:text-green-200">
               <li>• {t('dialectic.session.scribeFeedback.listenerGuidelines.listen')}</li>
               <li>• {t('dialectic.session.scribeFeedback.listenerGuidelines.reflect')}</li>
               <li>• {t('dialectic.session.scribeFeedback.listenerGuidelines.ask')}</li>
@@ -145,13 +138,13 @@ export const ScribeFeedback: React.FC<ScribeFeedbackProps> = ({
 
         {/* Complete button - only for host */}
         {isHost && (
-          <div className="text-center mt-8">
+          <div className="text-center mt-6 sm:mt-8">
             <button
               onClick={() => {
                 setIsComplete(true);
                 onComplete();
               }}
-              className="px-6 py-3 bg-accent-600 text-white rounded-lg hover:bg-accent-700 transition-colors"
+              className="px-4 sm:px-6 py-2 sm:py-3 bg-accent-600 text-white rounded-lg hover:bg-accent-700 transition-colors text-sm sm:text-base"
             >
               {t('dialectic.session.scribeFeedback.complete')}
             </button>

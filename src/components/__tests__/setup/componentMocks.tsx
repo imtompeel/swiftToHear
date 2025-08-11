@@ -34,16 +34,16 @@ export const SessionCreation: React.FC<any> = (props) => {
           <p>dialectic.creation.duration.help</p>
           
           <button data-testid="duration-option-5" className="border-secondary-200">
-            5 dialectic.creation.duration.minutes
+            5 dialectic.creation.duration.minute
           </button>
           <button data-testid="duration-option-10" className="border-secondary-200">
-            10 dialectic.creation.duration.minutes
+            10 dialectic.creation.duration.minute
           </button>
           <button data-testid="duration-option-15" className="border-accent-500">
-            15 dialectic.creation.duration.minutes
+            15 dialectic.creation.duration.minute
           </button>
           <button data-testid="duration-option-20" className="border-secondary-200">
-            20 dialectic.creation.duration.minutes
+            20 dialectic.creation.duration.minute
           </button>
           
           <input 

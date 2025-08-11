@@ -1,4 +1,3 @@
-import { FirestoreSessionService } from './firestoreSessionService';
 import { FirebaseSignalingService, SignalingMessage } from './firebaseSignalingService';
 
 export interface WebRTCMessage {
@@ -371,14 +370,6 @@ export class WebRTCService {
     this.onConnectionStateChange?.('disconnected');
   }
 
-  // Reset the service state (call this when reinitializing)
-  private reset() {
-    this.peerConnections.clear();
-    this.localStream = null;
-    this.sessionId = null;
-    this.currentUserId = null;
-    this.signalingService = null;
-  }
 
   // Get local stream
   getLocalStream(): MediaStream | null {

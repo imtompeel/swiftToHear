@@ -27,7 +27,9 @@ export const useRoleRotation = ({
   const getTotalRounds = () => {
     const participantCount = getParticipantCount();
     
-    if (participantCount === 3) {
+    if (participantCount === 2) {
+      return 2; // 2-person sessions: speaker ↔ listener
+    } else if (participantCount === 3) {
       return 3; // Everyone rotates through 3 active roles
     } else if (participantCount === 4) {
       // Check if there's a permanent passive observer
@@ -58,7 +60,13 @@ export const useRoleRotation = ({
 
     const participantCount = getParticipantCount();
     
-    if (participantCount === 3) {
+    if (participantCount === 2) {
+      // 2-person rotation: speaker ↔ listener
+      if (!currentRole || (currentRole !== 'speaker' && currentRole !== 'listener')) {
+        return 'speaker';
+      }
+      return currentRole === 'speaker' ? 'listener' : 'speaker';
+    } else if (participantCount === 3) {
       // 3-person rotation: speaker → listener → scribe → speaker
       const roleOrder = ['speaker', 'listener', 'scribe'];
       if (!currentRole || !roleOrder.includes(currentRole)) {

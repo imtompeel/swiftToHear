@@ -208,5 +208,89 @@
     "date": "Fecha",
     "time": "Hora",
     "status": "Estado"
+  },
+  "dialectic": {
+    "session": {
+      "inPerson": {
+        "title": "Sesión Presencial",
+        "qrCode": {
+          "title": "Código QR para Participantes",
+          "instructions": "Los participantes escanean este código QR con sus dispositivos móviles para unirse a la sesión"
+        },
+        "participants": {
+          "title": "Participantes Conectados"
+        },
+        "controls": {
+          "title": "Controles de Sesión",
+          "startSession": "Iniciar Sesión",
+          "nextPhase": "Siguiente Fase",
+          "pause": "Pausar Sesión"
+        },
+        "phase": {
+          "waiting": "Esperando para Comenzar",
+          "speaking": "Fase de Habla",
+          "listening": "Fase de Escucha",
+          "reflection": "Fase de Reflexión",
+          "feedback": "Fase de Retroalimentación"
+        },
+        "status": {
+          "title": "Estado de la Sesión"
+        },
+        "checkIn": {
+          "title": "Antes de Iniciar la Sesión",
+          "remember": "Recuerda hacer check-in entre ustedes:",
+          "introduce": "Tómate un momento para presentarte si no se han conocido",
+          "share": "Comparte lo que está vivo en ti ahora mismo",
+          "intentions": "Establece cualquier intención para la sesión",
+          "ready": "Asegúrate de que todos se sientan listos para comenzar"
+        },
+        "currentPhase": {
+          "waiting": "Esperando Participantes",
+          "round": "Ronda {{round}}",
+          "scribeFeedback": "Ronda {{round}} - Retroalimentación del Escriba",
+          "roundComplete": "Todas las Rondas Completadas",
+          "freeDialogue": "Diálogo Libre (Diálogos)",
+          "completed": "Sesión Completada"
+        },
+        "phaseDescriptions": {
+          "round": "Roles de Orador y Oyente activos simultáneamente",
+          "scribeFeedback": "Escriba compartiendo insights de la Ronda {{round}}",
+          "roundComplete": "Elige qué hacer a continuación",
+          "freeDialogue": "Conversación abierta sin restricciones de roles"
+        },
+        "roundOptions": {
+          "title": "¡Todas las Rondas Completadas!",
+          "repeatRounds": "Repetir Rondas",
+          "startDialogos": "Iniciar Diálogos",
+          "endSession": "Terminar Sesión"
+        },
+        "controlButtons": {
+          "completeRound": "Completar Ronda",
+          "nextRound": "Siguiente Ronda",
+          "pauseSession": "Pausar Sesión",
+          "endSession": "Terminar Sesión"
+        },
+        "copyLink": "Copiar",
+        "copyLinkTitle": "Copiar enlace al portapapeles"
+      }
+    },
+    "creation": {
+      "participantLimits": {
+        "label": "Máximo de Participantes",
+        "description": "Establece el número máximo de participantes para esta sesión. Cualquiera que se una después del 3er participante será asignado como observador para la primera ronda.",
+        "tip": "4 participantes es el máximo recomendado para un diálogo efectivo. 5 es el máximo absoluto. Para 6+ participantes, considera dividir en dos sesiones separadas.",
+        "recommended": "Recomendado",
+        "maximum": "Máximo",
+        "splitSessions": "¡Considera dividir sesiones!",
+        "participants": "participantes",
+        "custom": {
+          "label": "Número personalizado (3-10 participantes)",
+          "placeholder": "Ingresa 3-10",
+          "warning": "Los grupos grandes pueden reducir la calidad del diálogo. Considera dividir en dos sesiones separadas."
+        },
+        "howItWorks": "Los primeros 3 participantes obtienen roles activos (orador, oyente, escriba). Los participantes adicionales se convierten en observadores y pueden rotar durante rondas adicionales.",
+        "preview": "Máx. participantes: {{count}} (los primeros 3 obtienen roles activos, otros se convierten en observadores para la primera ronda)"
+      }
+    }
   }
 }

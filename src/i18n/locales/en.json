@@ -90,7 +90,20 @@
       "title": "Practising the art of listening",
       "intro1": "If we are to become mature in Christ, we must recover the art of listening—not passive silence, but active, compassionate attention. The kind of listening that Jesus often invited through his poetic and enigmatic statements. His parables, questions, and open-ended encounters called others to listen more deeply—to themselves, to him, and to the movement of God in their lives. This kind of listening slows us down, draws us out, and opens a space where the Wisdom might speak.",
       "intro2": "To that end, a small group of us are beginning to experiment with a simple practice designed to help us listen better and trust more deeply in the process of godly conversation. It centres around three roles:",
-
+      "roles": {
+        "speaker": {
+          "title": "Speaker",
+          "description": "Shares what's on their heart without interruption, taking time to explore their thoughts and feelings."
+        },
+        "listener": {
+          "title": "Listener",
+          "description": "Offers full attention and reflects back what they heard, without adding their own thoughts or advice."
+        },
+        "scribe": {
+          "title": "Scribe",
+          "description": "Captures key insights and themes that emerge, helping the group remember what was shared."
+        }
+      },
       "rotation": "Crucially, these roles rotate. Everyone becomes a speaker, a listener, and a scribe after an allotted time. No one controls the outcome. Instead, we place faith in what can emerge when we listen together in love. As Proverbs 20:5 says, \"The purposes of a person's heart are deep waters, but one who has insight draws them out.\" This practice is a way of drawing out—not just others' words, but the meaning beneath them, even those meanings hidden from ourselves.",
       "discovery": "As the conversation unfolds, it often leads us to discoveries none of us could have reached alone. As Paul reminds us in 1 Corinthians 13:12, \"For now we see through a glass, darkly; but then face to face: now I know in part; but then shall I know even as also I am known.\" Our understanding is always partial. But through mutual listening, we begin to uncover not only what we don't know, but what we don't know we don't know—the blind spots and assumptions that only another's voice can help illuminate.",
       "faith": "This practice is not about asserting control over words or ideas, but about cultivating faith in the conversation itself—faith that when we \"submit to one another out of reverence for Christ\" (Ephesians 5:21), something deeper than individual insight can emerge. We begin, as 2 Timothy 2:24–25 teaches, to \"patiently endure,\" \"correct with gentleness,\" and leave room for \"God [to] perhaps grant them repentance leading to a knowledge of the truth.\""
@@ -98,6 +111,8 @@
     "format": {
       "title": "Why Use This Format?",
       "expandButton": "Why Use This Format?",
+      "showMore": "Read more about this format",
+      "showLess": "Show less",
       "intro1": "The specific structure—Speaker, Listener, Scribe—has no direct precedent in Scripture, it is a newer technology. But many of our current practices are. The early church had no hymn books, Sunday schools, or digital tools. We use these because they help us live out the principles of Scripture.",
       "intro2": "This listening format is just that—a tool to enact timeless values:",
       "values": {
@@ -124,6 +139,11 @@
       },
       "pitfalls": {
         "title": "It also helps us guard against common pitfalls:",
+        "labels": {
+          "reactiveness": "Reactiveness and debate:",
+          "dominance": "Dominance and status:",
+          "losingInsight": "Losing insight:"
+        },
         "items": {
           "reactiveness": "Reactiveness and debate: The Listener doesn't reply, but reflects back what they heard.",
           "dominance": "Dominance and status: The roles rotate—no one stays in charge.",
@@ -141,6 +161,9 @@
       "title": "An invitation",
       "description": "We are planning a pilot event to explore this listening practice together—open to all who want to try. Whether you're confident or curious, cautious or sceptical, you are welcome.",
       "callToAction": "If you're interested in taking part, or helping us test and shape this for broader use, please get in touch.",
+      "errors": {
+        "joinFailed": "Failed to join waiting list. Please try again."
+      },
       "form": {
         "emailPlaceholder": "Enter your email address",
         "submitButton": "Join Waiting List",
@@ -162,7 +185,7 @@
     "footer": {
       "copyright": "© 2025 Swift to Hear. All rights reserved.",
       "finalQuote": {
-        "text": "Let us listen well—to each other, to the Word, and to the Spirit who speaks through our shared searching.",
+        "text": "Let us listen well—to each other, to the Word, through our shared searching.",
         "reference": ""
       }
     }
@@ -201,6 +224,59 @@
         },
         "noSignups": "No email signups yet.",
         "loadingError": "Error loading email signups. Please try again."
+      },
+      "guide": {
+        "title": "Platform Guide",
+        "subtitle": "A comprehensive guide to using the Swift to Hear listening practice platform for both video and in-person sessions.",
+        "backToAdmin": "Back to Admin Panel",
+        "tableOfContents": "Table of Contents",
+        "overview": {
+          "title": "Platform Overview",
+          "description": "Swift to Hear is a structured listening practice platform designed to help participants develop deep listening skills through guided conversations. The platform supports both video-based sessions (for remote participants) and in-person sessions (for face-to-face groups).",
+          "keyFeatures": "Key Features",
+          "sessionStructure": "Session Structure"
+        },
+        "sessionTypes": {
+          "title": "Session Types",
+          "video": {
+            "title": "Video Sessions",
+            "description": "Perfect for remote teams, online workshops, or when participants are geographically distributed."
+          },
+          "inPerson": {
+            "title": "In-Person Sessions",
+            "description": "Ideal for face-to-face workshops, team building, or classroom settings where participants are physically present."
+          }
+        },
+        "roles": {
+          "title": "Participant Roles",
+          "speaker": {
+            "title": "Speaker",
+            "description": "Shares thoughts, experiences, and insights while being mindful of pace and pauses."
+          },
+          "listener": {
+            "title": "Listener",
+            "description": "Provides full attention and presence, reflecting back what they hear without judgment."
+          },
+          "scribe": {
+            "title": "Scribe",
+            "description": "Captures key insights, themes, and questions that emerge during the conversation."
+          }
+        },
+        "bestPractices": {
+          "title": "Best Practices",
+          "forHosts": "For Hosts",
+          "forParticipants": "For Participants"
+        },
+        "troubleshooting": {
+          "title": "Troubleshooting",
+          "commonIssues": "Common Issues",
+          "tipsForSuccess": "Tips for Success"
+        },
+        "callToAction": {
+          "title": "Ready to Get Started?",
+          "subtitle": "Create your first session and experience the power of structured listening practice.",
+          "createSession": "Create a Session"
+        }
       }
     }
   },
@@ -446,15 +522,102 @@
         },
         "participants": {
           "title": "Active Participants"
+        }
+      },
+      "inPerson": {
+        "title": "In-Person Session",
+        "qrCode": {
+          "title": "QR Code for Participants",
+          "instructions": "Participants scan this QR code with their mobile devices to join the session"
         },
-        "notes": {
-          "title": "Session Notes",
-          "description": "Capture any insights or observations from your free dialogue",
-          "placeholder": "Share any thoughts, insights, or observations from your conversation..."
+        "participants": {
+          "title": "Connected Participants"
         },
-        "endSession": "End Session",
-        "hostControl": "The host will control when to end this phase"
-      }
+        "controls": {
+          "title": "Session Controls",
+          "startSession": "Start Session",
+          "nextPhase": "Next Phase",
+          "pause": "Pause Session"
+        },
+        "phase": {
+          "waiting": "Waiting to Start",
+          "speaking": "Speaking Phase",
+          "listening": "Listening Phase",
+          "reflection": "Reflection Phase",
+          "feedback": "Feedback Phase"
+        },
+        "status": {
+          "title": "Session Status"
+        },
+        "checkIn": {
+          "title": "Before Starting the Session",
+          "remember": "Remember to check-in with each other:",
+          "introduce": "Take a moment to introduce yourselves if you haven't met",
+          "share": "Share what's alive in you right now",
+          "intentions": "Set any intentions for the session",
+          "ready": "Ensure everyone feels ready to begin"
+        },
+        "currentPhase": {
+          "waiting": "Waiting for Participants",
+          "round": "Round {{round}}",
+          "scribeFeedback": "Round {{round}} - Scribe Feedback",
+          "roundComplete": "All Rounds Completed",
+          "freeDialogue": "Free Dialogue (Dialogos)",
+          "completed": "Session Completed"
+        },
+        "phaseDescriptions": {
+          "round": "Speaker and Listener roles active simultaneously",
+          "scribeFeedback": "Scribe sharing insights from Round {{round}}",
+          "roundComplete": "Choose what to do next",
+          "freeDialogue": "Open conversation without role restrictions"
+        },
+        "roundOptions": {
+          "title": "All Rounds Completed!",
+          "repeatRounds": "Repeat Rounds (Roles Will Rotate)",
+          "repeatRoundsDescription": "Start a new set of rounds with rotated roles so everyone experiences different positions",
+          "startDialogos": "Start Dialogos",
+          "endSession": "End Session"
+        },
+        "roleSelection": {
+          "title": "Choose Your Role",
+          "speaker": {
+            "title": "Speaker",
+            "description": "Share your thoughts and experiences"
+          },
+          "listener": {
+            "title": "Listener", 
+            "description": "Practice deep, attentive listening"
+          },
+          "scribe": {
+            "title": "Scribe",
+            "description": "Capture key insights and themes"
+          },
+          "taken": "Taken",
+          "allRolesTaken": "⚠️ All roles are currently taken. Please wait for a role to become available."
+        },
+        "controlButtons": {
+          "completeRound": "Complete Round",
+          "nextRound": "Next Round",
+          "pauseSession": "Pause Session",
+          "endSession": "End Session"
+        },
+        "copyLink": "Copy",
+        "copyLinkTitle": "Copy link to clipboard"
+      },
+      "mobile": {
+        "waiting": {
+          "title": "Waiting for Session",
+          "message": "The host will start the session soon",
+          "role": "Your Role"
+        }
+      },
+      "notes": {
+        "title": "Session Notes",
+        "description": "Capture any insights or observations from your free dialogue",
+        "placeholder": "Share any thoughts, insights, or observations from your conversation..."
+      },
+      "endSession": "End Session",
+      "hostControl": "The host will control when to end this phase"
     },
     "wordCloud": {
       "title": "Popular Topics",
@@ -487,55 +650,72 @@
       "whatRelationship": "What relationship is calling for your attention?",
       "whatPurpose": "What questions about purpose or calling are you holding?",
       "whatGrowth": "Where do you sense you're being invited to grow?"
-    },
-    "roles": {
-      "chooseRole": "Choose Your Role",
-      "speaker": {
-        "title": "Speaker",
-        "description": "Share what's alive in you with focused time and gentle guidance."
       },
-      "listener": {
-        "title": "Listener", 
-        "description": "Practice deep listening with prompts for reflection and response."
-      },
-      "scribe": {
-        "title": "Scribe",
-        "description": "Capture insights, themes, and key moments as they emerge."
-      },
-      "observer": {
-        "title": "Observer",
-        "description": "Watch the listening dynamics and learn from the process.",
-        "temporary": {
-          "title": "Temporary Observer",
-          "description": "Wait for your turn to participate actively",
-          "badge": "Temporary"
+      "roles": {
+        "chooseRole": "Choose Your Role",
+        "speaker": {
+          "title": "Speaker",
+          "description": "Share what's alive in you with focused time and gentle guidance."
         },
-        "permanent": {
-          "title": "Permanent Observer", 
-          "description": "Observe the entire session without participating",
-          "badge": "Permanent"
+        "listener": {
+          "title": "Listener", 
+          "description": "Practice deep listening with prompts for reflection and response."
+        },
+        "scribe": {
+          "title": "Scribe",
+          "description": "Capture insights, themes, and key moments as they emerge."
+        },
+        "observer": {
+          "title": "Observer",
+          "description": "Watch the listening dynamics and learn from the process.",
+          "temporary": {
+            "title": "Temporary Observer",
+            "description": "Wait for your turn to participate actively",
+            "badge": "Temporary"
+          },
+          "permanent": {
+            "title": "Permanent Observer", 
+            "description": "Observe the entire session without participating",
+            "badge": "Permanent"
+          }
         }
-      }
-    },
+      },
 
     "creation": {
       "title": "Create Practice Session",
       "description": "Set up a new dialectic listening session for your group",
-      "duration": {
-        "label": "Session Duration",
-        "description": "How long should your practice session be?",
-        "help": "Choose the duration that works best for your group. You can always adjust this for future sessions.",
-        "options": {
-          "5": "5 minutes (Quick practice)",
-          "10": "10 minutes (Focused session)",
-          "15": "15 minutes (Standard session)",
-          "20": "20 minutes (Deep exploration)"
+      "sessionType": {
+        "label": "Session Type",
+        "description": "Choose how participants will join and interact in your session",
+        "video": {
+          "title": "Video Call",
+          "description": "Participants join via video call with real-time audio and video"
         },
-        "custom": "Custom duration",
-        "customPlaceholder": "Enter minutes (3-60)",
-        "minutes": "minutes",
-        "minError": "Minimum session time is 3 minutes",
-        "maxError": "Maximum session time is 60 minutes"
+        "inPerson": {
+          "title": "In-Person",
+          "description": "For in person use or when using a seperate video platform."
+        },
+        "hybrid": {
+          "title": "Hybrid",
+          "description": "Mix of in-person and remote participants"
+        }
+      },
+      "duration": {
+        "label": "Round Length",
+        "description": "How long should each speaking round be?",
+        "help": "Choose the round length that works best for your group. Total session time includes check-in and feedback periods.",
+        "options": {
+          "2": "Quick rounds",
+          "5": "Short rounds",
+          "7": "Standard rounds",
+          "10": "Extended rounds"
+        },
+        "custom": "Custom round length",
+        "customPlaceholder": "Enter minutes (3-30)",
+        "minute": "minute",
+        "rounds": "rounds",
+        "minError": "Minimum round time is 3 minutes",
+        "maxError": "Maximum round time is 30 minutes"
       },
       "topic": {
         "label": "Session Topic",
@@ -576,12 +756,49 @@
       },
       "preview": {
         "title": "Session Preview",
-        "duration": "Duration: {{duration}} minutes",
-        "participants": "Expected: 3-4 participants",
+        "roundLength": "Round length: {{minutes}} minutes",
+        "estimatedTotal": "Estimated total: {{minutes}} minutes (includes check-in & feedback)",
+        "sessionType": "Session type: {{type}}",
         "format": "Format: Role-based practice with rotation",
         "hostRole": "Host role: {{role}}",
-        "groupMode": "Group mode: {{mode}}",
+        "sessionInfo": "Session will adapt automatically as participants join",
         "groupConfig": "Groups: {{size}} people, {{strategy}} observers"
+      },
+      "participantLimits": {
+        "label": "Maximum Participants",
+        "description": "Set the maximum number of participants for this session. Anyone joining after the 3rd participant will be assigned as an observer for the first round.",
+        "tip": "4 participants is the recommended maximum for effective dialogue. 5 is the absolute maximum. For 6+ participants, consider breaking into two separate sessions.",
+        "recommended": "Recommended",
+        "maximum": "Maximum",
+        "splitSessions": "Consider splitting sessions!",
+        "participants": "participants",
+        "custom": {
+          "label": "Custom number",
+          "placeholder": "Enter 3-10",
+          "warning": "Large groups may reduce dialogue quality. Consider breaking into two separate sessions."
+        },
+        "howItWorks": "The first 3 participants get active roles (speaker, listener, scribe). Additional participants become observers and can rotate in during extra rounds.",
+        "preview": "Max participants: {{count}} (first 3 get active roles, others become observers for the first round)"
+      },
+      "fivePersonChoice": {
+        "title": "5 Participants - Choose Your Format",
+        "description": "You have 5 participants. Choose how you'd like to structure the session:",
+        "split": {
+          "title": "Split into Groups",
+          "badge": "2 + 3 people",
+          "description": "Create two groups: one with 2 people and one with 3 people",
+          "benefit1": "Everyone gets active roles",
+          "benefit2": "More intimate conversations"
+        },
+        "together": {
+          "title": "Stay Together",
+          "badge": "5 people + 2 observers",
+          "description": "Keep all 5 people together with 2 temporary observers",
+          "benefit1": "Full group experience",
+          "benefit2": "Observers can rotate in"
+        },
+        "cancel": "Cancel",
+        "confirm": "Confirm Choice"
       },
       "create": "Create Session",
       "creating": "Creating session...",
@@ -592,28 +809,15 @@
         "copied": "Link copied to clipboard!",
         "qrCode": "QR Code for easy sharing"
       },
-      "groupMode": {
-        "label": "Session Type",
-        "description": "Choose how participants will be organised during the session",
-        "single": {
-          "title": "Single Session",
-          "description": "All participants in one group (3-4 people)",
-          "badge": "Single Group"
-        },
-        "multi": {
-          "title": "Group Sessions",
-          "description": "Break into smaller groups (3-4 people per group)",
-          "badge": "Multiple Groups"
-        }
-      },
+
       "groupConfig": {
         "label": "Group Configuration",
-        "description": "Configure how participants will be grouped",
+        "description": "Groups will be balanced between 3-4 people with distributed observers",
         "groupSize": {
           "label": "Group Size",
           "3": "3 people per group",
           "4": "4 people per group",
-          "mixed": "Mixed sizes",
+          "mixed": "Mixed sizes (3-4 people)",
           "mixedDesc": "Balance between 3-4 people",
           "people": "{{count}} people per group"
         },
@@ -753,6 +957,8 @@
     },
     "dashboard": {
       "title": "Group Management Dashboard",
+      "showDashboard": "View Dashboard",
+      "hideDashboard": "Hide Dashboard",
       "sessionInfo": {
         "duration": "Duration",
         "groups": "Groups",
@@ -898,9 +1104,9 @@
         "description": "All preparation steps completed. Ready to start your dialectic practice session?",
         "startSession": "Start Practice Session"
       }
-    },
-    "assistance": {
-      "speaker": {
+      },
+      "assistance": {
+        "speaker": {
         "title": "Speaker",
         "mainGuidance": "Take time to explore slowly through your ideas, leave gaps for the listener to reflect back",
         "comfortPrompt": "Take time to think",
@@ -921,6 +1127,10 @@
         "reminders": {
           "title": "Gentle Reminders"
         },
+        "raisedHand": {
+          "title": "Listener Needs Space",
+          "description": "The listener has raised their hand. Please pause to allow reflection."
+        },
         "transitioning": "Transitioning roles...",
         "sessionFlowNote": "The host will advance the session when ready"
       },
@@ -937,10 +1147,14 @@
           "listenWithout": "Listen without preparing your response",
           "noticeImpulse": "Notice your impulse to respond",
           "offerPresence": "Try not to steer the conversation but inquire into the speaker",
-          "reflectBack": "Reflect back what you actually heard"
+          "reflectBack": "Reflect back what you actually heard",
+          "interruptIfNeeded": "Interrupt if speaker isn't leaving space for reflection"
         },
-        "currentFocus": {
-          "title": "Current Focus"
+        "interactions": {
+          "title": "Speaker Interactions",
+          "raiseHand": "Raise Hand",
+          "raiseHandDesc": "Signal to the speaker that you need them to pause for reflection",
+          "notMemoryTest": "Reflection is not a test of memory - share what resonated with you"
         },
         "reflectionStarters": {
           "whatHeard": "What I heard was...",
@@ -959,10 +1173,21 @@
           "captureInsights": "Capture key insights and themes",
           "avoidTranscription": "Avoid transcribing word-for-word",
           "lookForPatterns": "Look for patterns and emotions",
-          "noteEmerging": "Note what emerges naturally"
+          "noteEmerging": "Note what emerges naturally",
+          "listenCarefully": "Listen carefully to capture the essence of what's being shared",
+          "captureKey": "Capture key insights and themes as they emerge",
+          "noteThemes": "Note recurring themes and patterns in the conversation",
+          "recordQuestions": "Record questions that arise and areas for deeper exploration",
+          "notesWillBePassed": "Your notes will be passed to the next scribe to build upon"
         },
         "tools": {
-          "notesPlaceholder": "Capture what you're hearing..."
+          "notesPlaceholder": "Capture what you're hearing...",
+          "previousNotesPlaceholder": "Write your fresh notes here, building on the insights above...",
+          "title": "Scribe Tools",
+          "realTime": "Real-time note-taking during the conversation",
+          "focusOn": "Focus on insights rather than word-for-word transcription",
+          "avoidInterrupting": "Avoid interrupting the flow of conversation",
+          "readyToShare": "Be ready to share your insights during feedback time"
         },
         "actions": {
           "captureInsight": "Capture Insight"
@@ -996,5 +1221,102 @@
         }
       }
     }
+  },
+  "safety": {
+    "timeout": {
+      "title": "Timeout Active",
+      "active": "Timeout Active",
+      "button": "Timeout",
+      "requestTooltip": "Request a 5-minute timeout",
+      "timeRemaining": "Time Remaining",
+      "endEarly": "End Timeout",
+      "endEarlyMessage": "You can end this timeout when you're ready to continue.",
+      "autoEndMessage": "Take as much time as you need.",
+      "takeCare": {
+        "title": "Take Care of Yourself",
+        "breathe": {
+          "title": "Breathe deeply",
+          "description": "Take slow, deep breaths to help calm your nervous system"
+        },
+        "move": {
+          "title": "Move your body",
+          "description": "Stand up, stretch, or take a short walk if possible"
+        },
+        "water": {
+          "title": "Get water",
+          "description": "Stay hydrated and take a moment to refresh"
+        },
+        "stepAway": {
+          "title": "Step away",
+          "description": "You can leave the video call if you need privacy"
+        }
+      },
+      "personalSupport": {
+        "title": "Personal Support",
+        "question": "Is there someone you can call or speak to right now?",
+        "friend": "A trusted friend or colleague",
+        "family": "A family member or loved one",
+        "therapist": "Your therapist or counsellor",
+        "support": "A support group or helpline"
+      },
+      "grounding": {
+        "title": "Grounding Techniques",
+        "technique1": {
+          "title": "5-4-3-2-1",
+          "description": "Name 5 things you can see, 4 you can touch, 3 you can hear, 2 you can smell, 1 you can taste"
+        },
+        "technique2": {
+          "title": "Progressive relaxation",
+          "description": "Tense and release each muscle group from toes to head"
+        },
+        "technique3": {
+          "title": "Mindful observation",
+          "description": "Focus on one object and describe it in detail"
+        },
+        "technique4": {
+          "title": "Self-compassion",
+          "description": "Remind yourself that it's okay to need a break"
+        }
+      },
+      "resources": {
+        "title": "Support Resources",
+        "crisis": {
+          "title": "Crisis Support",
+          "samaritans": "Samaritans: 116 123",
+          "nhs": "NHS Crisis: 111",
+          "emergency": "Emergency: 999"
+        },
+        "online": {
+          "title": "Online Resources",
+          "mind": "Mind: mind.org.uk",
+          "samaritans": "Samaritans: samaritans.org"
+        }
+      },
+      "remember": {
+        "title": "Remember",
+        "pass": "You can always pass on any activity or question",
+        "boundaries": "Your boundaries and wellbeing come first",
+        "support": "The group will support you when you're ready to continue",
+        "pressure": "There's no pressure to share more than you're comfortable with"
+      },
+      "otherParticipants": {
+        "title": "Safety Timeout Active",
+        "message": "{{name}} has requested a safety timeout and needs some time to care for themselves.",
+        "whatToDo": {
+          "title": "What You Can Do:",
+          "respect": "Respect their need for space and privacy",
+          "quiet": "Keep the session quiet and calm",
+          "support": "Be supportive and understanding",
+          "wait": "Wait patiently for them to return when ready"
+        },
+        "ifYouNeedHelp": {
+          "title": "If You Need Support Too:",
+          "message": "If you're also feeling distressed or need support, you can access our safety protocols and resources."
+        },
+        "viewProtocol": "View Safety Protocol",
+        "waitingMessage": "Waiting for timeout to end..."
+      }
+    }
   }
 }
+
