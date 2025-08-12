@@ -21,7 +21,7 @@ const Navigation: React.FC = () => {
                 <span className="text-white font-bold text-sm">S</span>
               </div>
               <span className="text-xl font-semibold text-secondary-900 dark:text-secondary-100">
-                {t('navigation.siteName')}
+                {t('shared.common.siteName')}
               </span>
             </Link>
           </div>
@@ -40,7 +40,7 @@ const Navigation: React.FC = () => {
             </Link>
 
             <span className="text-sm font-medium text-secondary-400 dark:text-secondary-500">
-              {t('navigation.comingSoon')}
+              {t('shared.common.comingSoon')}
             </span>
             
             {/* Test Links - Only show in development */}
@@ -134,7 +134,7 @@ const Navigation: React.FC = () => {
               </Link>
 
               <div className="px-3 py-2 text-base font-medium text-secondary-400 dark:text-secondary-500">
-                {t('navigation.comingSoon')}
+                {t('shared.common.comingSoon')}
               </div>
               
               {/* Test Links - Only show in development */}

@@ -1,5 +1,5 @@
-import { Timestamp } from 'firebase/firestore';
-import { SessionData } from '../services/firestoreSessionService';
+import { Timestamp, FieldValue } from 'firebase/firestore';
+import { SessionData } from './sessionTypes';
 import { GroupSessionData, GroupData } from './groupSession';
 
 // Session context interface that works for both single and group sessions
@@ -11,14 +11,14 @@ export interface SessionContext {
   hostId: string;
   hostName: string;
   hostRole?: 'participant' | 'observer-permanent';
-  createdAt: Timestamp;
+  createdAt: Timestamp | FieldValue;
   participants: SessionParticipant[];
   status: 'waiting' | 'active' | 'completed';
   minParticipants: number;
   maxParticipants: number;
   topicSuggestions: SessionTopicSuggestion[];
   currentPhase?: 'topic-selection' | 'hello-checkin' | 'listening' | 'transition' | 'reflection' | 'completion' | 'free-dialogue' | 'completed' | 'waiting' | 'round' | 'scribe-feedback' | 'round-complete' | undefined;
-  phaseStartTime?: Timestamp;
+  phaseStartTime?: Timestamp | FieldValue;
   currentRound?: number;
   scribeNotes?: string; // Notes from the current scribe
   accumulatedScribeNotes?: string; // All scribe notes accumulated across rounds
@@ -48,7 +48,7 @@ export interface SessionTopicSuggestion {
   topic: string;
   suggestedBy: string;
   suggestedByUserId: string;
-  suggestedAt: Timestamp | Date;
+  suggestedAt: Timestamp | FieldValue | Date;
   votes: number;
   voters: string[];
 }

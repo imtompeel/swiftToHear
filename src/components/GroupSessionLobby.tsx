@@ -141,7 +141,7 @@ export const GroupSessionLobby: React.FC<GroupSessionLobbyProps> = ({
             </h3>
             <div className="space-y-2 text-sm text-secondary-600 dark:text-secondary-400">
               <p><strong>{t('dialectic.lobby.sessionInfo.name')}:</strong> {session.sessionName}</p>
-              <p><strong>{t('dialectic.lobby.sessionInfo.participants')}:</strong> {session.participants.filter(p => p.id !== session.hostId).length}</p>
+              <p><strong>{t('dialectic.lobby.sessionInfo.participants')}:</strong> {session.participants.filter(p => p.id !== currentUserId).length}</p>
               <p><strong>{t('dialectic.lobby.sessionInfo.mode')}:</strong> {t('dialectic.creation.sessionType.adaptive.title')}</p>
             </div>
           </div>
@@ -153,14 +153,14 @@ export const GroupSessionLobby: React.FC<GroupSessionLobbyProps> = ({
             <div className="space-y-2 text-sm">
               <p className="text-secondary-600 dark:text-secondary-400">
                 {t('dialectic.lobby.participantStatus.ready', { 
-                  count: readyParticipants.filter(p => p.id !== session.hostId).length, 
-                  total: session.participants.filter(p => p.id !== session.hostId).length 
+                  count: readyParticipants.filter(p => p.id !== currentUserId).length, 
+                  total: session.participants.filter(p => p.id !== currentUserId).length 
                 })}
               </p>
               <div className="w-full bg-secondary-200 dark:bg-secondary-600 rounded-full h-2">
                 <div 
                   className="bg-green-500 h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${(readyParticipants.filter(p => p.id !== session.hostId).length / Math.max(session.participants.filter(p => p.id !== session.hostId).length, 1)) * 100}%` }}
+                  style={{ width: `${(readyParticipants.filter(p => p.id !== currentUserId).length / Math.max(session.participants.filter(p => p.id !== currentUserId).length, 1)) * 100}%` }}
                 ></div>
               </div>
             </div>
@@ -289,7 +289,7 @@ export const GroupSessionLobby: React.FC<GroupSessionLobbyProps> = ({
             onClick={handleStartSession}
             className="px-6 py-3 bg-accent-500 text-white rounded-lg hover:bg-accent-600 font-medium"
           >
-            {t('dialectic.lobby.actions.startSession')}
+            {t('shared.actions.startSession')}
           </button>
         )}
 
@@ -297,7 +297,7 @@ export const GroupSessionLobby: React.FC<GroupSessionLobbyProps> = ({
           onClick={handleLeaveSession}
           className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 font-medium"
         >
-          {isHost ? t('dialectic.lobby.actions.cancelSession') : t('dialectic.lobby.actions.leaveSession')}
+          {isHost ? t('dialectic.lobby.actions.cancelSession') : t('shared.actions.leaveSession')}
         </button>
       </div>
 
@@ -306,7 +306,7 @@ export const GroupSessionLobby: React.FC<GroupSessionLobbyProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-secondary-800 rounded-lg p-6 max-w-md mx-4">
             <h3 className="text-lg font-semibold text-primary-900 dark:text-primary-100 mb-4">
-              {t('dialectic.lobby.confirmStart.title')}
+              {t('shared.actions.startSession')}
             </h3>
             <p className="text-secondary-600 dark:text-secondary-400 mb-6">
               {t('dialectic.lobby.confirmStart.description')}
@@ -322,7 +322,7 @@ export const GroupSessionLobby: React.FC<GroupSessionLobbyProps> = ({
                 onClick={confirmStartSession}
                 className="px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600"
               >
-                {t('dialectic.lobby.confirmStart.confirm')}
+                {t('shared.actions.startSession')}
               </button>
             </div>
           </div>
@@ -333,7 +333,7 @@ export const GroupSessionLobby: React.FC<GroupSessionLobbyProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-secondary-800 rounded-lg p-6 max-w-md mx-4">
             <h3 className="text-lg font-semibold text-red-900 dark:text-red-100 mb-4">
-              {t('dialectic.lobby.confirmLeave.title')}
+              {t('shared.actions.leaveSession')}
             </h3>
             <p className="text-secondary-600 dark:text-secondary-400 mb-6">
               {t('dialectic.lobby.confirmLeave.description')}

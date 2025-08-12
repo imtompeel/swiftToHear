@@ -165,33 +165,35 @@ export const InPersonSession: React.FC<InPersonSessionProps> = ({
       </div>
 
       {/* QR Code Section */}
-      <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-primary-900 dark:text-primary-100">
+      <div className="bg-white dark:bg-secondary-800 rounded-xl shadow-xl p-8 border-2 border-accent-200">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-primary-900 dark:text-primary-100 mb-2">
             {t('dialectic.session.inPerson.qrCode.title')}
           </h2>
-          <div className="text-sm text-secondary-600 dark:text-secondary-400">
+          <p className="text-lg text-secondary-600 dark:text-secondary-400 mb-4">
+            {t('dialectic.session.inPerson.qrCode.instructions')}
+          </p>
+          <div className="text-sm text-accent-600 dark:text-accent-400 font-medium">
             {getMobileParticipants().length} participant{getMobileParticipants().length !== 1 ? 's' : ''} joined
           </div>
         </div>
-        <div className="text-center">
-          <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg inline-block mb-4">
-            <div className="w-48 h-48 bg-white border-2 border-gray-300 flex items-center justify-center p-2">
-              <QRCodeSVG
-                value={sessionQRCode}
-                size={176}
-                level="M"
-                includeMargin={true}
-                bgColor="#FFFFFF"
-                fgColor="#000000"
-              />
-            </div>
+        
+        <div className="flex justify-center mb-6">
+          <div className="bg-white p-6 rounded-xl shadow-lg border-2 border-gray-200">
+            <QRCodeSVG
+              value={sessionQRCode}
+              size={320}
+              level="M"
+              includeMargin={true}
+              bgColor="#FFFFFF"
+              fgColor="#000000"
+            />
           </div>
-          <p className="text-sm text-secondary-600 dark:text-secondary-400">
-            {t('dialectic.session.inPerson.qrCode.instructions')}
-          </p>
-          <div className="flex items-center justify-center space-x-2 mt-2">
-            <p className="text-xs text-secondary-500 dark:text-secondary-500 break-all">
+        </div>
+        
+        <div className="flex flex-col items-center space-y-3">
+          <div className="flex items-center space-x-3 bg-secondary-50 dark:bg-secondary-700 rounded-lg px-4 py-2">
+            <p className="text-sm text-secondary-600 dark:text-secondary-400 break-all font-mono">
               {sessionQRCode}
             </p>
             <button
@@ -199,11 +201,11 @@ export const InPersonSession: React.FC<InPersonSessionProps> = ({
                 navigator.clipboard.writeText(sessionQRCode);
                 // You could add a toast notification here if you have one
               }}
-              className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors flex-shrink-0"
+              className="px-4 py-2 text-sm bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors flex-shrink-0 font-medium"
               title={t('dialectic.session.inPerson.copyLinkTitle')}
-                          >
-                {t('dialectic.session.inPerson.copyLink')}
-              </button>
+            >
+              {t('dialectic.session.inPerson.copyLink')}
+            </button>
           </div>
         </div>
       </div>

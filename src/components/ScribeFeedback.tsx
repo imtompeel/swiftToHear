@@ -56,7 +56,7 @@ export const ScribeFeedback: React.FC<ScribeFeedbackProps> = ({
         {/* Video Section */}
         <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-4 sm:p-6 h-fit">
           <h2 className="text-lg sm:text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-3 sm:mb-4">
-            {t('dialectic.session.scribeFeedback.videoCall')}
+            {t('shared.common.videoCall')}
           </h2>
           <VideoCall
             sessionId={session.sessionId}

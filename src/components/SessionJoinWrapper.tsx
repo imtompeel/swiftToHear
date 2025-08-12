@@ -6,6 +6,18 @@ import { useAuth } from '../contexts/AuthContext';
 
 const SessionJoinWrapper: React.FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
+  const { user, loading: authLoading } = useAuth();
+  const [joinLoading, setJoinLoading] = useState(false);
+  const [anonymousUserId, setAnonymousUserId] = useState<string>('');
+
+  // Generate anonymous user ID for unauthenticated users
+  useEffect(() => {
+    if (!user && !anonymousUserId) {
+      const anonymousId = `anonymous_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      setAnonymousUserId(anonymousId);
+    }
+  }, [user, anonymousUserId]);
+
   const { 
     session, 
     loadSession, 
@@ -15,26 +27,31 @@ const SessionJoinWrapper: React.FC = () => {
     error, 
     clearError,
     loading: sessionLoading 
-  } = useSession();
-  const { user, loading: authLoading } = useAuth();
-  const [joinLoading, setJoinLoading] = useState(false);
+  } = useSession(user?.uid || anonymousUserId, user?.displayName || user?.email || 'Anonymous User');
 
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Load session data only when user is authenticated
+  // Load session data - allow both authenticated and anonymous users
   useEffect(() => {
-    if (sessionId && user && !authLoading) {
+    if (sessionId && !authLoading) {
       loadSession(sessionId);
     }
-  }, [sessionId, user, authLoading, loadSession]);
+  }, [sessionId, authLoading, loadSession]);
 
   const handleJoinSession = async (joinData: any) => {
     setJoinLoading(true);
     try {
-      await joinSession(joinData);
+      // Use authenticated user info if available, otherwise use anonymous info
+      const finalJoinData = {
+        ...joinData,
+        userId: user?.uid || anonymousUserId,
+        userName: user?.displayName || user?.email || joinData.userName || 'Anonymous User'
+      };
+      
+      await joinSession(finalJoinData);
     } catch (err) {
       console.error('Failed to join session:', err);
       setJoinLoading(false);
@@ -47,8 +64,6 @@ const SessionJoinWrapper: React.FC = () => {
     console.log('Role selected:', role);
   };
 
-
-
   // Show loading while auth is being determined
   if (authLoading) {
     return (
@@ -56,17 +71,6 @@ const SessionJoinWrapper: React.FC = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600 dark:text-gray-400">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Check if user is authenticated
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-gray-600 dark:text-gray-400">Please sign in to join a session.</p>
         </div>
       </div>
     );
@@ -100,8 +104,8 @@ const SessionJoinWrapper: React.FC = () => {
         session={session}
         onJoinSession={handleJoinSession}
         onRoleSelect={handleRoleSelect}
-        currentUserId={currentUserId}
-        currentUserName={currentUserName}
+        currentUserId={user?.uid || anonymousUserId}
+        currentUserName={user?.displayName || user?.email || 'Anonymous User'}
         isFirstTime={true}
       />
       

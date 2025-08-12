@@ -13,64 +13,7 @@ import {
   onSnapshot
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
-
-export interface SessionData {
-  sessionId: string;
-  sessionName: string;
-  duration: number;
-  topic: string;
-  hostId: string;
-  hostName: string;
-  hostRole?: 'participant' | 'observer-permanent';
-  createdAt: Timestamp;
-  participants: Participant[];
-  status: 'waiting' | 'active' | 'completed';
-  minParticipants: number;
-  maxParticipants: number;
-  topicSuggestions: TopicSuggestion[];
-  sessionType?: 'video' | 'in-person' | 'hybrid';
-  currentPhase?: 'topic-selection' | 'hello-checkin' | 'listening' | 'transition' | 'reflection' | 'completion' | 'free-dialogue' | 'completed' | undefined;
-  phaseStartTime?: Timestamp;
-  currentRound?: number;
-  fivePersonChoice?: 'split' | 'together';
-  groupConfiguration?: {
-    autoAssignRoles: boolean;
-  };
-  scribeNotes?: string; // Notes from the current scribe
-  accumulatedScribeNotes?: string; // All scribe notes accumulated across rounds
-  safetyTimeout?: {
-    isActive: boolean;
-    requestedBy: string | null;
-    requestedByUserName: string | null;
-    startTime: Timestamp | null;
-  };
-}
-
-export interface TopicSuggestion {
-  id: string;
-  topic: string;
-  suggestedBy: string;
-  suggestedByUserId: string;
-  suggestedAt: Timestamp | Date;
-  votes: number;
-  voters: string[]; // Array of user IDs who voted for this topic
-}
-
-export interface Participant {
-  id: string;
-  name: string;
-  role: string;
-  status: 'ready' | 'not-ready' | 'connecting';
-  connectionStatus?: 'good' | 'poor' | 'disconnected';
-  handRaised?: boolean;
-}
-
-export interface JoinData {
-  sessionId: string;
-  userId: string;
-  userName: string;
-  role?: string; // Optional when auto-assign is enabled
-}
+import { SessionData, TopicSuggestion, Participant, JoinData } from '../types/sessionTypes';
 
 export class FirestoreSessionService {
   private static COLLECTION_NAME = 'sessions';
@@ -164,16 +107,30 @@ export class FirestoreSessionService {
         const participantCount = mobileParticipants.length;
         let assignedRole = joinData.role || '';
 
-        // First 3 participants get active roles (speaker, listener, scribe)
-        if (participantCount < 3) {
-          if (!assignedRole) {
-            // Auto-assign active roles for first 3 participants
-            const activeRoles = ['speaker', 'listener', 'scribe'];
-            assignedRole = activeRoles[participantCount];
+        // Check what roles are currently taken
+        const takenRoles = mobileParticipants.map(p => p.role);
+        const activeRoles = ['speaker', 'listener', 'scribe'];
+        const availableActiveRoles = activeRoles.filter(role => !takenRoles.includes(role));
+
+        // If user selected a role, validate it's available
+        if (assignedRole) {
+          if (availableActiveRoles.includes(assignedRole)) {
+            // User's selected role is available, use it
+          } else if (takenRoles.includes(assignedRole)) {
+            // User's selected role is taken, assign an available active role
+            assignedRole = availableActiveRoles[0] || 'observer';
+          } else {
+            // User selected an invalid role, assign an available active role
+            assignedRole = availableActiveRoles[0] || 'observer';
           }
         } else {
-          // 4th participant onwards becomes observer
-          assignedRole = 'observer';
+          // No role selected, assign an available active role
+          if (availableActiveRoles.length > 0) {
+            assignedRole = availableActiveRoles[0];
+          } else {
+            // All active roles are taken, assign observer
+            assignedRole = 'observer';
+          }
         }
 
         const participant: Participant = {
@@ -630,11 +587,18 @@ export class FirestoreSessionService {
   // Get available roles for a session
   static getAvailableRoles(session: SessionData): string[] {
     const allRoles = ['speaker', 'listener', 'scribe', 'observer'];
-    const takenRoles = session.participants.map(p => p.role).filter(role => role !== ''); // Filter out empty roles
+    
+    // For in-person sessions, exclude the host from role availability calculation
+    const relevantParticipants = session.sessionType === 'in-person' 
+      ? session.participants.filter(p => p.id !== session.hostId)
+      : session.participants;
+    
+    const takenRoles = relevantParticipants.map(p => p.role).filter(role => role !== ''); // Filter out empty roles
     
     console.log('getAvailableRoles:', {
+      sessionType: session.sessionType,
       allRoles,
-      participants: session.participants.map(p => ({ id: p.id, name: p.name, role: p.role })),
+      participants: relevantParticipants.map(p => ({ id: p.id, name: p.name, role: p.role })),
       takenRoles,
       availableRoles: allRoles.filter(role => !takenRoles.includes(role))
     });

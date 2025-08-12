@@ -67,7 +67,7 @@ export const MobileParticipantInterface: React.FC<MobileParticipantInterfaceProp
       // Calculate actual time remaining based on phase start time
       if (liveSession.phaseStartTime) {
         let startTime: number;
-        if (liveSession.phaseStartTime.toMillis) {
+        if (liveSession.phaseStartTime && typeof liveSession.phaseStartTime === 'object' && 'toMillis' in liveSession.phaseStartTime) {
           startTime = liveSession.phaseStartTime.toMillis();
         } else if (typeof liveSession.phaseStartTime === 'number') {
           startTime = liveSession.phaseStartTime;

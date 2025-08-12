@@ -56,7 +56,7 @@ export const SessionSetup: React.FC<SessionSetupProps> = ({
           {/* Role Selection */}
           <div data-testid="role-assignment" className="space-y-6">
             <h3 className="text-xl font-semibold text-center text-secondary-900 dark:text-secondary-100">
-              {t('dialectic.roles.chooseRole')}
+              {t('shared.common.chooseRole')}
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -91,7 +91,7 @@ export const SessionSetup: React.FC<SessionSetupProps> = ({
                 onClick={onStartSession}
                 className="px-8 py-3 bg-accent-600 text-white rounded-lg hover:bg-accent-700 font-semibold"
               >
-                {t('dialectic.session.startSession')}
+                {t('shared.actions.startSession')}
               </button>
             </div>
           )}

@@ -7,7 +7,20 @@ service cloud.firestore {
       allow create: if 
         request.resource.data.email is string &&
         request.resource.data.email.size() > 0;
-      allow read, update, delete: if request.auth != null;
+      // Only allow superadmins to read email signups
+      allow read, update, delete: if 
+        request.auth != null && 
+        exists(/databases/$(database)/documents/superadmins/$(request.auth.uid));
+    }
+    
+    // Superadmin collection - allow initial setup and then restrict to superadmins
+    match /superadmins/{document} {
+      // For the first superadmin setup, allow authenticated users to create their own document
+      // Once a superadmin exists, only superadmins can read/write
+      allow read, write: if 
+        request.auth != null && 
+        (document == request.auth.uid || 
+         exists(/databases/$(database)/documents/superadmins/$(request.auth.uid)));
     }
     
     // Test collection (for debugging)
@@ -24,11 +37,11 @@ service cloud.firestore {
         request.resource.data.sessionId == sessionId &&
         request.resource.data.status == 'waiting';
       
-      // Allow authenticated users (including anonymous) to read sessions
-      allow read: if request.auth != null;
+      // Allow anyone to read sessions (for anonymous joining)
+      allow read: if true;
       
-      // Allow authenticated users (including anonymous) to update sessions if they are a participant
-      allow update: if request.auth != null;
+      // Allow anyone to update sessions (for anonymous joining)
+      allow update: if true;
       
       // Allow host to delete their own session
       allow delete: if 

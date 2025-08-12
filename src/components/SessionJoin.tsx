@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
+import { SessionData, JoinData } from '../types/sessionTypes';
+import { JoinRoleSelection, JoinSelectedRoleDisplay } from './lobby';
 
 interface SessionJoinProps {
   session: SessionData | null;
@@ -8,15 +10,6 @@ interface SessionJoinProps {
   currentUserId: string;
   currentUserName: string;
   isFirstTime?: boolean;
-}
-
-import { SessionData } from '../services/firestoreSessionService';
-
-interface JoinData {
-  sessionId: string;
-  userId: string;
-  userName: string;
-  role: string;
 }
 
 const SessionJoin: React.FC<SessionJoinProps> = ({ 
@@ -57,40 +50,7 @@ const SessionJoin: React.FC<SessionJoinProps> = ({
   const [isJoining, setIsJoining] = useState(false);
   const [joinError, setJoinError] = useState<string>('');
 
-  const roles = [
-    {
-      id: 'speaker',
-      title: t('dialectic.roles.speaker.title'),
-      description: t('dialectic.roles.speaker.description'),
-      icon: '🗣️'
-    },
-    {
-      id: 'listener',
-      title: t('dialectic.roles.listener.title'),
-      description: t('dialectic.roles.listener.description'),
-      icon: '👂'
-    },
-    {
-      id: 'scribe',
-      title: t('dialectic.roles.scribe.title'),
-      description: t('dialectic.roles.scribe.description'),
-      icon: '✍️'
-    },
-    {
-      id: 'observer-temporary',
-      title: t('dialectic.roles.observer.temporary.title'),
-      description: t('dialectic.roles.observer.temporary.description'),
-      icon: '👁️',
-      badge: t('dialectic.roles.observer.temporary.badge')
-    },
-    {
-      id: 'observer-permanent',
-      title: t('dialectic.roles.observer.permanent.title'),
-      description: t('dialectic.roles.observer.permanent.description'),
-      icon: '👁️',
-      badge: t('dialectic.roles.observer.permanent.badge')
-    }
-  ];
+
 
   const handleRoleSelect = (role: string) => {
     setSelectedRole(role);
@@ -164,18 +124,23 @@ const SessionJoin: React.FC<SessionJoinProps> = ({
   }
 
   // Calculate available roles - handle both temporary and permanent observers
-  const totalParticipants = session.participants.length + 1; // +1 for the current user joining
+  // For in-person sessions, exclude the host from participant count
+  const mobileParticipants = session.sessionType === 'in-person' 
+    ? session.participants.filter(p => p.id !== session.hostId)
+    : session.participants;
+  
+  const totalParticipants = mobileParticipants.length + 1; // +1 for the current user joining
   
   // For 2-person sessions, only speaker and listener roles are available (no scribe)
   const baseRoles = totalParticipants === 2 ? ['speaker', 'listener'] : ['speaker', 'listener', 'scribe'];
 
   // Check if any observer role is taken
-  const hasObserver = session.participants.some(p => 
+  const hasObserver = mobileParticipants.some(p => 
     p.role === 'observer' || p.role === 'observer-temporary' || p.role === 'observer-permanent'
   );
   
   // Get available base roles (speaker, listener, scribe)
-  const availableBaseRoles = baseRoles.filter(role => !session.participants.some(p => p.role === role));
+  const availableBaseRoles = baseRoles.filter(role => !mobileParticipants.some(p => p.role === role));
   
   // Observer roles are only available if:
   // 1. No observer exists yet, AND
@@ -217,7 +182,7 @@ const SessionJoin: React.FC<SessionJoinProps> = ({
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-8" data-testid="session-join-component">
+    <div className="max-w-6xl mx-auto p-6 space-y-8" data-testid="session-join-component">
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold text-primary-900 dark:text-primary-100">
           {t('dialectic.join.title')}
@@ -244,6 +209,27 @@ const SessionJoin: React.FC<SessionJoinProps> = ({
         <p className="text-sm text-blue-800 dark:text-blue-200">
           {t('dialectic.join.welcomeDescription')}
         </p>
+      </div>
+
+      {/* Dynamic Layout: Role Selection or Selected Role Display - Moved to top */}
+      <div className="space-y-4" data-testid="role-selection-section">
+        {/* Show Role Selection when no role is selected */}
+        {!selectedRole && (
+          <JoinRoleSelection
+            availableRoles={availableRoles}
+            totalParticipants={totalParticipants}
+            onRoleSelect={handleRoleSelect}
+            selectedRole={selectedRole}
+          />
+        )}
+
+        {/* Show Selected Role Display when role is selected */}
+        {selectedRole && (
+          <JoinSelectedRoleDisplay
+            selectedRole={selectedRole}
+            onRoleChange={() => setSelectedRole('')}
+          />
+        )}
       </div>
 
       {/* Session Information */}
@@ -289,14 +275,14 @@ const SessionJoin: React.FC<SessionJoinProps> = ({
           <div className="flex justify-between items-center text-sm" data-testid="participant-count">
             <span className="text-secondary-600 dark:text-secondary-400">
               {t('dialectic.join.participantCount', { 
-                current: session.participants.filter(p => p.id !== session.hostId).length, 
+                current: mobileParticipants.length, 
                 total: 4 
               })}
             </span>
           </div>
           
           <div className="space-y-2">
-            {session.participants.map((participant) => (
+            {mobileParticipants.map((participant) => (
               <div key={participant.id} className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <span className="text-primary-900 dark:text-primary-100">{participant.name}</span>
@@ -327,73 +313,7 @@ const SessionJoin: React.FC<SessionJoinProps> = ({
         </p>
       </div>
 
-      {/* Role Selection */}
-      <div className="space-y-4" data-testid="role-selection-section">
-        <h3 className="text-lg font-medium text-primary-900 dark:text-primary-100">
-          {t('dialectic.join.chooseRole')}
-        </h3>
-        
-        {availableRoles.length === 1 && (availableRoles[0] === 'observer-temporary' || availableRoles[0] === 'observer-permanent') && (
-          <div className="bg-yellow-50 dark:bg-yellow-900 rounded-lg p-4">
-            <p className="text-sm text-yellow-800 dark:text-yellow-100">
-              {t('dialectic.join.onlyObserverAvailable')}
-            </p>
-          </div>
-        )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {roles.map((role) => {
-            const isAvailable = availableRoles.includes(role.id);
-            const isSelected = selectedRole === role.id;
-            const isScribeDisabled = role.id === 'scribe' && totalParticipants < 3;
-            const isTemporaryObserverDisabled = role.id === 'observer-temporary' && totalParticipants < 4;
-            const isPermanentObserverDisabled = role.id === 'observer-permanent' && totalParticipants < 3;
-            
-            return (
-              <button
-                key={role.id}
-                onClick={() => isAvailable && !isScribeDisabled && !isTemporaryObserverDisabled && !isPermanentObserverDisabled && handleRoleSelect(role.id)}
-                disabled={!isAvailable || isScribeDisabled || isTemporaryObserverDisabled || isPermanentObserverDisabled}
-                className={`p-4 rounded-lg border-2 text-left transition-colors ${
-                  isSelected 
-                    ? 'border-accent-500 bg-accent-50 dark:bg-accent-900' 
-                    : isAvailable && !isScribeDisabled && !isTemporaryObserverDisabled && !isPermanentObserverDisabled
-                      ? 'border-secondary-200 dark:border-secondary-600 hover:border-secondary-300 dark:hover:border-secondary-500' 
-                      : 'border-secondary-100 dark:border-secondary-700 bg-secondary-50 dark:bg-secondary-800 opacity-50 cursor-not-allowed'
-                }`}
-                data-testid={`role-${role.id}`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="text-2xl">{role.icon}</div>
-                  {role.badge && (
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      role.id === 'observer-temporary' 
-                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                        : 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
-                    }`}>
-                      {role.badge}
-                    </span>
-                  )}
-                </div>
-                <div className="font-semibold text-primary-900 dark:text-primary-100 mb-1">
-                  {role.title}
-                </div>
-                <div className="text-sm text-secondary-600 dark:text-secondary-400">
-                  {role.description}
-                </div>
-                {!isAvailable && (
-                  <div className="text-xs text-secondary-500 dark:text-secondary-400 mt-2">
-                    {role.id === 'scribe' && totalParticipants < 3 ? 'Only available in 3+ person sessions' :
-                     role.id === 'observer-temporary' && totalParticipants < 4 ? 'Only available in 4+ person sessions' :
-                     role.id === 'observer-permanent' && totalParticipants < 3 ? 'Only available in 3+ person sessions' :
-                     t('dialectic.join.roleTaken')}
-                  </div>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
 
       {/* Role Guidance */}
       <div className="bg-secondary-50 dark:bg-secondary-800 rounded-lg p-4" data-testid="role-guidance">

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { useTheme } from '../contexts/ThemeContext';
-import { TopicSuggestion as TopicSuggestionType } from '../services/firestoreSessionService';
+import { TopicSuggestion as TopicSuggestionType } from '../types/sessionTypes';
 
 interface TopicSuggestionProps {
   session: any;
@@ -119,8 +119,8 @@ const TopicSuggestion: React.FC<TopicSuggestionProps> = ({
         ) : (
           <div className="space-y-3">
             {suggestions
-              .sort((a, b) => b.votes - a.votes)
-              .map((suggestion) => (
+              .sort((a: TopicSuggestionType, b: TopicSuggestionType) => b.votes - a.votes)
+              .map((suggestion: TopicSuggestionType) => (
                 <div
                   key={suggestion.id}
                   className="flex items-center justify-between p-3 bg-secondary-50 dark:bg-secondary-700 rounded-lg"

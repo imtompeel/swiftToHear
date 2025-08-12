@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FirestoreSessionService, SessionData, JoinData } from '../services/firestoreSessionService';
+import { FirestoreSessionService } from '../services/firestoreSessionService';
+import { SessionData, JoinData, Participant } from '../types/sessionTypes';
 import { useAuth } from '../contexts/AuthContext';
 
-export const useSession = () => {
+export const useSession = (externalUserId?: string, externalUserName?: string) => {
   const [session, setSession] = useState<SessionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -13,9 +14,9 @@ export const useSession = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Get current user info from auth context
-  const currentUserId = user?.uid || '';
-  const currentUserName = user?.displayName || user?.email || 'Anonymous User';
+  // Get current user info from auth context or external parameters
+  const currentUserId = externalUserId || user?.uid || '';
+  const currentUserName = externalUserName || user?.displayName || user?.email || 'Anonymous User';
 
   // Update host status when user or session changes
   useEffect(() => {
@@ -61,7 +62,7 @@ export const useSession = () => {
       
       // Create a simple hash of the session data to detect changes
       const sessionHash = JSON.stringify({
-        participants: sessionData.participants.map(p => ({ id: p.id, role: p.role, status: p.status })),
+        participants: sessionData.participants.map((p: Participant) => ({ id: p.id, role: p.role, status: p.status })),
         status: sessionData.status,
         currentPhase: sessionData.currentPhase
       });
@@ -116,7 +117,7 @@ export const useSession = () => {
   }, [currentUserId]);
 
   // Create session
-  const createSession = useCallback(async (sessionData: Omit<SessionData, 'sessionId' | 'createdAt' | 'participants' | 'status'>, options?: { skipNavigation?: boolean }) => {
+  const createSession = useCallback(async (sessionData: Omit<SessionData, 'sessionId' | 'createdAt' | 'participants' | 'status' | 'topicSuggestions'>, options?: { skipNavigation?: boolean }) => {
     try {
       setLoading(true);
       setError(null);
@@ -421,13 +422,13 @@ export const useSession = () => {
   // Check if current user is in session
   const isCurrentUserInSession = useCallback(() => {
     if (!session) return false;
-    return session.participants.some(p => p.id === currentUserId);
+    return session.participants.some((p: Participant) => p.id === currentUserId);
   }, [session, currentUserId]);
 
   // Get current user's participant data
   const getCurrentUserParticipant = useCallback(() => {
     if (!session) return null;
-    return session.participants.find(p => p.id === currentUserId) || null;
+    return session.participants.find((p: Participant) => p.id === currentUserId) || null;
   }, [session, currentUserId]);
 
   return {

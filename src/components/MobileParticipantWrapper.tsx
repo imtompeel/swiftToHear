@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { MobileParticipantInterface } from './MobileParticipantInterface';
 import { useSession } from '../hooks/useSession';
 import { SessionParticipant, createSessionContext } from '../types/sessionContext';
@@ -7,8 +7,10 @@ import { useTranslation } from '../hooks/useTranslation';
 
 const MobileParticipantWrapper: React.FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
-  const navigate = useNavigate();
   const { t } = useTranslation();
+  const [participantName, setParticipantName] = useState<string>('');
+  const [participantId, setParticipantId] = useState<string>('');
+  
   const { 
     session, 
     loadSession, 
@@ -18,8 +20,7 @@ const MobileParticipantWrapper: React.FC = () => {
     loading, 
     error, 
     clearError 
-  } = useSession();
-  const [participantName, setParticipantName] = useState<string>('');
+  } = useSession(participantId, participantName);
   const [selectedRole, setSelectedRole] = useState<string>('');
   const [isJoining, setIsJoining] = useState(false);
   const [hasJoined, setHasJoined] = useState(false);
@@ -77,6 +78,7 @@ const MobileParticipantWrapper: React.FC = () => {
           console.log('Restoring participant state:', existingParticipant);
           setParticipantName(existingParticipant.name);
           setSelectedRole(existingParticipant.role);
+          setParticipantId(storedParticipantId);
           setHasJoined(true);
           return;
         } else {
@@ -99,26 +101,27 @@ const MobileParticipantWrapper: React.FC = () => {
     setIsJoining(true);
     try {
       // Generate a unique participant ID
-      const participantId = `mobile-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const newParticipantId = `mobile-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      setParticipantId(newParticipantId);
       
       console.log('Joining session with:', {
         sessionId: session.sessionId,
-        participantId,
+        participantId: newParticipantId,
         userName: participantName,
         role: selectedRole
       });
       
       await joinSession({
         sessionId: session.sessionId,
-        userId: participantId,
+        userId: newParticipantId,
         userName: participantName,
         role: selectedRole
       }, { skipNavigation: true });
       
       // Store participant ID in localStorage for persistence across refreshes
-      localStorage.setItem(`participant-${session.sessionId}`, participantId);
+      localStorage.setItem(`participant-${session.sessionId}`, newParticipantId);
       
-      console.log('Successfully joined session, stored participant ID:', participantId);
+      console.log('Successfully joined session, stored participant ID:', newParticipantId);
       setHasJoined(true);
     } catch (err) {
       console.error('Failed to join session:', err);
@@ -144,7 +147,11 @@ const MobileParticipantWrapper: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+          <p className="text-red-600 dark:text-red-400 mb-4">
+            {error === 'Session is full' 
+              ? 'This session has reached its maximum number of participants. Please contact the host to join.' 
+              : error}
+          </p>
           <button 
             onClick={clearError}
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -168,6 +175,12 @@ const MobileParticipantWrapper: React.FC = () => {
             <p className="text-gray-600 dark:text-gray-400">
               {session.sessionName}
             </p>
+            <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              {(() => {
+                const mobileParticipants = session.participants.filter(p => p.id !== session.hostId);
+                return `${mobileParticipants.length} of ${session.maxParticipants} participants`;
+              })()}
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -188,7 +201,7 @@ const MobileParticipantWrapper: React.FC = () => {
             {/* Role Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t('dialectic.session.inPerson.roleSelection.title')}
+                {t('shared.common.chooseRole')}
               </label>
               <div className="space-y-2">
                 {['speaker', 'listener', 'scribe'].map((role) => {
@@ -214,7 +227,7 @@ const MobileParticipantWrapper: React.FC = () => {
                           ? 'text-gray-500 dark:text-gray-400' 
                           : 'text-gray-900 dark:text-white'
                       }`}>
-                        {t(`dialectic.session.inPerson.roleSelection.${role}.title`)}
+                        {t(`dialectic.roles.${role}.title`)}
                         {isRoleTaken && (
                           <span className="ml-2 text-xs bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 px-2 py-1 rounded">
                             {t('dialectic.session.inPerson.roleSelection.taken')}
@@ -226,7 +239,7 @@ const MobileParticipantWrapper: React.FC = () => {
                           ? 'text-gray-400 dark:text-gray-500' 
                           : 'text-gray-600 dark:text-gray-400'
                       }`}>
-                        {t(`dialectic.session.inPerson.roleSelection.${role}.description`)}
+                        {t(`dialectic.roles.${role}.description`)}
                       </div>
                     </button>
                   );

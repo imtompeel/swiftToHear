@@ -150,7 +150,7 @@ describe('SessionJoin Component', () => {
       render(<SessionJoin {...defaultProps} />);
       
       expect(screen.getByTestId('role-selection-section')).toBeInTheDocument();
-      expect(screen.getByText('dialectic.join.chooseRole')).toBeInTheDocument();
+      expect(screen.getByText('shared.common.chooseRole')).toBeInTheDocument();
       
       expect(screen.getByTestId('role-listener')).toBeInTheDocument();
       expect(screen.getByTestId('role-scribe')).toBeInTheDocument();
@@ -382,7 +382,7 @@ describe('SessionJoin Component', () => {
       render(<SessionJoin {...defaultProps} />);
       
       expect(screen.getByRole('main')).toBeInTheDocument();
-      expect(screen.getByLabelText('dialectic.join.chooseRole')).toBeInTheDocument();
+      expect(screen.getByLabelTextt('shared.common.chooseRole').toBeInTheDocument();
     });
 
     it('should support keyboard navigation for role selection', () => {

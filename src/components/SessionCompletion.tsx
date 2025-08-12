@@ -88,7 +88,7 @@ export const SessionCompletion: React.FC<SessionCompletionProps> = ({
                 <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900 dark:to-purple-800 rounded-lg p-6 border-2 border-purple-200 dark:border-purple-700 hover:border-purple-300 dark:hover:border-purple-600 transition-colors">
                   <div className="text-4xl mb-4">🏁</div>
                   <h3 className="font-semibold text-purple-900 dark:text-purple-100 mb-2">
-                    {t('dialectic.session.completion.endSession.title')}
+                    {t('shared.actions.endSession')}
                   </h3>
                   <p className="text-sm text-purple-700 dark:text-purple-300 mb-4">
                     {t('dialectic.session.completion.endSession.description')}
@@ -97,7 +97,7 @@ export const SessionCompletion: React.FC<SessionCompletionProps> = ({
                     onClick={onEndSession}
                     className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
                   >
-                    {t('dialectic.session.completion.endSession.button')}
+                    {t('shared.actions.endSession')}
                   </button>
                 </div>
               </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from '../../hooks/useTranslation';
 import { SessionContext, SessionParticipant } from '../../types/sessionContext';
 import { HoverTimer } from '../HoverTimer';
-import { FirestoreSessionService } from '../../services/firestoreSessionService';
+
 import { ListenerGuidance } from '../guidance/ListenerGuidance';
 import { ListenerInteractions } from '../guidance/ListenerInteractions';
 import { ReflectionStarters } from '../common/ReflectionStarters';
@@ -66,7 +66,7 @@ export const MobileListenerInterface: React.FC<MobileListenerInterfaceProps> = (
             )}
           </div>
           <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            {t('dialectic.assistance.listener.title')}
+            {t('shared.roles.listener')}
           </h1>
           <p className="text-sm text-gray-600 dark:text-gray-300">
             {t('dialectic.assistance.listener.mainGuidance')}

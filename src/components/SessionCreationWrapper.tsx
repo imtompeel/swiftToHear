@@ -27,7 +27,6 @@ const SessionCreationWrapper: React.FC = () => {
         hostName: user?.displayName || user?.email || 'Anonymous',
         minParticipants: sessionData.minParticipants,
         maxParticipants: sessionData.maxParticipants,
-        topicSuggestions: sessionData.topicSuggestions || [],
         sessionType: sessionData.sessionType || 'video',
         groupConfiguration: {
           autoAssignRoles: false // Allow manual role selection for in-person sessions

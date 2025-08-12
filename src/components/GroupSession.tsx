@@ -358,7 +358,7 @@ export const GroupSession: React.FC<GroupSessionProps> = ({
             onClick={onLeaveSession}
             className="px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600"
           >
-            {t('dialectic.session.leaveSession')}
+            {t('shared.actions.leaveSession')}
           </button>
         </div>
       </div>
@@ -379,7 +379,7 @@ export const GroupSession: React.FC<GroupSessionProps> = ({
             onClick={onLeaveSession}
             className="px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600"
           >
-            {t('dialectic.session.leaveSession')}
+            {t('shared.actions.leaveSession')}
           </button>
         </div>
       </div>
@@ -565,7 +565,7 @@ export const GroupSession: React.FC<GroupSessionProps> = ({
                 onClick={onGroupComplete}
                 className="px-6 py-3 bg-accent-500 text-white rounded-lg hover:bg-accent-600"
               >
-                {t('dialectic.session.leaveSession')}
+                {t('shared.actions.leaveSession')}
               </button>
             </div>
           </div>
@@ -619,7 +619,7 @@ export const GroupSession: React.FC<GroupSessionProps> = ({
                 onClick={onLeaveSession}
                 className="px-3 py-1.5 sm:px-4 sm:py-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-xs sm:text-sm"
               >
-                {t('dialectic.session.leaveSession')}
+                {t('shared.actions.leaveSession')}
               </button>
             </div>
           </div>

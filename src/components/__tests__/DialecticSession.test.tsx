@@ -79,7 +79,7 @@ describe('DialecticSession Component', () => {
     it('should show leave session button', () => {
       render(<DialecticSession />);
       
-      expect(screen.getByText('dialectic.session.leaveSession')).toBeInTheDocument();
+      expect(screen.getByText('shared.actions.leaveSession')).toBeInTheDocument();
     });
 
     it('should show complete round button for host', () => {
@@ -213,7 +213,7 @@ describe('DialecticSession Component', () => {
       
       // Select a role to enable start button
       fireEvent.click(screen.getByTestId('role-speaker'));
-      expect(screen.getByText('dialectic.session.startSession')).toBeInTheDocument();
+      expect(screen.getByText('t('shared.actions.startSession')oBeInTheDocument();
     });
 
     it('should provide seamless URL-to-video journey', async () => {
@@ -532,8 +532,7 @@ describe('DialecticSession Component', () => {
       fireEvent.click(screen.getByTestId('duration-option-10'));
       
       // Start session
-      fireEvent.click(screen.getByText('dialectic.session.startSession'));
-      
+      fireEvent.click(screen.getByText('diat('shared.actions.startSession')   
       // Should show approximately the selected duration (allowing for slight timing differences)
       expect(screen.getByText(/^(9:5[0-9]|10:00)$/)).toBeInTheDocument();
     });

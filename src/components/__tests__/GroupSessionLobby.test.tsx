@@ -88,7 +88,7 @@ describe('GroupSessionLobby', () => {
   it('shows start session button for host when participants are ready', () => {
     render(<GroupSessionLobby {...mockProps} />);
     
-    expect(screen.getByText('dialectic.lobby.actions.startSession')).toBeInTheDocument();
+    expect(screen.getByText('shared.actions.startSession')).toBeInTheDocument();
   });
 
   it('shows shuffle groups button for host in multi-group mode', () => {

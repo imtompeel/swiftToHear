@@ -23,7 +23,7 @@ interface SessionData {
   groupConfiguration?: GroupConfiguration;
   minParticipants: number;
   maxParticipants: number;
-  sessionType: 'video' | 'in-person' | 'hybrid';
+  sessionType: 'video' | 'in-person';
 }
 
 interface TopicSuggestion {
@@ -51,7 +51,7 @@ const SessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) =>
   const [sessionCreated, setSessionCreated] = useState(false);
   const [sessionLink, setSessionLink] = useState('');
   const [hostRole, setHostRole] = useState<'participant' | 'observer-permanent'>('participant');
-  const [sessionType, setSessionType] = useState<'video' | 'in-person' | 'hybrid'>('video');
+  const [sessionType, setSessionType] = useState<'video' | 'in-person'>('video');
   const [maxParticipants, setMaxParticipants] = useState<number>(4);
   const [customMaxParticipants, setCustomMaxParticipants] = useState<string>('');
   
@@ -203,7 +203,7 @@ const SessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) =>
         return;
       }
       
-      // For video and hybrid sessions, show the regular share link
+      // For video sessions, show the regular share link
       const sessionId = createdSession?.sessionId || sessionData.sessionId;
       const link = `${window.location.origin}/practice/join/${sessionId}`;
       setSessionLink(link);
@@ -332,7 +332,7 @@ const SessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) =>
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Video Call Option */}
             <button
               onClick={() => setSessionType('video')}
@@ -358,7 +358,7 @@ const SessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) =>
                     ? 'text-gray-900'
                     : 'text-primary-900 dark:text-primary-100'
                 }`}>
-                  {t('dialectic.creation.sessionType.video.title')}
+                  {t('shared.common.videoCall')}
                 </div>
               </div>
               <div className={`text-sm ${
@@ -404,43 +404,6 @@ const SessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) =>
                   : 'text-secondary-600 dark:text-secondary-400'
               }`}>
                 {t('dialectic.creation.sessionType.inPerson.description')}
-              </div>
-            </button>
-
-            {/* Hybrid Option */}
-            <button
-              onClick={() => setSessionType('hybrid')}
-              className={`p-6 rounded-lg border-2 text-left transition-all ${
-                sessionType === 'hybrid'
-                  ? 'border-accent-500 bg-accent-50 shadow-lg'
-                  : 'border-secondary-200 hover:border-secondary-300 hover:shadow-md'
-              }`}
-              data-testid="session-type-hybrid"
-            >
-              <div className="flex items-center space-x-3 mb-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  sessionType === 'hybrid'
-                    ? 'bg-accent-500 text-white'
-                    : 'bg-secondary-200 text-secondary-600'
-                }`}>
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
-                  </svg>
-                </div>
-                <div className={`font-semibold ${
-                  sessionType === 'hybrid'
-                    ? 'text-gray-900'
-                    : 'text-primary-900 dark:text-primary-100'
-                }`}>
-                  {t('dialectic.creation.sessionType.hybrid.title')}
-                </div>
-              </div>
-              <div className={`text-sm ${
-                sessionType === 'hybrid'
-                  ? 'text-gray-700'
-                  : 'text-secondary-600 dark:text-secondary-400'
-              }`}>
-                {t('dialectic.creation.sessionType.hybrid.description')}
               </div>
             </button>
           </div>
@@ -835,7 +798,7 @@ const SessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) =>
             {t('dialectic.creation.preview.title')}
           </h3>
           <div className="text-sm text-secondary-600 dark:text-secondary-400 space-y-1">
-            <p><strong>{t('dialectic.creation.preview.sessionType', { type: t(`dialectic.creation.sessionType.${sessionType === 'video' ? 'video' : sessionType === 'in-person' ? 'inPerson' : 'hybrid'}.title`) })}</strong></p>
+            <p><strong>{t('dialectic.creation.preview.sessionType', { type: t(`dialectic.creation.sessionType.${sessionType === 'video' ? 'video' : 'inPerson'}.title`) })}</strong></p>
             <p>{t('dialectic.creation.preview.roundLength', { minutes: formatDuration(selectedDuration) })}</p>
             <p>{t('dialectic.creation.preview.estimatedTotal', { minutes: Math.round(calculateTotalSessionTime(formatDuration(selectedDuration)) * (sessionType === 'in-person' ? maxParticipants / 3 : 1)) })}</p>
             <p>{t('dialectic.creation.preview.format')}</p>

@@ -59,7 +59,7 @@ export const MobileScribeInterface: React.FC<MobileScribeInterfaceProps> = ({
             )}
           </div>
           <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            {t('dialectic.assistance.scribe.title')}
+            {t('shared.roles.scribe')}
           </h1>
           <p className="text-sm text-gray-600 dark:text-gray-300">
             {t('dialectic.assistance.scribe.mainGuidance')}

@@ -110,7 +110,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSuccess, onSwitchToSignIn }) => {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                {t('auth.signUp.email')}
+                {t('shared.common.email')}
               </label>
               <input
                 id="email"
@@ -122,7 +122,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSuccess, onSwitchToSignIn }) => {
                 className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                   validationErrors.email ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
                 }`}
-                placeholder={t('auth.signUp.emailPlaceholder')}
+                placeholder={t('shared.placeholders.enterEmail')}
               />
               {validationErrors.email && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">{validationErrors.email}</p>
@@ -131,7 +131,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSuccess, onSwitchToSignIn }) => {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                {t('auth.signUp.password')}
+                {t('shared.common.password')}
               </label>
               <input
                 id="password"
@@ -143,7 +143,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSuccess, onSwitchToSignIn }) => {
                 className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                   validationErrors.password ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
                 }`}
-                placeholder={t('auth.signUp.passwordPlaceholder')}
+                placeholder={t('shared.placeholders.enterPassword')}
               />
               {validationErrors.password && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">{validationErrors.password}</p>

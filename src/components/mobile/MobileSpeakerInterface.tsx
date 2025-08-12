@@ -65,7 +65,7 @@ export const MobileSpeakerInterface: React.FC<MobileSpeakerInterfaceProps> = ({
             )}
           </div>
           <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            {t('dialectic.assistance.speaker.title')}
+            {t('shared.roles.speaker')}
           </h1>
           <p className="text-sm text-gray-600 dark:text-gray-300">
             {t('dialectic.assistance.speaker.mainGuidance')}

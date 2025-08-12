@@ -3,10 +3,11 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './components/LandingPage';
 
 import AdminPanel from './components/AdminPanel';
+import SuperadminPanel from './components/SuperadminPanel';
+import SuperadminLogin from './components/SuperadminLogin';
 import AdminGuide from './components/AdminGuide';
 import SafetyGuidelines from './components/SafetyGuidelines';
 import { DialecticSession } from './components/DialecticSession';
-import { SessionCreationWrapper } from './components/SessionCreationWrapper';
 import { SessionJoinWrapper } from './components/SessionJoinWrapper';
 import { SessionLobbyWrapper } from './components/SessionLobbyWrapper';
 import { InPersonSessionWrapper } from './components/InPersonSessionWrapper';
@@ -22,6 +23,9 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import './i18n/config'; // Initialize i18n
 
+// Import step-by-step session creation
+import StepByStepSessionCreationWrapper from './components/session-creation/StepByStepSessionCreationWrapper';
+
 function App() {
   return (
     <ThemeProvider>
@@ -36,9 +40,10 @@ function App() {
               <Route path="/practice" element={<DialecticSession />} />
               <Route path="/practice/create" element={
                 <ProtectedRoute>
-                  <SessionCreationWrapper />
+                  <StepByStepSessionCreationWrapper />
                 </ProtectedRoute>
               } />
+              
               <Route path="/practice/join/:sessionId" element={
                 <ProtectedRoute>
                   <SessionJoinWrapper />
@@ -61,6 +66,8 @@ function App() {
               } />
               
               <Route path="/admin" element={<AdminPanel />} />
+              <Route path="/superadmin" element={<SuperadminPanel />} />
+              <Route path="/superadmin/login" element={<SuperadminLogin />} />
               <Route path="/admin/guide" element={<AdminGuide />} />
               <Route path="/admin/safety" element={<SafetyGuidelines />} />
               <Route path="/test" element={<SessionTestPage />} />

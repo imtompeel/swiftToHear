@@ -99,7 +99,8 @@ const SessionHeader = React.memo<{
   currentTimeRemaining: number;
   t: (key: string, params?: any) => string;
   safetyTimeout: any;
-}>(({ sessionState, roleRotation, videoCall, currentTimeRemaining, t, safetyTimeout }) => {
+  sessionPhase?: string;
+}>(({ sessionState, roleRotation, videoCall, currentTimeRemaining, t, safetyTimeout, sessionPhase }) => {
   return (
     <div className="bg-accent-600 text-white p-4">
       <div className="flex justify-between items-center">
@@ -119,6 +120,7 @@ const SessionHeader = React.memo<{
             {/* Safety Timeout Button */}
             <SafetyTimeoutButton
               onRequestTimeout={safetyTimeout.requestTimeout}
+              onEndTimeout={safetyTimeout.endTimeout}
               isTimeoutActive={safetyTimeout.isTimeoutActive}
               className="text-white"
             />
@@ -130,7 +132,10 @@ const SessionHeader = React.memo<{
                 {videoCall.isConnected ? 'Video Connected' : videoCall.isConnecting ? 'Connecting...' : 'Video Disconnected'}
               </span>
             </div>
-            <TimerDisplay timeRemaining={currentTimeRemaining} />
+            {/* Hide main timer during check-in phase */}
+            {sessionPhase !== 'hello-checkin' && (
+              <TimerDisplay timeRemaining={currentTimeRemaining} />
+            )}
           </div>
         </div>
       </div>
@@ -565,11 +570,11 @@ const SessionControls = React.memo<{
           onClick={() => sessionState.setCurrentPhase('initialization')}
           className="px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-secondary-900 dark:hover:text-secondary-100"
         >
-          {t('dialectic.session.leaveSession')}
+          {t('shared.actions.leaveSession')}
         </button>
         
         <div className="flex space-x-2">
-          {isHost && session?.currentPhase !== 'transition' && (
+          {isHost && session?.currentPhase !== 'transition' && session?.currentPhase !== 'hello-checkin' && (
             <button
               onClick={onCompleteRound}
               className="px-6 py-2 bg-accent-600 text-white rounded-md hover:bg-accent-700"
@@ -833,6 +838,7 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
             currentTimeRemaining={currentTimeRemaining}
             t={t}
             safetyTimeout={safetyTimeout}
+            sessionPhase={session?.currentPhase}
           />
 
           {/* Mobile Toggle Controls - Only visible on small screens */}
@@ -872,7 +878,7 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
             <div className={`w-full lg:w-3/5 xl:w-2/3 ${showVideoOnMobile ? 'block' : 'hidden'} lg:block`}>
               <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-3 sm:p-4 lg:p-6 xl:p-8 overflow-hidden">
                 <h2 className="text-lg sm:text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-3 sm:mb-4">
-                  {t('dialectic.session.videoCall')}
+                  {t('shared.common.videoCall')}
                 </h2>
                 <div className="w-full overflow-hidden">
                   <SessionVideo 

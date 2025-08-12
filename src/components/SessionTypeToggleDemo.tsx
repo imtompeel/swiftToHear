@@ -55,7 +55,7 @@ export const SessionTypeToggleDemo: React.FC = () => {
                     ? 'text-gray-900'
                     : 'text-primary-900 dark:text-primary-100'
                 }`}>
-                  {t('dialectic.creation.sessionType.video.title')}
+                  {t('shared.common.videoCall')}
                 </div>
               </div>
               <div className={`text-sm ${

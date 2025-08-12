@@ -245,7 +245,7 @@ describe('SessionLobby Component', () => {
       
       expect(screen.getByTestId('host-controls')).toBeInTheDocument();
       expect(screen.getByTestId('start-session-button')).toBeInTheDocument();
-      expect(screen.getByText('dialectic.lobby.startSession')).toBeInTheDocument();
+      expect(screen.getByText('shared.actions.startSession')).toBeInTheDocument();
     });
 
     it('should not show host controls for regular participants', () => {
@@ -287,7 +287,7 @@ describe('SessionLobby Component', () => {
       fireEvent.click(startButton);
       
       // The real component shows a confirmation dialog instead of calling directly
-      expect(screen.getByText('dialectic.lobby.confirmStart.title')).toBeInTheDocument();
+      expect(screen.getByTextt('shared.actions.startSession').toBeInTheDocument();
     });
 
     it('should show confirmation dialog for session start', async () => {
@@ -296,7 +296,7 @@ describe('SessionLobby Component', () => {
       const startButton = screen.getByTestId('start-session-button');
       fireEvent.click(startButton);
       
-      expect(screen.getByText('dialectic.lobby.confirmStart.title')).toBeInTheDocument();
+      expect(screen.getByText('dialet('shared.actions.startSession')TheDocument();
       expect(screen.getByTestId('confirm-start-button')).toBeInTheDocument();
       
       const confirmButton = screen.getByTestId('confirm-start-button');
@@ -433,7 +433,7 @@ describe('SessionLobby Component', () => {
       renderWithProviders(<SessionLobby {...defaultProps} />);
       
       expect(screen.getByTestId('leave-session-button')).toBeInTheDocument();
-      expect(screen.getByText('dialectic.lobby.leaveSession')).toBeInTheDocument();
+      expect(screen.getByText('dialectic.lot('shared.actions.leaveSession')ment();
     });
 
     it('should call onLeaveSession when participant leaves', () => {

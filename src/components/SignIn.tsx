@@ -57,7 +57,7 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess, onSwitchToSignUp }) => {
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                {t('auth.signIn.email')}
+                {t('shared.common.email')}
               </label>
               <input
                 id="email"
@@ -67,13 +67,13 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess, onSwitchToSignUp }) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder={t('auth.signIn.emailPlaceholder')}
+                placeholder={t('shared.placeholders.enterEmail')}
               />
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                {t('auth.signIn.password')}
+                {t('shared.common.password')}
               </label>
               <input
                 id="password"
@@ -83,7 +83,7 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess, onSwitchToSignUp }) => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder={t('auth.signIn.passwordPlaceholder')}
+                placeholder={t('shared.placeholders.enterPassword')}
               />
             </div>
           </div>
@@ -94,7 +94,7 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess, onSwitchToSignUp }) => {
               disabled={isLoading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? t('auth.signIn.signingIn') : t('auth.signIn.submit')}
+              {isLoading ? t('shared.actions.signingIn') : t('shared.actions.signIn')}
             </button>
           </div>
 

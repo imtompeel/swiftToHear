@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { addEmailSignup } from '../services/emailService';
 import { useTranslation } from '../hooks/useTranslation';
 
@@ -48,7 +49,7 @@ const LandingPage: React.FC = () => {
             {/* Overlapping Title */}
             <div className="absolute top-3/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]">
-                {t('landing.hero.title')}
+                {t('shared.common.siteName')}
               </h1>
             </div>
             
@@ -69,9 +70,9 @@ const LandingPage: React.FC = () => {
           <div className="grid md:grid-cols-2 gap-8 mb-8">
             <div className="card border-accent-200 dark:border-accent-700">
               <blockquote className="text-lg text-secondary-700 dark:text-secondary-300 italic mb-4">
-                "{t('landing.scripture.verses.james.text')}"
+                "{t('shared.scripture.james119')}"
               </blockquote>
-              <p className="text-accent-700 dark:text-accent-400 font-medium">— {t('landing.scripture.verses.james.reference')}</p>
+              <p className="text-accent-700 dark:text-accent-400 font-medium">— {t('shared.scripture.james119Ref')}</p>
             </div>
             
             <div className="card border-accent-200 dark:border-accent-700">
@@ -134,11 +135,11 @@ const LandingPage: React.FC = () => {
 
             <div className="grid md:grid-cols-3 gap-6 mb-8">
               <div className="card text-center border-accent-200 dark:border-accent-700">
-                <h3 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-2">{t('landing.practising.roles.speaker.title')}</h3>
+                <h3 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-2">{t('shared.roles.speaker')}</h3>
                 <p className="text-secondary-600 dark:text-secondary-400">{t('landing.practising.roles.speaker.description')}</p>
               </div>
               <div className="card text-center border-accent-200 dark:border-accent-700">
-                <h3 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-2">{t('landing.practising.roles.listener.title')}</h3>
+                <h3 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-2">{t('shared.roles.listener')}</h3>
                 <p className="text-secondary-600 dark:text-secondary-400">{t('landing.practising.roles.listener.description')}</p>
               </div>
               <div className="card text-center border-accent-200 dark:border-accent-700">
@@ -194,7 +195,7 @@ const LandingPage: React.FC = () => {
                   </div>
                   <div className="card border-accent-200 dark:border-accent-700">
                     <h4 className="font-semibold text-secondary-900 dark:text-secondary-100 mb-2">{t('landing.format.values.attentiveListening.title')}</h4>
-                    <p className="text-secondary-600 dark:text-secondary-400 text-sm">"{t('landing.format.values.attentiveListening.verse')}" ({t('landing.format.values.attentiveListening.reference')})</p>
+                    <p className="text-secondary-600 dark:text-secondary-400 text-sm">"{t('landing.format.values.attentiveListening.verse')}" ({t('shared.scripture.james119Ref')})</p>
                   </div>
                   <div className="card border-accent-200 dark:border-accent-700">
                     <h4 className="font-semibold text-secondary-900 dark:text-secondary-100 mb-2">{t('landing.format.values.drawingWisdom.title')}</h4>
@@ -226,6 +227,25 @@ const LandingPage: React.FC = () => {
             <p className="text-lg text-secondary-700 dark:text-secondary-300 leading-relaxed mb-8">
               {t('landing.rootedInWord.content')}
             </p>
+
+            {/* Platform Guide Link */}
+            <div className="bg-accent-50 dark:bg-accent-900/20 rounded-lg p-6 mb-8 border border-accent-200 dark:border-accent-700">
+              <h3 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-3">
+                Want to learn more about the platform?
+              </h3>
+              <p className="text-secondary-700 dark:text-secondary-300 mb-4">
+                Explore our comprehensive platform guide to understand how to use Swift to Hear effectively for both video and in-person sessions.
+              </p>
+              <Link
+                to="/admin/guide"
+                className="inline-flex items-center text-accent-600 dark:text-accent-400 hover:text-accent-700 dark:hover:text-accent-300 font-medium transition-colors"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                View Platform Guide →
+              </Link>
+            </div>
           </div>
         </div>
       </section>

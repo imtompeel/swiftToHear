@@ -3,12 +3,14 @@ import { useTranslation } from '../hooks/useTranslation';
 
 interface SafetyTimeoutButtonProps {
   onRequestTimeout: () => void;
+  onEndTimeout: () => void;
   isTimeoutActive: boolean;
   className?: string;
 }
 
 export const SafetyTimeoutButton: React.FC<SafetyTimeoutButtonProps> = ({
   onRequestTimeout,
+  onEndTimeout,
   isTimeoutActive,
   className = ''
 }) => {
@@ -16,12 +18,16 @@ export const SafetyTimeoutButton: React.FC<SafetyTimeoutButtonProps> = ({
 
   if (isTimeoutActive) {
     return (
-      <div className={`flex items-center space-x-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg ${className}`}>
-        <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-        <span className="text-blue-700 dark:text-blue-300 text-sm font-medium">
-          {t('safety.timeout.active')}
+      <button
+        onClick={onEndTimeout}
+        className={`flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white rounded-lg transition-colors duration-200 ${className}`}
+        title={t('safety.timeout.endTooltip')}
+      >
+        <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+        <span className="text-white text-sm font-medium">
+          {t('safety.timeout.end')}
         </span>
-      </div>
+      </button>
     );
   }
 

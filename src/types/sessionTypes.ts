@@ -1,4 +1,4 @@
-import { Timestamp } from 'firebase/firestore';
+import { Timestamp, FieldValue } from 'firebase/firestore';
 
 export interface SessionData {
   sessionId: string;
@@ -8,15 +8,15 @@ export interface SessionData {
   hostId: string;
   hostName: string;
   hostRole?: 'participant' | 'observer-permanent';
-  createdAt: Timestamp;
+  createdAt: Timestamp | FieldValue;
   participants: Participant[];
   status: 'waiting' | 'active' | 'completed';
   minParticipants: number;
   maxParticipants: number;
   topicSuggestions: TopicSuggestion[];
   sessionType?: 'video' | 'in-person' | 'hybrid';
-  currentPhase?: 'topic-selection' | 'hello-checkin' | 'listening' | 'transition' | 'reflection' | 'completion' | 'free-dialogue' | 'completed' | undefined;
-  phaseStartTime?: Timestamp;
+  currentPhase?: 'topic-selection' | 'hello-checkin' | 'listening' | 'transition' | 'reflection' | 'completion' | 'free-dialogue' | 'completed' | 'round' | undefined;
+  phaseStartTime?: Timestamp | FieldValue;
   currentRound?: number;
   fivePersonChoice?: 'split' | 'together';
   groupConfiguration?: {
@@ -28,7 +28,7 @@ export interface SessionData {
     isActive: boolean;
     requestedBy: string | null;
     requestedByUserName: string | null;
-    startTime: Timestamp | null;
+    startTime: Timestamp | FieldValue | null;
   };
 }
 
@@ -37,7 +37,7 @@ export interface TopicSuggestion {
   topic: string;
   suggestedBy: string;
   suggestedByUserId: string;
-  suggestedAt: Timestamp | Date;
+  suggestedAt: Timestamp | FieldValue | Date;
   votes: number;
   voters: string[]; // Array of user IDs who voted for this topic
 }

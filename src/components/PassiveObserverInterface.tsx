@@ -29,7 +29,7 @@ export const PassiveObserverInterface: React.FC<PassiveObserverInterfaceProps> =
         {/* Header Section */}
         <div className="text-center mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            {t('dialectic.assistance.observer.title')}
+            {t('shared.roles.observer')}
           </h1>
           <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300">
             {t('dialectic.assistance.observer.mainGuidance')}

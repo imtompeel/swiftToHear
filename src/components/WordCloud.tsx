@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from '../hooks/useTranslation';
-import { TopicSuggestion } from '../services/firestoreSessionService';
+import { TopicSuggestion } from '../types/sessionTypes';
 
 interface WordCloudProps {
   suggestions: TopicSuggestion[];
