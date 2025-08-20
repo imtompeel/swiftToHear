@@ -23,7 +23,7 @@ export const SessionTypeToggleDemo: React.FC = () => {
         <div className="space-y-4">
           <div>
             <label className="block text-lg font-medium text-primary-900 dark:text-primary-100 mb-2">
-              {t('dialectic.creation.sessionType.label')}
+              {t('shared.common.sessionType')}
             </label>
             <p className="text-secondary-600 dark:text-secondary-400 mb-4">
               {t('dialectic.creation.sessionType.description')}

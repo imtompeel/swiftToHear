@@ -179,7 +179,7 @@ export const TechCheck: React.FC<TechCheckProps> = ({ onComplete }) => {
               : 'bg-accent-600 text-white hover:bg-accent-700'
           }`}
         >
-          {allReady ? t('dialectic.preparation.techCheck.continueSession') : t('dialectic.preparation.techCheck.continueAnyway')}
+          {allReady ? t('shared.actions.continueToSession') : t('dialectic.preparation.techCheck.continueAnyway')}
         </button>
       </div>
     </div>

@@ -76,52 +76,23 @@ export class SessionLifecycleService {
         };
       }
 
-      // For video/hybrid sessions, use existing logic
-      if (session.groupConfiguration?.autoAssignRoles) {
-        // Add participant without role (will be assigned later)
-        const participant: Participant = {
-          id: joinData.userId,
-          name: joinData.userName,
-          role: '', // Empty role - will be auto-assigned when session starts
-          status: 'not-ready'
-        };
+      // For video/hybrid sessions, allow joining without a role (participants will choose in lobby)
+      // This matches the simplified in-person approach
+      const participant: Participant = {
+        id: joinData.userId,
+        name: joinData.userName,
+        role: joinData.role || '', // Allow empty role - will be chosen in lobby
+        status: 'not-ready'
+      };
 
-        const updatedParticipants = [...session.participants, participant];
-        
-        await this.crudService.updateParticipants(joinData.sessionId, updatedParticipants);
+      const updatedParticipants = [...session.participants, participant];
+      
+      await this.crudService.updateParticipants(joinData.sessionId, updatedParticipants);
 
-        return {
-          ...session,
-          participants: updatedParticipants
-        };
-      } else {
-        // Manual role assignment - check if role is available
-        if (!joinData.role) {
-          throw new Error('Role is required when auto-assign is disabled');
-        }
-        
-        const availableRoles = this.getAvailableRoles(session);
-        if (!availableRoles.includes(joinData.role)) {
-          throw new Error('Role not available');
-        }
-
-        // Add participant with specified role
-        const participant: Participant = {
-          id: joinData.userId,
-          name: joinData.userName,
-          role: joinData.role,
-          status: 'not-ready'
-        };
-
-        const updatedParticipants = [...session.participants, participant];
-        
-        await this.crudService.updateParticipants(joinData.sessionId, updatedParticipants);
-
-        return {
-          ...session,
-          participants: updatedParticipants
-        };
-      }
+      return {
+        ...session,
+        participants: updatedParticipants
+      };
     } catch (error) {
       console.error('Error joining session:', error);
       throw error;

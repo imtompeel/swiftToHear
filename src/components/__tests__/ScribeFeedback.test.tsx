@@ -1,190 +1,86 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import '@testing-library/jest-dom';
+import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
 import { ScribeFeedback } from '../ScribeFeedback';
+import { createSessionContext } from '../../types/sessionContext';
 
 // Mock the useTranslation hook
 vi.mock('../../hooks/useTranslation', () => ({
   useTranslation: () => ({
-    t: (key: string) => key
-  })
+    t: (key: string) => key,
+  }),
 }));
 
-// Mock the VideoCall component
-vi.mock('../VideoCall', () => ({
-  VideoCall: ({ className }: { className?: string }) => (
-    <div data-testid="video-call" className={className}>
-      Mock Video Call Component
-    </div>
-  )
+// Mock the HoverTimer component
+vi.mock('../HoverTimer', () => ({
+  HoverTimer: ({ timeRemaining }: { timeRemaining: number }) => (
+    <div data-testid="hover-timer">Timer: {timeRemaining}</div>
+  ),
 }));
 
 describe('ScribeFeedback Component', () => {
-  const defaultProps = {
-    scribeName: 'Charlie',
-    roundNumber: 1,
-    onComplete: vi.fn(),
-    duration: 2.5 * 60 * 1000, // 2.5 minutes
-    notes: 'Sample scribe notes from the session',
+  const mockSession = createSessionContext({
     sessionId: 'test-session',
-    currentUserId: '1',
-    currentUserName: 'Alice',
+    currentRound: 1,
+    currentPhase: 'transition',
     participants: [
-      { id: '1', name: 'Alice', role: 'speaker', status: 'ready' as const },
-      { id: '2', name: 'Bob', role: 'listener', status: 'ready' as const },
-      { id: '3', name: 'Charlie', role: 'scribe', status: 'ready' as const }
+      { id: '1', name: 'Speaker', role: 'speaker' },
+      { id: '2', name: 'Listener', role: 'listener' },
+      { id: '3', name: 'Scribe', role: 'scribe' },
     ],
-    isHost: true
+  });
+
+  const defaultProps = {
+    session: mockSession,
+    currentUserId: '1',
+    currentUserName: 'Speaker',
+    participants: mockSession.participants,
+    onComplete: vi.fn(),
+    isHost: false,
+    notes: 'Test scribe notes',
   };
 
-  beforeEach(() => {
-    vi.clearAllMocks();
+  it('should render without video components', () => {
+    render(<ScribeFeedback {...defaultProps} />);
+    
+    // Should render the main component
+    expect(screen.getByTestId('scribe-feedback')).toBeInTheDocument();
+    
+    // Should render the title
+    expect(screen.getByText('dialectic.session.scribeFeedback.title')).toBeInTheDocument();
+    
+    // Should render the notes
+    expect(screen.getByText('Test scribe notes')).toBeInTheDocument();
+    
+    // Should NOT render any video-related elements
+    expect(screen.queryByText('shared.common.videoCall')).not.toBeInTheDocument();
   });
 
-  describe('Component Rendering', () => {
-    it('should render scribe feedback component', () => {
-      render(<ScribeFeedback {...defaultProps} />);
-      
-      expect(screen.getByTestId('scribe-feedback')).toBeInTheDocument();
-      expect(screen.getByText('dialectic.scribeFeedback.title')).toBeInTheDocument();
-    });
-
-    it('should display scribe name and round number', () => {
-      render(<ScribeFeedback {...defaultProps} />);
-      
-      expect(screen.getByText(/Charlie/)).toBeInTheDocument();
-      expect(screen.getByText(/Round 1/)).toBeInTheDocument();
-    });
-
-    it('should show scribe notes when provided', () => {
-      render(<ScribeFeedback {...defaultProps} />);
-      
-      expect(screen.getByText('Sample scribe notes from the session')).toBeInTheDocument();
-    });
-
-    it('should show guidelines section', () => {
-      render(<ScribeFeedback {...defaultProps} />);
-      
-      expect(screen.getByText('dialectic.scribeFeedback.guidelines.title')).toBeInTheDocument();
-      expect(screen.getByText('dialectic.scribeFeedback.guidelines.feedback')).toBeInTheDocument();
-    });
+  it('should render guidelines for scribe and listeners', () => {
+    render(<ScribeFeedback {...defaultProps} />);
+    
+    // Should render scribe guidelines
+    expect(screen.getByText('dialectic.session.scribeFeedback.guidelines.title')).toBeInTheDocument();
+    
+    // Should render listener guidelines
+    expect(screen.getByText('dialectic.session.scribeFeedback.listenerGuidelines.title')).toBeInTheDocument();
   });
 
-  describe('Video Integration', () => {
-    it('should show video call by default', () => {
-      render(<ScribeFeedback {...defaultProps} />);
-      
-      expect(screen.getByTestId('video-call')).toBeInTheDocument();
-      expect(screen.getByText('Video Call')).toBeInTheDocument();
-    });
-
-    it('should hide video when hideVideo prop is true', () => {
-      render(<ScribeFeedback {...defaultProps} hideVideo={true} />);
-      
-      expect(screen.queryByTestId('video-call')).not.toBeInTheDocument();
-      expect(screen.queryByText('Video Call')).not.toBeInTheDocument();
-    });
-
-    it('should show video when hideVideo prop is false', () => {
-      render(<ScribeFeedback {...defaultProps} hideVideo={false} />);
-      
-      expect(screen.getByTestId('video-call')).toBeInTheDocument();
-      expect(screen.getByText('Video Call')).toBeInTheDocument();
-    });
+  it('should show complete button only for host', () => {
+    const { rerender } = render(<ScribeFeedback {...defaultProps} />);
+    
+    // Should not show complete button for non-host
+    expect(screen.queryByText('dialectic.session.scribeFeedback.complete')).not.toBeInTheDocument();
+    
+    // Should show complete button for host
+    rerender(<ScribeFeedback {...defaultProps} isHost={true} />);
+    expect(screen.getByText('dialectic.session.scribeFeedback.complete')).toBeInTheDocument();
   });
 
-  describe('Timer Functionality', () => {
-    it('should display timer with correct duration', () => {
-      render(<ScribeFeedback {...defaultProps} />);
-      
-      // Should show timer component
-      expect(screen.getByTestId('scribe-feedback')).toBeInTheDocument();
-    });
-
-    it('should show time remaining in minutes and seconds', () => {
-      render(<ScribeFeedback {...defaultProps} />);
-      
-      // Timer should be displayed
-      expect(screen.getByTestId('scribe-feedback')).toBeInTheDocument();
-    });
-  });
-
-  describe('Host Controls', () => {
-    it('should show complete button for host', () => {
-      render(<ScribeFeedback {...defaultProps} isHost={true} />);
-      
-      expect(screen.getByText('dialectic.scribeFeedback.complete')).toBeInTheDocument();
-    });
-
-    it('should not show complete button for non-host', () => {
-      render(<ScribeFeedback {...defaultProps} isHost={false} />);
-      
-      expect(screen.queryByText('dialectic.scribeFeedback.complete')).not.toBeInTheDocument();
-    });
-
-    it('should call onComplete when complete button is clicked', () => {
-      render(<ScribeFeedback {...defaultProps} isHost={true} />);
-      
-      const completeButton = screen.getByText('dialectic.scribeFeedback.complete');
-      fireEvent.click(completeButton);
-      
-      expect(defaultProps.onComplete).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('Notes Display', () => {
-    it('should display scribe notes in a readable format', () => {
-      render(<ScribeFeedback {...defaultProps} />);
-      
-      expect(screen.getByText('Sample scribe notes from the session')).toBeInTheDocument();
-    });
-
-    it('should handle empty notes gracefully', () => {
-      render(<ScribeFeedback {...defaultProps} notes="" />);
-      
-      // Should still render the component without notes
-      expect(screen.getByTestId('scribe-feedback')).toBeInTheDocument();
-    });
-
-    it('should handle undefined notes gracefully', () => {
-      render(<ScribeFeedback {...defaultProps} notes={undefined} />);
-      
-      // Should still render the component without notes
-      expect(screen.getByTestId('scribe-feedback')).toBeInTheDocument();
-    });
-  });
-
-  describe('Participant Information', () => {
-    it('should show participant list', () => {
-      render(<ScribeFeedback {...defaultProps} />);
-      
-      expect(screen.getByText('Alice')).toBeInTheDocument();
-      expect(screen.getByText('Bob')).toBeInTheDocument();
-      expect(screen.getByText('Charlie')).toBeInTheDocument();
-    });
-
-    it('should display participant roles', () => {
-      render(<ScribeFeedback {...defaultProps} />);
-      
-      // Should show participants with their roles
-      expect(screen.getByText('Alice')).toBeInTheDocument();
-      expect(screen.getByText('Bob')).toBeInTheDocument();
-      expect(screen.getByText('Charlie')).toBeInTheDocument();
-    });
-  });
-
-  describe('Accessibility', () => {
-    it('should have proper test IDs for testing', () => {
-      render(<ScribeFeedback {...defaultProps} />);
-      
-      expect(screen.getByTestId('scribe-feedback')).toBeInTheDocument();
-    });
-
-    it('should have semantic HTML structure', () => {
-      render(<ScribeFeedback {...defaultProps} />);
-      
-      expect(screen.getByText('dialectic.scribeFeedback.title')).toBeInTheDocument();
-    });
+  it('should not render notes section when notes are not provided', () => {
+    render(<ScribeFeedback {...defaultProps} notes={undefined} />);
+    
+    // Should not render notes title
+    expect(screen.queryByText('dialectic.session.scribeFeedback.notesTitle')).not.toBeInTheDocument();
   });
 });

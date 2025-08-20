@@ -25,7 +25,7 @@ export const SafetyTimeoutButton: React.FC<SafetyTimeoutButtonProps> = ({
       >
         <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
         <span className="text-white text-sm font-medium">
-          {t('safety.timeout.end')}
+          {t('shared.actions.endTimeout')}
         </span>
       </button>
     );

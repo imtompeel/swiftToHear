@@ -44,7 +44,7 @@ describe('App Routing for Session Management', () => {
       );
       
       expect(screen.getByTestId('session-join-component')).toBeInTheDocument();
-      expect(screen.getByText('dialectic.join.title')).toBeInTheDocument();
+      expect(screen.getByText('shared.actions.joinPracticeSession')).toBeInTheDocument();
     });
 
     it('should render SessionLobby component at /practice/lobby/:sessionId', () => {

@@ -18,7 +18,7 @@ export const TopicSelection: React.FC<TopicSelectionProps> = ({
 
   // Sample prompts to inspire users (not categories)
   const samplePrompts = [
-    t('dialectic.samplePrompts.whatIsAlive'),
+    t('shared.common.whatIsAlive'),
     t('dialectic.samplePrompts.whatChallenge'),
     t('dialectic.samplePrompts.whatTransition'),
     t('dialectic.samplePrompts.whatRelationship'),

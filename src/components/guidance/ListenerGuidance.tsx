@@ -23,7 +23,7 @@ export const ListenerGuidance: React.FC<ListenerGuidanceProps> = ({
         <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
           <li className="flex items-start">
             <span className="text-green-500 mr-2">•</span>
-            {t('dialectic.assistance.listener.guidance.listenWithout')}
+            {t('dialectic.assistance.listener.guidance.fullPresence')}
           </li>
           <li className="flex items-start">
             <span className="text-green-500 mr-2">•</span>
@@ -31,11 +31,11 @@ export const ListenerGuidance: React.FC<ListenerGuidanceProps> = ({
           </li>
           <li className="flex items-start">
             <span className="text-green-500 mr-2">•</span>
-            {t('dialectic.assistance.listener.guidance.offerPresence')}
+            {t('dialectic.assistance.listener.guidance.reflectBack')}
           </li>
           <li className="flex items-start">
             <span className="text-green-500 mr-2">•</span>
-            {t('dialectic.assistance.listener.guidance.reflectBack')}
+            {t('dialectic.assistance.listener.guidance.notMemoryTest')}
           </li>
           <li className="flex items-start">
             <span className="text-green-500 mr-2">•</span>

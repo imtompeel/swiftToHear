@@ -137,11 +137,11 @@ export const GroupSessionLobby: React.FC<GroupSessionLobbyProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <h3 className="font-semibold text-primary-900 dark:text-primary-100 mb-2">
-              {t('dialectic.lobby.sessionInfo.title')}
+              {t('shared.common.sessionInformation')}
             </h3>
             <div className="space-y-2 text-sm text-secondary-600 dark:text-secondary-400">
-              <p><strong>{t('dialectic.lobby.sessionInfo.name')}:</strong> {session.sessionName}</p>
-              <p><strong>{t('dialectic.lobby.sessionInfo.participants')}:</strong> {session.participants.filter(p => p.id !== currentUserId).length}</p>
+              <p><strong>{t('shared.common.sessionName')}:</strong> {session.sessionName}</p>
+              <p><strong>{t('shared.common.participants')}:</strong> {session.participants.filter(p => p.id !== currentUserId).length}</p>
               <p><strong>{t('dialectic.lobby.sessionInfo.mode')}:</strong> {t('dialectic.creation.sessionType.adaptive.title')}</p>
             </div>
           </div>
@@ -175,7 +175,7 @@ export const GroupSessionLobby: React.FC<GroupSessionLobbyProps> = ({
                 onClick={copySessionLink}
                 className="w-full px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors text-sm"
               >
-                {t('dialectic.lobby.actions.copyLink')}
+                {t('shared.actions.copyLink')}
               </button>
               {isHost && session.participants.length > 4 && (
                 <button
@@ -205,7 +205,7 @@ export const GroupSessionLobby: React.FC<GroupSessionLobbyProps> = ({
                     {t('dialectic.lobby.groupPreview.groupName', { name: String.fromCharCode(65 + index) })}
                   </h3>
                   <span className="text-sm text-secondary-600 dark:text-secondary-400">
-                    {group.participants.length} {t('dialectic.lobby.groupPreview.participants')}
+                    {group.participants.length} {t('shared.common.participants')}
                   </span>
                 </div>
                 <div className="space-y-2">
@@ -316,7 +316,7 @@ export const GroupSessionLobby: React.FC<GroupSessionLobbyProps> = ({
                 onClick={() => setShowStartConfirmation(false)}
                 className="px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-secondary-200"
               >
-                {t('dialectic.lobby.confirmStart.cancel')}
+                {t('shared.actions.cancel')}
               </button>
               <button
                 onClick={confirmStartSession}
@@ -343,7 +343,7 @@ export const GroupSessionLobby: React.FC<GroupSessionLobbyProps> = ({
                 onClick={() => setShowHostLeaveConfirmation(false)}
                 className="px-4 py-2 text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-secondary-200"
               >
-                {t('dialectic.lobby.confirmLeave.cancel')}
+                {t('shared.actions.cancel')}
               </button>
               <button
                 onClick={confirmLeaveSession}

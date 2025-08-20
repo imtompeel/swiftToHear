@@ -143,7 +143,7 @@ const LandingPage: React.FC = () => {
                 <p className="text-secondary-600 dark:text-secondary-400">{t('landing.practising.roles.listener.description')}</p>
               </div>
               <div className="card text-center border-accent-200 dark:border-accent-700">
-                <h3 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-2">{t('landing.practising.roles.scribe.title')}</h3>
+                <h3 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-2">{t('shared.roles.scribe')}</h3>
                 <p className="text-secondary-600 dark:text-secondary-400">{t('landing.practising.roles.scribe.description')}</p>
               </div>
             </div>
@@ -158,7 +158,7 @@ const LandingPage: React.FC = () => {
               {t('landing.practising.faith')}
             </p>
 
-            <h2 className="text-2xl font-bold text-secondary-900 dark:text-secondary-100 mb-6">{t('landing.format.title')}</h2>
+            <h2 className="text-2xl font-bold text-secondary-900 dark:text-secondary-100 mb-6">{t('shared.common.whyUseFormat')}</h2>
             <p className="text-lg text-secondary-700 dark:text-secondary-300 leading-relaxed mb-4">
               {t('landing.format.intro1')}
             </p>
@@ -195,7 +195,7 @@ const LandingPage: React.FC = () => {
                   </div>
                   <div className="card border-accent-200 dark:border-accent-700">
                     <h4 className="font-semibold text-secondary-900 dark:text-secondary-100 mb-2">{t('landing.format.values.attentiveListening.title')}</h4>
-                    <p className="text-secondary-600 dark:text-secondary-400 text-sm">"{t('landing.format.values.attentiveListening.verse')}" ({t('shared.scripture.james119Ref')})</p>
+                    <p className="text-secondary-600 dark:text-secondary-400 text-sm">"{t('shared.scripture.james119')}" ({t('shared.scripture.james119Ref')})</p>
                   </div>
                   <div className="card border-accent-200 dark:border-accent-700">
                     <h4 className="font-semibold text-secondary-900 dark:text-secondary-100 mb-2">{t('landing.format.values.drawingWisdom.title')}</h4>
@@ -286,7 +286,7 @@ const LandingPage: React.FC = () => {
                       disabled={isLoading}
                       className="bg-white dark:bg-secondary-100 text-accent-800 dark:text-accent-900 hover:bg-secondary-50 dark:hover:bg-secondary-200 font-medium py-3 px-8 rounded-md transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {isLoading ? t('landing.invitation.form.submitting') : t('landing.invitation.form.submitButton')}
+                      {isLoading ? t('shared.actions.joining') : t('landing.invitation.form.submitButton')}
                     </button>
                   </div>
                   

@@ -27,7 +27,7 @@ const RoleSelection: React.FC<RoleSelectionProps> = ({
       {hasRole && currentParticipant?.role && (
         <div className="text-sm text-secondary-600 dark:text-secondary-400">
           Current role: <span className="font-medium text-primary-700 dark:text-primary-300">
-            {t(`dialectic.roles.${currentParticipant.role}.title`)}
+            {currentParticipant.role === 'observer' ? t('shared.roles.observer') : t(`dialectic.roles.${currentParticipant.role}.title`)}
           </span>
         </div>
       )}
@@ -76,7 +76,7 @@ const RoleSelection: React.FC<RoleSelectionProps> = ({
                   ? 'text-gray-900'
                   : 'text-primary-900 dark:text-primary-100'
               }`}>
-                {t(`dialectic.roles.${role}.title`)}
+                {role === 'observer' ? t('shared.roles.observer') : t(`dialectic.roles.${role}.title`)}
               </div>
               
               {/* Role Description - Flexible height */}

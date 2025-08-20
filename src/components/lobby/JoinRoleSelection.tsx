@@ -37,14 +37,14 @@ const JoinRoleSelection: React.FC<JoinRoleSelectionProps> = ({
     },
     {
       id: 'observer-temporary',
-      title: 'Observer',
+      title: t('shared.roles.observer'),
       description: t('dialectic.roles.observer.temporary.description'),
       icon: '👀',
       badge: t('dialectic.roles.observer.temporary.badge')
     },
     {
       id: 'observer-permanent',
-      title: 'Observer',
+      title: t('shared.roles.observer'),
       description: t('dialectic.roles.observer.permanent.description'),
       icon: '👀',
       badge: t('dialectic.roles.observer.permanent.badge')
@@ -137,7 +137,7 @@ const JoinRoleSelection: React.FC<JoinRoleSelectionProps> = ({
                   {role.id === 'scribe' && totalParticipants < 3 ? 'Only available in 3+ person sessions' :
                    role.id === 'observer-temporary' && totalParticipants < 4 ? 'Only available in 4+ person sessions' :
                    role.id === 'observer-permanent' && totalParticipants < 3 ? 'Only available in 3+ person sessions' :
-                   t('dialectic.join.roleTaken')}
+                   t('shared.common.taken')}
                 </div>
               )}
             </button>

@@ -38,11 +38,20 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
   const [showStartConfirmation, setShowStartConfirmation] = useState(false);
   const [showHostLeaveConfirmation, setShowHostLeaveConfirmation] = useState(false);
   const [showFivePersonChoice, setShowFivePersonChoice] = useState(false);
-  const [, setSelectedRole] = useState<string>('');
+  const [isClearingRole, setIsClearingRole] = useState(false);
 
   // Get current participant
   const currentParticipant = session.participants.find(p => p.id === currentUserId);
-  const hasRole = currentParticipant?.role && currentParticipant.role !== '';
+  
+  // Use session data for role state, but respect the clearing flag
+  const hasRole = isClearingRole ? false : (currentParticipant?.role && currentParticipant.role !== '');
+  
+  // Reset clearing flag when session data updates
+  React.useEffect(() => {
+    if (isClearingRole && currentParticipant?.role === '') {
+      setIsClearingRole(false);
+    }
+  }, [currentParticipant?.role, isClearingRole]);
 
   // Get available roles - handle both temporary and permanent observers
   const totalParticipants = session.participants.length + (session.hostRole === 'participant' ? 1 : 0);
@@ -67,7 +76,13 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
   const nonHostParticipants = session.participants.filter(p => p.id !== session.hostId);
   // Host can start session if all non-host participants are ready, or if they're the only participant
   const allNonHostParticipantsReady = readyNonHostParticipants.length === nonHostParticipants.length && nonHostParticipants.length > 0;
-  const canStartSession = isHost && (allNonHostParticipantsReady || session.participants.length === 1);
+  
+  // For in-person sessions, check if there's at least one speaker and one listener
+  const hasSpeaker = session.participants.some(p => p.role === 'speaker');
+  const hasListener = session.participants.some(p => p.role === 'listener');
+  const hasRequiredRoles = session.sessionType === 'in-person' ? (hasSpeaker && hasListener) : true;
+  
+  const canStartSession = isHost && hasRole && hasRequiredRoles && (allNonHostParticipantsReady || session.participants.length === 1);
 
 
   // Debug logging
@@ -75,20 +90,26 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
     currentUserId,
     currentParticipant,
     hasRole,
+    isClearingRole,
     availableRoles,
     isHost,
     sessionHostId: session.hostId,
+    sessionType: session.sessionType,
     participants: session.participants.map(p => ({ id: p.id, name: p.name, role: p.role, status: p.status })),
     readyParticipants: readyParticipants.length,
     readyNonHostParticipants: readyNonHostParticipants.length,
     nonHostParticipants: nonHostParticipants.length,
     allNonHostParticipantsReady,
-    canStartSession
+    hasSpeaker,
+    hasListener,
+    hasRequiredRoles,
+    canStartSession,
+    hostHasRole: hasRole
   });
 
   const handleRoleSelect = (role: string) => {
     console.log('Role selected:', role, 'for user:', currentUserId);
-    setSelectedRole(role);
+    setIsClearingRole(false);
     onUpdateParticipantRole(currentUserId, role);
   };
 
@@ -185,7 +206,7 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
       case 'scribe':
         return t('dialectic.lobby.scribeTips');
       case 'observer':
-        return t('dialectic.lobby.observerTips');
+        return t('shared.guidance.observeDynamics');
       default:
         return '';
     }
@@ -212,9 +233,21 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
               {t('shared.actions.startSession')}
             </button>
             
-            {!allNonHostParticipantsReady && nonHostParticipants.length > 0 && (
+            {!hasRole && isHost && (
+              <p className="text-sm text-secondary-600 dark:text-secondary-400 mt-2">
+                Please select your role before starting the session
+              </p>
+            )}
+            {!allNonHostParticipantsReady && nonHostParticipants.length > 0 && hasRole && (
               <p className="text-sm text-secondary-600 dark:text-secondary-400 mt-2">
                 Waiting for {nonHostParticipants.length - readyNonHostParticipants.length} more participant{nonHostParticipants.length - readyNonHostParticipants.length === 1 ? '' : 's'} to be ready
+              </p>
+            )}
+            {session.sessionType === 'in-person' && !hasRequiredRoles && hasRole && (
+              <p className="text-sm text-secondary-600 dark:text-secondary-400 mt-2">
+                {!hasSpeaker && !hasListener ? 'Need at least one speaker and one listener to start' :
+                 !hasSpeaker ? 'Need at least one speaker to start' :
+                 !hasListener ? 'Need at least one listener to start' : ''}
               </p>
             )}
           </div>
@@ -297,7 +330,7 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
       </div>
 
       {/* Dynamic Layout: Role Selection or Topic Suggestions */}
-      {!session.groupConfiguration?.autoAssignRoles && (
+      {(session.groupConfiguration?.autoAssignRoles !== true || !session.groupConfiguration) && (
         <>
           {/* Show Role Selection when no role is selected */}
           {!hasRole && (
@@ -349,18 +382,20 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
       </div>
 
       {/* Selected Role Display - Show above participants when role is selected */}
-      {!session.groupConfiguration?.autoAssignRoles && hasRole && (
+      {(session.groupConfiguration?.autoAssignRoles !== true || !session.groupConfiguration) && hasRole && (
         <SelectedRoleDisplay
           currentParticipant={currentParticipant}
           onRoleChange={() => {
+            console.log('Change role clicked - clearing role');
             // Clear the role to go back to role selection
+            setIsClearingRole(true);
             onUpdateParticipantRole(currentUserId, '');
           }}
         />
       )}
 
       {/* Participant List */}
-      <div className="space-y-4" data-testid="participant-list" aria-label={t('dialectic.lobby.participantList')}>
+      <div className="space-y-4" data-testid="participant-list" aria-label={t('shared.common.participants')}>
         <h3 className="text-lg font-medium text-primary-900 dark:text-primary-100">
           Participants
         </h3>
@@ -427,50 +462,63 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
 
 
 
-      {/* Preparation Tips */}
-      <div className="space-y-4">
-        <div className="bg-accent-50 dark:bg-accent-900 rounded-lg p-4" data-testid="role-preparation-tips">
-          <h4 className="font-medium text-accent-900 dark:text-accent-100 mb-2">Preparation Tips</h4>
-          <p className="text-sm text-accent-700 dark:text-accent-200">{getRoleTips()}</p>
+      {/* Preparation Tips - Improved Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Role Preparation Tips */}
+        <div className="bg-gradient-to-br from-accent-50 to-accent-100 dark:from-accent-900 dark:to-accent-800 rounded-xl p-6 border border-accent-200 dark:border-accent-700" data-testid="role-preparation-tips">
+          <div className="flex items-center mb-4">
+            <span className="text-2xl mr-3">💡</span>
+            <h4 className="font-semibold text-accent-900 dark:text-accent-100">Preparation Tips</h4>
+          </div>
+          <p className="text-sm text-accent-700 dark:text-accent-200 leading-relaxed">{getRoleTips()}</p>
         </div>
 
-        <div className="bg-secondary-50 dark:bg-secondary-800 rounded-lg p-4" data-testid="tech-check-option">
-          <h4 className="font-medium text-primary-900 dark:text-primary-100 mb-2">
-            {t('dialectic.lobby.testAudioVideo')}
-          </h4>
-          <p className="text-sm text-secondary-600 dark:text-secondary-400">
+        {/* Tech Check */}
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 rounded-xl p-6 border border-blue-200 dark:border-blue-700" data-testid="tech-check-option">
+          <div className="flex items-center mb-4">
+            <span className="text-2xl mr-3">🎤</span>
+            <h4 className="font-semibold text-blue-900 dark:text-blue-100">
+              {t('dialectic.lobby.testAudioVideo')}
+            </h4>
+          </div>
+          <p className="text-sm text-blue-700 dark:text-blue-200 leading-relaxed">
             Make sure your microphone and camera are working properly before we begin.
           </p>
         </div>
 
-        <div className="bg-secondary-50 dark:bg-secondary-800 rounded-lg p-4 space-y-2" data-testid="session-preview">
-          <h4 className="font-medium text-primary-900 dark:text-primary-100">
-            {t('dialectic.lobby.sessionPreview.title')}
-          </h4>
-          <div className="text-sm text-secondary-600 dark:text-secondary-400 space-y-1">
-            <p>{t('dialectic.lobby.sessionPreview.totalTime', { duration: calculateTotalSessionTime(formatDuration(session.duration)) })}</p>
-            <p>{t('dialectic.lobby.sessionPreview.rounds', { rounds: 3, roundDuration: formatDuration(session.duration) })}</p>
-            <p>{t('dialectic.lobby.sessionPreview.format')}</p>
+        {/* Session Preview */}
+        <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-xl p-6 border border-green-200 dark:border-green-700" data-testid="session-preview">
+          <div className="flex items-center mb-4">
+            <span className="text-2xl mr-3">⏱️</span>
+            <h4 className="font-semibold text-green-900 dark:text-green-100">
+              {t('dialectic.lobby.sessionPreview.title')}
+            </h4>
+          </div>
+          <div className="text-sm text-green-700 dark:text-green-200 space-y-2">
+            <div className="flex items-center">
+              <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+              <span>{t('dialectic.lobby.sessionPreview.totalTime', { duration: calculateTotalSessionTime(formatDuration(session.duration)) })}</span>
+            </div>
+            <div className="flex items-center">
+              <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+              <span>{t('dialectic.lobby.sessionPreview.rounds', { rounds: 3, roundDuration: formatDuration(session.duration) })}</span>
+            </div>
+            <div className="flex items-center">
+              <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+              <span>{t('dialectic.lobby.sessionPreview.format')}</span>
+            </div>
           </div>
         </div>
 
-        <div className="bg-secondary-50 dark:bg-secondary-800 rounded-lg p-4" data-testid="session-guidelines">
-          <h4 className="font-medium text-primary-900 dark:text-primary-100 mb-2">
-            {t('dialectic.lobby.guidelines')}
-          </h4>
-          <ul className="text-sm text-secondary-600 dark:text-secondary-400 space-y-1">
-            <li>• Listen with full attention and presence</li>
-            <li>• Speak from your heart and experience</li>
-            <li>• Respect the time limits for each round</li>
-            <li>• Maintain confidentiality of what's shared</li>
-          </ul>
-        </div>
-
-        <div className="bg-secondary-50 dark:bg-secondary-800 rounded-lg p-4" data-testid="contextual-help">
-          <h4 className="font-medium text-primary-900 dark:text-primary-100 mb-2">
-            {t('dialectic.lobby.firstTimeHere')}
-          </h4>
-          <p className="text-sm text-secondary-600 dark:text-secondary-400">
+        {/* First Time Here */}
+        <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900 dark:to-purple-800 rounded-xl p-6 border border-purple-200 dark:border-purple-700" data-testid="contextual-help">
+          <div className="flex items-center mb-4">
+            <span className="text-2xl mr-3">🌟</span>
+            <h4 className="font-semibold text-purple-900 dark:text-purple-100">
+              {t('dialectic.lobby.firstTimeHere')}
+            </h4>
+          </div>
+          <p className="text-sm text-purple-700 dark:text-purple-200 leading-relaxed">
             This is a structured practice for deep listening and authentic sharing. Each participant will have the opportunity to speak and listen in different roles.
           </p>
         </div>
@@ -519,7 +567,7 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
                 onClick={() => setShowStartConfirmation(false)}
                 className="flex-1 px-4 py-2 bg-secondary-200 text-secondary-700 rounded hover:bg-secondary-300 transition-colors"
               >
-                {t('dialectic.lobby.confirmStart.cancel')}
+                {t('shared.actions.cancel')}
               </button>
             </div>
           </div>

@@ -3,6 +3,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { SessionContext, SessionParticipant } from '../types/sessionContext';
 import { QRCodeSVG } from 'qrcode.react';
 import { FirestoreSessionService } from '../services/firestoreSessionService';
+import { ScribeFeedback } from './ScribeFeedback';
 
 interface InPersonSessionProps {
   session: SessionContext;
@@ -26,6 +27,11 @@ export const InPersonSession: React.FC<InPersonSessionProps> = ({
   const getMobileParticipantsWithRoles = () => {
     return participants.filter(p => p.id !== session.hostId && p.role && p.role !== 'observer');
   };
+
+  // Check if session can be started (at least one speaker and one listener)
+  const hasSpeaker = participants.some(p => p.role === 'speaker');
+  const hasListener = participants.some(p => p.role === 'listener');
+  const canStartSession = hasSpeaker && hasListener;
   const [currentRound, setCurrentRound] = useState<number>(1);
   const [currentPhase, setCurrentPhase] = useState<'waiting' | 'round' | 'scribe-feedback' | 'round-complete' | 'free-dialogue' | 'completed'>('waiting');
   const [sessionQRCode, setSessionQRCode] = useState<string>('');
@@ -222,11 +228,26 @@ export const InPersonSession: React.FC<InPersonSessionProps> = ({
             </p>
             <ul className="list-disc list-inside space-y-2 text-blue-700 dark:text-blue-300 ml-4">
               <li>{t('dialectic.session.inPerson.checkIn.introduce')}</li>
-              <li>{t('dialectic.session.inPerson.checkIn.share')}</li>
+              <li>{t('shared.guidance.shareWhatIsAlive')}</li>
               <li>{t('dialectic.session.inPerson.checkIn.intentions')}</li>
               <li>{t('dialectic.session.inPerson.checkIn.ready')}</li>
             </ul>
           </div>
+        </div>
+      )}
+
+      {/* Scribe Feedback Phase */}
+      {currentPhase === 'scribe-feedback' && (
+        <div className="mb-6">
+          <ScribeFeedback
+            session={session}
+            currentUserId={session.hostId}
+            currentUserName={session.hostName}
+            participants={participants}
+            onComplete={handleNextPhase}
+            isHost={true}
+            notes={session.scribeNotes?.[currentRound] || ''}
+          />
         </div>
       )}
 
@@ -292,7 +313,7 @@ export const InPersonSession: React.FC<InPersonSessionProps> = ({
                   onClick={handleEndSession}
                   className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                 >
-                  {t('dialectic.session.inPerson.roundOptions.endSession')}
+                  {t('shared.actions.endSession')}
                 </button>
               </div>
               <div className="mt-4 text-sm text-green-700 dark:text-green-300">
@@ -309,12 +330,23 @@ export const InPersonSession: React.FC<InPersonSessionProps> = ({
           {/* Control Buttons */}
           <div className="flex justify-center space-x-4">
             {currentPhase === 'waiting' && (
-              <button
-                onClick={handleStartSession}
-                className="px-6 py-3 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors"
-              >
-                {t('dialectic.session.inPerson.controls.startSession')}
-              </button>
+              <div className="text-center">
+                <button
+                  onClick={handleStartSession}
+                  disabled={!canStartSession}
+                  className="px-6 py-3 bg-accent-500 text-white rounded-lg hover:bg-accent-600 disabled:bg-secondary-300 disabled:cursor-not-allowed transition-colors"
+                >
+                  {t('dialectic.session.inPerson.controls.startSession')}
+                </button>
+                
+                {!canStartSession && (
+                  <p className="text-sm text-secondary-600 dark:text-secondary-400 mt-2">
+                    {!hasSpeaker && !hasListener ? 'Need at least one speaker and one listener to start' :
+                     !hasSpeaker ? 'Need at least one speaker to start' :
+                     !hasListener ? 'Need at least one listener to start' : ''}
+                  </p>
+                )}
+              </div>
             )}
             
             {(currentPhase === 'round' || currentPhase === 'scribe-feedback') && (
@@ -323,14 +355,14 @@ export const InPersonSession: React.FC<InPersonSessionProps> = ({
                   onClick={handleNextPhase}
                   className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                 >
-                  {currentPhase === 'round' ? t('dialectic.session.inPerson.controlButtons.completeRound') : t('dialectic.session.inPerson.controlButtons.nextRound')}
+                  {currentPhase === 'round' ? t('shared.actions.completeRound') : t('shared.actions.nextRound')}
                 </button>
                 
                 <button
                   onClick={() => setCurrentPhase('waiting')}
                   className="px-6 py-3 bg-secondary-500 text-white rounded-lg hover:bg-secondary-600 transition-colors"
                 >
-                  {t('dialectic.session.inPerson.controls.pause')}
+                  {t('shared.actions.pauseSession')}
                 </button>
               </>
             )}

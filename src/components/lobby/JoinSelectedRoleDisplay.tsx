@@ -26,10 +26,10 @@ const JoinSelectedRoleDisplay: React.FC<JoinSelectedRoleDisplayProps> = ({
   };
 
   const getRoleTitle = (role: string) => {
-    if (role === 'observer-temporary') {
-      return t('dialectic.roles.observer.temporary.title');
+    if (role === 'observer' || role === 'observer-temporary') {
+      return t('shared.roles.observer');
     } else if (role === 'observer-permanent') {
-      return t('dialectic.roles.observer.permanent.title');
+      return t('shared.common.permanentObserver');
     }
     return t(`dialectic.roles.${role}.title`);
   };

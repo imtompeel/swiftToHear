@@ -59,10 +59,7 @@ const SessionJoinWrapper: React.FC = () => {
     }
   };
 
-  const handleRoleSelect = (role: string) => {
-    // Role selection is handled within the SessionJoin component
-    console.log('Role selected:', role);
-  };
+
 
   // Show loading while auth is being determined
   if (authLoading) {
@@ -103,7 +100,6 @@ const SessionJoinWrapper: React.FC = () => {
       <SessionJoin 
         session={session}
         onJoinSession={handleJoinSession}
-        onRoleSelect={handleRoleSelect}
         currentUserId={user?.uid || anonymousUserId}
         currentUserName={user?.displayName || user?.email || 'Anonymous User'}
         isFirstTime={true}

@@ -67,7 +67,7 @@ export const PreparationPhase: React.FC<PreparationPhaseProps> = ({
           <div className="flex items-center space-x-4">
             {[
               { key: 'orientation', label: t('dialectic.preparation.steps.orientation') },
-              { key: 'practice', label: t('dialectic.preparation.steps.practice') },
+              { key: 'practice', label: t('shared.common.practice') },
               { key: 'tech-check', label: t('dialectic.preparation.steps.techCheck') },
               { key: 'ready', label: t('dialectic.preparation.steps.ready') }
             ].map((step, index) => {

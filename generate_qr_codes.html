@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swift to Hear - QR Code Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .section {
+            background: white;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .qr-item {
+            text-align: center;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+        }
+        .qr-item h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 18px;
+        }
+        .qr-item p {
+            margin: 0 0 15px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .qr-code {
+            margin: 15px 0;
+        }
+        .url {
+            font-family: monospace;
+            font-size: 12px;
+            color: #888;
+            word-break: break-all;
+            margin-top: 10px;
+            padding: 5px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #555;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .print-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        .print-button:hover {
+            background: #0056b3;
+        }
+        @media print {
+            .print-button {
+                display: none;
+            }
+            body {
+                background: white;
+            }
+            .section {
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Swift to Hear - Quick Timer QR Codes</h1>
+    
+    <div style="text-align: center; margin-bottom: 30px;">
+        <button class="print-button" onclick="window.print()">Print All QR Codes</button>
+        <button class="print-button" onclick="printSection('production')">Print Production QR Codes</button>
+        <button class="print-button" onclick="printSection('localhost')">Print Localhost QR Codes</button>
+        <button class="print-button" onclick="regenerateQRCodes()" style="background: #28a745;">Regenerate QR Codes</button>
+    </div>
+    
+    <div id="debug-info" style="background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 5px; font-size: 12px;">
+        <strong>Debug Info:</strong> <span id="debug-status">Loading...</span>
+    </div>
+
+    <!-- Production QR Codes -->
+    <div class="section" id="production-section">
+        <h2>Production QR Codes (https://swifttohear.web.app/)</h2>
+        <div class="qr-grid">
+            <div class="qr-item">
+                <h3>2 Minute Timer</h3>
+                <p>Quick 2-minute timer for short sessions</p>
+                <div class="qr-code" id="prod-2min"></div>
+                <div class="url" id="prod-2min-url"></div>
+            </div>
+            
+            <div class="qr-item">
+                <h3>3 Minute Timer</h3>
+                <p>Standard 3-minute timer</p>
+                <div class="qr-code" id="prod-3min"></div>
+                <div class="url" id="prod-3min-url"></div>
+            </div>
+            
+            <div class="qr-item">
+                <h3>5 Minute Timer</h3>
+                <p>Extended 5-minute timer</p>
+                <div class="qr-code" id="prod-5min"></div>
+                <div class="url" id="prod-5min-url"></div>
+            </div>
+            
+            <div class="qr-item">
+                <h3>Custom Timer</h3>
+                <p>Set your own duration (1-120 minutes)</p>
+                <div class="qr-code" id="prod-custom"></div>
+                <div class="url" id="prod-custom-url"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Localhost QR Codes -->
+    <div class="section" id="localhost-section">
+        <h2>Localhost QR Codes (http://localhost:3000/)</h2>
+        <div class="qr-grid">
+            <div class="qr-item">
+                <h3>2 Minute Timer</h3>
+                <p>Quick 2-minute timer for short sessions</p>
+                <div class="qr-code" id="local-2min"></div>
+                <div class="url" id="local-2min-url"></div>
+            </div>
+            
+            <div class="qr-item">
+                <h3>3 Minute Timer</h3>
+                <p>Standard 3-minute timer</p>
+                <div class="qr-code" id="local-3min"></div>
+                <div class="url" id="local-3min-url"></div>
+            </div>
+            
+            <div class="qr-item">
+                <h3>5 Minute Timer</h3>
+                <p>Extended 5-minute timer</p>
+                <div class="qr-code" id="local-5min"></div>
+                <div class="url" id="local-5min-url"></div>
+            </div>
+            
+            <div class="qr-item">
+                <h3>Custom Timer</h3>
+                <p>Set your own duration (1-120 minutes)</p>
+                <div class="qr-code" id="local-custom"></div>
+                <div class="url" id="local-custom-url"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const productionBase = 'https://swifttohear.web.app';
+        const localhostBase = 'http://localhost:3000';
+        
+        const timerConfigs = [
+            { id: '2min', duration: 2, label: '2 Minute Timer' },
+            { id: '3min', duration: 3, label: '3 Minute Timer' },
+            { id: '5min', duration: 5, label: '5 Minute Timer' },
+            { id: 'custom', duration: 'custom', label: 'Custom Timer' }
+        ];
+
+        function generateQRCode(elementId, url, urlElementId) {
+            const element = document.getElementById(elementId);
+            const urlElement = document.getElementById(urlElementId);
+            
+            if (element && urlElement) {
+                // Clear the element first
+                element.innerHTML = '';
+                
+                try {
+                    // Use the QRCode constructor approach
+                    new QRCode(element, {
+                        text: url,
+                        width: 200,
+                        height: 200,
+                        colorDark: "#000000",
+                        colorLight: "#FFFFFF",
+                        correctLevel: QRCode.CorrectLevel.M
+                    });
+                    
+                    urlElement.textContent = url;
+                } catch (error) {
+                    console.error('QR Code generation error:', error);
+                    // Fallback: create a simple text representation
+                    element.innerHTML = `<div style="border: 2px solid #ccc; padding: 20px; background: #f9f9f9;">
+                        <div style="font-size: 12px; color: #666;">QR Code for:</div>
+                        <div style="font-family: monospace; font-size: 10px; word-break: break-all;">${url}</div>
+                    </div>`;
+                    urlElement.textContent = url;
+                }
+            }
+        }
+
+        function generateAllQRCodes() {
+            document.getElementById('debug-status').textContent = 'Generating QR codes...';
+            
+            timerConfigs.forEach(config => {
+                // Production QR codes
+                const prodUrl = `${productionBase}/timer/${config.duration}`;
+                generateQRCode(`prod-${config.id}`, prodUrl, `prod-${config.id}-url`);
+                
+                // Localhost QR codes
+                const localUrl = `${localhostBase}/timer/${config.duration}`;
+                generateQRCode(`local-${config.id}`, localUrl, `local-${config.id}-url`);
+            });
+            
+            setTimeout(() => {
+                document.getElementById('debug-status').textContent = 'QR codes generated successfully!';
+            }, 1000);
+        }
+        
+        function regenerateQRCodes() {
+            document.getElementById('debug-status').textContent = 'Regenerating QR codes...';
+            generateAllQRCodes();
+        }
+
+        function printSection(section) {
+            const printWindow = window.open('', '_blank');
+            const sectionElement = document.getElementById(`${section}-section`);
+            
+            if (sectionElement) {
+                printWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>Swift to Hear QR Codes - ${section}</title>
+                            <style>
+                                body { font-family: Arial, sans-serif; margin: 20px; }
+                                .qr-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+                                .qr-item { text-align: center; padding: 15px; border: 1px solid #ccc; }
+                                .qr-code { margin: 10px 0; }
+                                .url { font-family: monospace; font-size: 10px; color: #666; margin-top: 5px; }
+                                h2 { color: #333; border-bottom: 1px solid #333; padding-bottom: 5px; }
+                            </style>
+                        </head>
+                        <body>
+                            <h1>Swift to Hear - Quick Timer QR Codes (${section})</h1>
+                            ${sectionElement.innerHTML}
+                        </body>
+                    </html>
+                `);
+                printWindow.document.close();
+                printWindow.print();
+            }
+        }
+
+        // Generate all QR codes when page loads
+        window.onload = function() {
+            let attempts = 0;
+            const maxAttempts = 50; // 5 seconds max
+            
+            // Check if QRCode library is loaded
+            function checkAndGenerate() {
+                attempts++;
+                
+                if (typeof QRCode !== 'undefined') {
+                    document.getElementById('debug-status').textContent = 'QRCode library loaded, generating codes...';
+                    generateAllQRCodes();
+                } else if (attempts >= maxAttempts) {
+                    document.getElementById('debug-status').textContent = 'QRCode library failed to load after 5 seconds - showing fallback';
+                    console.error('QRCode library not loaded after 5 seconds');
+                    // Show fallback URLs
+                    timerConfigs.forEach(config => {
+                        const prodUrl = `${productionBase}/timer/${config.duration}`;
+                        const localUrl = `${localhostBase}/timer/${config.duration}`;
+                        
+                        document.getElementById(`prod-${config.id}-url`).textContent = prodUrl;
+                        document.getElementById(`local-${config.id}-url`).textContent = localUrl;
+                        
+                        document.getElementById(`prod-${config.id}`).innerHTML = 
+                            `<div style="border: 2px solid #ccc; padding: 20px; background: #f9f9f9;">
+                                <div style="font-size: 12px; color: #666;">QR Code for:</div>
+                                <div style="font-family: monospace; font-size: 10px; word-break: break-all;">${prodUrl}</div>
+                            </div>`;
+                        
+                        document.getElementById(`local-${config.id}`).innerHTML = 
+                            `<div style="border: 2px solid #ccc; padding: 20px; background: #f9f9f9;">
+                                <div style="font-size: 12px; color: #666;">QR Code for:</div>
+                                <div style="font-family: monospace; font-size: 10px; word-break: break-all;">${localUrl}</div>
+                            </div>`;
+                    });
+                } else {
+                    document.getElementById('debug-status').textContent = `Waiting for QRCode library to load... (attempt ${attempts}/${maxAttempts})`;
+                    setTimeout(checkAndGenerate, 100);
+                }
+            }
+            
+            // Start checking after a short delay
+            setTimeout(checkAndGenerate, 100);
+        };
+    </script>
+</body>
+</html>

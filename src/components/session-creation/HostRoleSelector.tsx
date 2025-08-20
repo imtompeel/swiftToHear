@@ -48,7 +48,7 @@ const HostRoleSelector: React.FC<HostRoleSelectorProps> = ({
           
           {/* Badge */}
           <div className="text-xs text-accent-600 dark:text-accent-400 mb-3">
-            {t('dialectic.creation.hostRole.participant.badge')}
+            {t('shared.roles.participant')}
           </div>
           
           {/* Description */}
@@ -88,12 +88,12 @@ const HostRoleSelector: React.FC<HostRoleSelectorProps> = ({
               ? 'text-gray-900'
               : 'text-primary-900 dark:text-primary-100'
           }`}>
-            {t('dialectic.creation.hostRole.observer.title')}
+            {t('shared.common.permanentObserver')}
           </div>
           
           {/* Badge */}
           <div className="text-xs px-2 py-1 rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 mb-3">
-            {t('dialectic.creation.hostRole.observer.badge')}
+            {t('shared.roles.observer')}
           </div>
           
           {/* Description */}

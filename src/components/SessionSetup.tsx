@@ -38,7 +38,7 @@ export const SessionSetup: React.FC<SessionSetupProps> = ({
           <div data-testid="website-header" className="hidden">Header</div>
           <div data-testid="website-navigation" className="hidden">Navigation</div>
           <div data-testid="navigation-breadcrumbs" className="text-sm text-secondary-500 mb-4">
-            {t('navigation.home')} &gt; {t('navigation.practice')}
+            {t('navigation.home')} &gt; {t('shared.common.practice')}
           </div>
           <div data-testid="website-footer" className="hidden">Footer</div>
         </div>

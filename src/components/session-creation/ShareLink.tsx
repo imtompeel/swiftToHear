@@ -37,7 +37,7 @@ const ShareLink: React.FC<ShareLinkProps> = ({ sessionLink, onCopyLink }) => {
             onClick={onCopyLink}
             className="px-4 py-2 bg-accent-500 text-white rounded hover:bg-accent-600 transition-colors"
           >
-            {t('dialectic.creation.shareLink.copy')}
+            {t('shared.actions.copyLink')}
           </button>
         </div>
         

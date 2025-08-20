@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { MobileParticipantInterface } from './MobileParticipantInterface';
+import { InPersonRoleSelection } from './InPersonRoleSelection';
 import { useSession } from '../hooks/useSession';
 import { SessionParticipant, createSessionContext } from '../types/sessionContext';
-import { useTranslation } from '../hooks/useTranslation';
 
 const MobileParticipantWrapper: React.FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
-  const { t } = useTranslation();
   const [participantName, setParticipantName] = useState<string>('');
   const [participantId, setParticipantId] = useState<string>('');
   
@@ -15,14 +14,12 @@ const MobileParticipantWrapper: React.FC = () => {
     session, 
     loadSession, 
     pollSession,
-    joinSession,
     currentUserId,
     loading, 
     error, 
     clearError 
   } = useSession(participantId, participantName);
-  const [selectedRole, setSelectedRole] = useState<string>('');
-  const [isJoining, setIsJoining] = useState(false);
+  const [, setSelectedRole] = useState<string>('');
   const [hasJoined, setHasJoined] = useState(false);
 
   // Scroll to top when component mounts
@@ -79,7 +76,7 @@ const MobileParticipantWrapper: React.FC = () => {
           setParticipantName(existingParticipant.name);
           setSelectedRole(existingParticipant.role);
           setParticipantId(storedParticipantId);
-          setHasJoined(true);
+                  setHasJoined(true);
           return;
         } else {
           console.warn('Stored participant ID not found in session:', storedParticipantId);
@@ -88,46 +85,25 @@ const MobileParticipantWrapper: React.FC = () => {
     }
   }, [session, hasJoined]);
 
-  // Auto-join if session is loaded and we have participant info
-  useEffect(() => {
-    if (session && participantName && selectedRole && !hasJoined) {
-      handleJoinSession();
-    }
-  }, [session, participantName, selectedRole, hasJoined]);
-
-  const handleJoinSession = async () => {
-    if (!session || !participantName || !selectedRole) return;
-
-    setIsJoining(true);
-    try {
-      // Generate a unique participant ID
+  const handleRoleSelected = (role: string) => {
+    setSelectedRole(role);
+    
+    // Generate a unique participant ID if not already set
+    if (!participantId && session) {
       const newParticipantId = `mobile-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       setParticipantId(newParticipantId);
-      
-      console.log('Joining session with:', {
-        sessionId: session.sessionId,
-        participantId: newParticipantId,
-        userName: participantName,
-        role: selectedRole
-      });
-      
-      await joinSession({
-        sessionId: session.sessionId,
-        userId: newParticipantId,
-        userName: participantName,
-        role: selectedRole
-      }, { skipNavigation: true });
-      
-      // Store participant ID in localStorage for persistence across refreshes
       localStorage.setItem(`participant-${session.sessionId}`, newParticipantId);
-      
-      console.log('Successfully joined session, stored participant ID:', newParticipantId);
-      setHasJoined(true);
-    } catch (err) {
-      console.error('Failed to join session:', err);
-    } finally {
-      setIsJoining(false);
     }
+  };
+
+  const handleNameChange = (name: string) => {
+    setParticipantName(name);
+  };
+
+  const handleReady = () => {
+    // User has clicked "I'm Ready" but we'll stay on the ready screen
+    // until the session actually starts (status changes from 'waiting')
+    console.log('User is ready for the session');
   };
 
   // Show loading while session is being loaded
@@ -163,122 +139,33 @@ const MobileParticipantWrapper: React.FC = () => {
     );
   }
 
-  // Show join form if not joined yet
-  if (!hasJoined) {
+  // Show role selection if not joined yet or session is still waiting
+  console.log('MobileParticipantWrapper: Checking conditions:', {
+    hasJoined,
+    sessionStatus: session.status,
+    sessionPhase: session.currentPhase,
+    shouldShowRoleSelection: !hasJoined || session.status === 'waiting'
+  });
+  
+  if (!hasJoined || session.status === 'waiting') {
+    // Use a stable participant ID
+    const stableParticipantId = participantId || (() => {
+      const storedId = localStorage.getItem(`participant-${session.sessionId}`);
+      if (storedId) return storedId;
+      const newId = `mobile-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem(`participant-${session.sessionId}`, newId);
+      return newId;
+    })();
+    
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-          <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              Join Session
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              {session.sessionName}
-            </p>
-            <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-              {(() => {
-                const mobileParticipants = session.participants.filter(p => p.id !== session.hostId);
-                return `${mobileParticipants.length} of ${session.maxParticipants} participants`;
-              })()}
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            {/* Name Input */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Your Name
-              </label>
-              <input
-                type="text"
-                value={participantName}
-                onChange={(e) => setParticipantName(e.target.value)}
-                placeholder="Enter your name"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-              />
-            </div>
-
-            {/* Role Selection */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t('shared.common.chooseRole')}
-              </label>
-              <div className="space-y-2">
-                {['speaker', 'listener', 'scribe'].map((role) => {
-                  // Check if this role is already taken by another participant
-                  const isRoleTaken = session.participants.some(p => p.role === role);
-                  const isRoleSelected = selectedRole === role;
-                  
-                  return (
-                    <button
-                      key={role}
-                      onClick={() => !isRoleTaken && setSelectedRole(role)}
-                      disabled={isRoleTaken}
-                      className={`w-full p-3 text-left rounded-lg border-2 transition-colors ${
-                        isRoleSelected
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                          : isRoleTaken
-                          ? 'border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-700 cursor-not-allowed opacity-60'
-                          : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
-                      }`}
-                    >
-                      <div className={`font-medium capitalize ${
-                        isRoleTaken 
-                          ? 'text-gray-500 dark:text-gray-400' 
-                          : 'text-gray-900 dark:text-white'
-                      }`}>
-                        {t(`dialectic.roles.${role}.title`)}
-                        {isRoleTaken && (
-                          <span className="ml-2 text-xs bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 px-2 py-1 rounded">
-                            {t('dialectic.session.inPerson.roleSelection.taken')}
-                          </span>
-                        )}
-                      </div>
-                      <div className={`text-sm ${
-                        isRoleTaken 
-                          ? 'text-gray-400 dark:text-gray-500' 
-                          : 'text-gray-600 dark:text-gray-400'
-                      }`}>
-                        {t(`dialectic.roles.${role}.description`)}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Join Button */}
-            <button
-              onClick={handleJoinSession}
-              disabled={!participantName || !selectedRole || isJoining}
-              className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-            >
-              {isJoining ? 'Joining...' : 'Join Session'}
-            </button>
-            
-            {/* Warning if all roles are taken */}
-            {(() => {
-              const takenRoles = session.participants.map(p => p.role).filter(role => role && ['speaker', 'listener', 'scribe'].includes(role));
-              const allRolesTaken = takenRoles.length >= 3;
-              
-              console.log('MobileParticipantWrapper Role Check:', {
-                participants: session.participants.map(p => ({ name: p.name, role: p.role })),
-                takenRoles,
-                allRolesTaken,
-                selectedRole
-              });
-              
-              return allRolesTaken && !selectedRole ? (
-                <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
-                  <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                    {t('dialectic.session.inPerson.roleSelection.allRolesTaken')}
-                  </p>
-                </div>
-              ) : null;
-            })()}
-          </div>
-        </div>
-      </div>
+      <InPersonRoleSelection
+        session={session}
+        currentUserId={stableParticipantId}
+        currentUserName={participantName}
+        onRoleSelected={handleRoleSelected}
+        onNameChange={handleNameChange}
+        onReady={handleReady}
+      />
     );
   }
 

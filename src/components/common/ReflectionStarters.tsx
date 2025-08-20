@@ -45,7 +45,7 @@ export const ReflectionStarters: React.FC<ReflectionStartersProps> = ({
           onKeyDown={onKeyDown}
           className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition-colors duration-200 text-sm"
         >
-          {t('dialectic.assistance.listener.startReflection')}
+          {t('shared.actions.startReflection')}
         </button>
       </div>
     </div>

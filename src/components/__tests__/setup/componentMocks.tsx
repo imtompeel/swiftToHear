@@ -188,7 +188,7 @@ export const SessionJoin: React.FC<any> = (props) => {
             onClick={() => onRoleSelect?.('observer')}
             className="border-secondary-200"
           >
-            dialectic.roles.observer.title
+            shared.roles.observer
             <p>dialectic.roles.observer.description</p>
           </button>
         )}

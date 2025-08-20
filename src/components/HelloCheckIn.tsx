@@ -76,7 +76,7 @@ export const HelloCheckIn: React.FC<HelloCheckInProps> = ({
         {/* Participants Section */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 sm:p-8 mb-4 sm:mb-6">
           <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
-            {t('dialectic.session.helloCheckIn.participants')}
+            {t('shared.common.participants')}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {participants.map((participant) => (
@@ -90,7 +90,7 @@ export const HelloCheckIn: React.FC<HelloCheckInProps> = ({
                     {participant.name}
                   </div>
                   <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">
-                    {participant.role ? t(`dialectic.roles.${participant.role}.title`) : 'No Role'}
+                    {participant.role ? (participant.role === 'observer' ? t('shared.roles.observer') : t(`dialectic.roles.${participant.role}.title`)) : 'No Role'}
                   </div>
                 </div>
               </div>
@@ -106,7 +106,7 @@ export const HelloCheckIn: React.FC<HelloCheckInProps> = ({
             </h3>
             <ul className="space-y-2 text-xs sm:text-sm text-blue-800 dark:text-blue-200">
               <li>• {t('dialectic.session.helloCheckIn.guidelines.introduce')}</li>
-              <li>• {t('dialectic.session.helloCheckIn.guidelines.share')}</li>
+              <li>• {t('shared.guidance.shareWhatIsAlive')}</li>
               <li>• {t('dialectic.session.helloCheckIn.guidelines.listen')}</li>
               <li>• {t('dialectic.session.helloCheckIn.guidelines.respect')}</li>
             </ul>

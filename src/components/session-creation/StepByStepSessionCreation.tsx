@@ -7,12 +7,11 @@ import TopicSuggestions from './TopicSuggestions';
 
 import HostRoleSelector from './HostRoleSelector';
 import ParticipantLimits from './ParticipantLimits';
-import GroupConfiguration from './GroupConfiguration';
 import SessionPreview from './SessionPreview';
 import ShareLink from './ShareLink';
 import { SessionCreationProps, SessionCreationState, SessionData, TopicSuggestion } from './types';
 
-type Step = 'session-type' | 'duration' | 'topics' | 'host-role' | 'participant-limits' | 'group-config' | 'preview';
+type Step = 'session-type' | 'duration' | 'topics' | 'host-role' | 'participant-limits' | 'preview';
 
 const StepByStepSessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) => {
   const { t } = useTranslation();
@@ -48,7 +47,6 @@ const StepByStepSessionCreation: React.FC<SessionCreationProps> = ({ onSessionCr
     'duration': true,
     'topics': true,
     'host-role': true,
-    'group-config': true,
     'preview': true
   });
 
@@ -70,28 +68,34 @@ const StepByStepSessionCreation: React.FC<SessionCreationProps> = ({ onSessionCr
     // If user switches from in-person to video and is currently on participant-limits step,
     // move them to the next available step
     if (state.sessionType === 'video' && currentStep === 'participant-limits') {
-      setCurrentStep('group-config');
+      setCurrentStep('preview');
     }
     
-    // Update step validation to include/exclude participant-limits based on session type
+    // If user switches to in-person and is currently on host-role step,
+    // move them to the next available step
+    if (state.sessionType === 'in-person' && currentStep === 'host-role') {
+      setCurrentStep('participant-limits');
+    }
+    
+    // Update step validation to include/exclude steps based on session type
     setStepValidation(prev => {
       if (state.sessionType === 'in-person') {
-        return { ...prev, 'participant-limits': true };
+        const { 'host-role': _, ...rest } = prev;
+        return { ...rest, 'participant-limits': true };
       } else {
         const { 'participant-limits': _, ...rest } = prev;
-        return rest;
+        return { ...rest, 'host-role': true };
       }
     });
   }, [state.sessionType, currentStep]);
 
-  // Step configuration - conditionally include participant-limits for in-person sessions
+  // Step configuration - simplified approach without group configuration for video sessions
   const steps: Array<{ id: Step; title: string; description: string; required: boolean }> = [
-    { id: 'session-type', title: t('dialectic.creation.steps.sessionType'), description: t('dialectic.creation.steps.sessionTypeDesc'), required: true },
-    { id: 'duration', title: t('dialectic.creation.steps.duration'), description: t('dialectic.creation.steps.durationDesc'), required: true },
-    { id: 'topics', title: t('dialectic.creation.steps.topics'), description: t('dialectic.creation.steps.topicsDesc'), required: false },
-    { id: 'host-role', title: t('dialectic.creation.steps.hostRole'), description: t('dialectic.creation.steps.hostRoleDesc'), required: true },
+    { id: 'session-type', title: t('shared.common.sessionType'), description: t('dialectic.creation.steps.sessionTypeDesc'), required: true },
+    { id: 'duration', title: t('shared.common.roundLength'), description: t('dialectic.creation.steps.durationDesc'), required: true },
+    { id: 'topics', title: t('shared.common.topicSuggestions'), description: t('dialectic.creation.steps.topicsDesc'), required: false },
+    ...(state.sessionType !== 'in-person' ? [{ id: 'host-role' as Step, title: t('shared.common.yourRole'), description: t('dialectic.creation.steps.hostRoleDesc'), required: true }] : []),
     ...(state.sessionType === 'in-person' ? [{ id: 'participant-limits' as Step, title: t('dialectic.creation.steps.participantLimits'), description: t('dialectic.creation.steps.participantLimitsDesc'), required: false }] : []),
-    { id: 'group-config', title: t('dialectic.creation.steps.groupConfig'), description: t('dialectic.creation.steps.groupConfigDesc'), required: false },
     { id: 'preview', title: t('dialectic.creation.steps.preview'), description: t('dialectic.creation.steps.previewDesc'), required: true }
   ];
 
@@ -231,19 +235,25 @@ const StepByStepSessionCreation: React.FC<SessionCreationProps> = ({ onSessionCr
       const sessionName = `Dialectic Session ${new Date().toLocaleDateString()}`;
       console.log('Creating session with name:', sessionName);
       
+      // Set group configuration for simplified approach (all sessions use manual role selection)
+      const groupConfig = {
+        ...state.groupConfiguration,
+        autoAssignRoles: false // For all sessions, participants choose roles manually
+      };
+
       const sessionData: SessionData = {
         sessionId: generateSessionId(),
         sessionName: sessionName,
         duration: state.selectedDuration,
         topic: state.topic.trim(),
         hostId: 'host-' + Math.random().toString(36).substr(2, 9),
-        hostRole: state.hostRole,
+        hostRole: state.sessionType === 'in-person' ? 'observer' : state.hostRole,
         createdAt: new Date(),
         participants: [],
         status: 'waiting',
         topicSuggestions: hostSuggestions,
         groupMode: 'auto',
-        groupConfiguration: state.groupConfiguration,
+        groupConfiguration: groupConfig,
         minParticipants: 2,
         maxParticipants: state.sessionType === 'in-person' ? state.maxParticipants : 20,
         sessionType: state.sessionType
@@ -347,13 +357,7 @@ const StepByStepSessionCreation: React.FC<SessionCreationProps> = ({ onSessionCr
           </div>
         );
 
-      case 'group-config':
-        return (
-                  <GroupConfiguration
-          groupConfiguration={state.groupConfiguration}
-          onGroupConfigurationChange={(config) => setState(prev => ({ ...prev, groupConfiguration: config }))}
-        />
-        );
+
 
       case 'preview':
         return (

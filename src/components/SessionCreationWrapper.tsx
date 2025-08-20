@@ -29,7 +29,7 @@ const SessionCreationWrapper: React.FC = () => {
         maxParticipants: sessionData.maxParticipants,
         sessionType: sessionData.sessionType || 'video',
         groupConfiguration: {
-          autoAssignRoles: false // Allow manual role selection for in-person sessions
+          autoAssignRoles: false // Allow manual role selection for all sessions (simplified approach)
         }
       }, { skipNavigation });
       

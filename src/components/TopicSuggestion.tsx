@@ -64,7 +64,7 @@ const TopicSuggestion: React.FC<TopicSuggestionProps> = ({
   return (
     <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-6 mb-6">
       <h3 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-4">
-        {t('dialectic.lobby.topicSuggestions.title')}
+        {t('shared.common.topicSuggestions')}
       </h3>
       
       {/* Add new topic suggestion */}
@@ -91,7 +91,7 @@ const TopicSuggestion: React.FC<TopicSuggestionProps> = ({
       {/* Sample topics */}
       <div className="mb-6">
         <h4 className="text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-3">
-          {t('dialectic.lobby.topicSuggestions.sampleTopics')}
+          {t('shared.actions.quickAddTopics')}
         </h4>
         <div className="flex flex-wrap gap-2">
           {sampleTopics.map((topic, index) => (

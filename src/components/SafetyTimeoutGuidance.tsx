@@ -28,7 +28,7 @@ export const SafetyTimeoutGuidance: React.FC<SafetyTimeoutGuidanceProps> = ({
         <div className="flex-1 min-w-0">
           <div className="mb-4">
             <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100">
-              {t('safety.timeout.title')}
+              {t('shared.common.timeoutActive')}
             </h3>
           </div>
 
@@ -64,43 +64,6 @@ export const SafetyTimeoutGuidance: React.FC<SafetyTimeoutGuidanceProps> = ({
                 </div>
               </div>
 
-              {/* Grounding Techniques */}
-              <div>
-                <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">
-                  {t('safety.timeout.grounding.title')}
-                </h4>
-                <ul className="space-y-2 text-sm text-blue-700 dark:text-blue-300">
-                  <li>• <strong>{t('safety.timeout.grounding.technique1.title')}:</strong> {t('safety.timeout.grounding.technique1.description')}</li>
-                  <li>• <strong>{t('safety.timeout.grounding.technique2.title')}:</strong> {t('safety.timeout.grounding.technique2.description')}</li>
-                  <li>• <strong>{t('safety.timeout.grounding.technique3.title')}:</strong> {t('safety.timeout.grounding.technique3.description')}</li>
-                  <li>• <strong>{t('safety.timeout.grounding.technique4.title')}:</strong> {t('safety.timeout.grounding.technique4.description')}</li>
-                </ul>
-              </div>
-
-              {/* Support Resources */}
-              <div>
-                <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">
-                  {t('safety.timeout.resources.title')}
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                  <div className="bg-white dark:bg-blue-800/30 rounded p-3">
-                    <div className="font-medium text-blue-800 dark:text-blue-200 mb-1">{t('safety.timeout.resources.crisis.title')}</div>
-                    <div className="text-blue-700 dark:text-blue-300">
-                      <div>{t('safety.timeout.resources.crisis.samaritans')}</div>
-                      <div>{t('safety.timeout.resources.crisis.nhs')}</div>
-                      <div>{t('safety.timeout.resources.crisis.emergency')}</div>
-                    </div>
-                  </div>
-                  <div className="bg-white dark:bg-blue-800/30 rounded p-3">
-                    <div className="font-medium text-blue-800 dark:text-blue-200 mb-1">{t('safety.timeout.resources.online.title')}</div>
-                    <div className="text-blue-700 dark:text-blue-300">
-                      <div>{t('safety.timeout.resources.online.mind')}</div>
-                      <div>{t('safety.timeout.resources.online.samaritans')}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
               {/* Session Guidelines */}
               <div>
                 <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">
@@ -122,7 +85,7 @@ export const SafetyTimeoutGuidance: React.FC<SafetyTimeoutGuidanceProps> = ({
                   onClick={onEndTimeout}
                   className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 text-sm font-medium"
                 >
-                  {t('safety.timeout.endEarly')}
+                  {t('shared.actions.endTimeout')}
                 </button>
               )}
               <div className="text-xs text-blue-600 dark:text-blue-400">

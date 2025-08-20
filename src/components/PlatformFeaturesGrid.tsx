@@ -12,7 +12,7 @@ const PlatformFeaturesGrid: React.FC = () => {
   const features = [
     {
       id: 'dialectic-session',
-      title: t('admin.dashboard.platformFeatures.dialecticSession.title'),
+      title: t('shared.common.dialecticSession'),
       description: t('admin.dashboard.platformFeatures.dialecticSession.description'),
       link: '/practice/create',
       icon: (
@@ -29,7 +29,7 @@ const PlatformFeaturesGrid: React.FC = () => {
     },
     {
       id: 'platform-guide',
-      title: t('admin.dashboard.platformFeatures.platformGuide.title'),
+      title: t('shared.common.platformGuide'),
       description: t('admin.dashboard.platformFeatures.platformGuide.description'),
       link: '/admin/guide',
       icon: (

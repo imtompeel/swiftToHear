@@ -70,7 +70,7 @@ const ParticipantLimits: React.FC<ParticipantLimitsProps> = ({
                   ? 'text-gray-900'
                   : 'text-primary-900 dark:text-primary-100'
               }`}>
-                {num === 4 ? t('dialectic.creation.participantLimits.recommended') : num === 5 ? t('dialectic.creation.participantLimits.maximum') : num === 6 ? t('dialectic.creation.participantLimits.splitSessions') : t('dialectic.creation.participantLimits.participants')}
+                {num === 4 ? t('dialectic.creation.participantLimits.recommended') : num === 5 ? t('dialectic.creation.participantLimits.maximum') : num === 6 ? t('dialectic.creation.participantLimits.splitSessions') : t('shared.common.participants')}
               </div>
               
               {/* Time Estimate */}

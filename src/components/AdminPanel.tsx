@@ -10,7 +10,7 @@ const AdminPanel: React.FC = () => {
   
   // Debug: Check if translations are working
   console.log('AdminPanel - isLoading:', isLoading);
-  console.log('AdminPanel - test translation:', t('admin.dashboard.title'));
+  console.log('AdminPanel - test translation:', t('shared.common.adminDashboard'));
   
   const [user, setUser] = useState<User | null>(null);
   const [email, setEmail] = useState('');
@@ -67,7 +67,7 @@ const AdminPanel: React.FC = () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (err) {
-      setError(t('admin.login.invalidCredentials'));
+      setError(t('shared.common.invalidCredentials'));
     } finally {
       setLoading(false);
     }
@@ -95,7 +95,7 @@ const AdminPanel: React.FC = () => {
         <div className="max-w-md w-full space-y-8">
           <div>
             <h2 className="mt-6 text-center text-3xl font-bold text-secondary-900 dark:text-secondary-100">
-              {t('admin.login.title')}
+              {t('shared.common.adminLogin')}
             </h2>
             <p className="mt-2 text-center text-sm text-secondary-600 dark:text-secondary-400">
               {t('admin.login.subtitle')}
@@ -121,7 +121,7 @@ const AdminPanel: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-md shadow-sm bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 placeholder-secondary-500 dark:placeholder-secondary-400 focus:outline-none focus:ring-accent-500 focus:border-accent-500"
-                placeholder={t('admin.login.emailPlaceholder')}
+                placeholder={t('shared.placeholders.adminEmail')}
               />
             </div>
             
@@ -137,7 +137,7 @@ const AdminPanel: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-md shadow-sm bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 placeholder-secondary-500 dark:placeholder-secondary-400 focus:outline-none focus:ring-accent-500 focus:border-accent-500"
-                placeholder={t('admin.login.passwordPlaceholder')}
+                placeholder={t('shared.placeholders.passwordDots')}
               />
             </div>
             
@@ -163,10 +163,10 @@ const AdminPanel: React.FC = () => {
         <div className="px-4 py-6 sm:px-0">
           <div>
             <h1 className="text-3xl font-bold text-secondary-900 dark:text-secondary-100">
-              {t('admin.dashboard.title')}
+              {t('shared.common.adminDashboard')}
             </h1>
             <p className="mt-1 text-sm text-secondary-600 dark:text-secondary-400">
-              {t('admin.dashboard.subtitle')}
+              {t('shared.common.platformGuide')}
             </p>
           </div>
         </div>

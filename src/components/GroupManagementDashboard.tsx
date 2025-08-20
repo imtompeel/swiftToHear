@@ -113,7 +113,7 @@ export const GroupManagementDashboard: React.FC<GroupManagementDashboardProps> =
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div>
                 <span className="font-medium text-primary-900 dark:text-primary-100">
-                  {t('dialectic.dashboard.sessionInfo.duration')}:
+                  {t('shared.common.duration')}:
                 </span>
                 <span className="text-secondary-600 dark:text-secondary-400 ml-2">
                   {formatTime(session.duration)}
@@ -129,7 +129,7 @@ export const GroupManagementDashboard: React.FC<GroupManagementDashboardProps> =
               </div>
               <div>
                 <span className="font-medium text-primary-900 dark:text-primary-100">
-                  {t('dialectic.dashboard.sessionInfo.totalParticipants')}:
+                  {t('shared.common.totalParticipants')}:
                 </span>
                 <span className="text-secondary-600 dark:text-secondary-400 ml-2">
                   {groups.reduce((total, group) => total + group.participants.length, 0)}
@@ -179,7 +179,7 @@ export const GroupManagementDashboard: React.FC<GroupManagementDashboardProps> =
                   </h3>
                 </div>
                 <span className="text-sm text-secondary-600 dark:text-secondary-400">
-                  {group.participants.length} {t('dialectic.dashboard.group.participants')}
+                  {group.participants.length} {t('shared.common.participants')}
                 </span>
               </div>
 
@@ -217,7 +217,7 @@ export const GroupManagementDashboard: React.FC<GroupManagementDashboardProps> =
               {/* Participants */}
               <div className="mb-4">
                 <h4 className="text-sm font-medium text-primary-900 dark:text-primary-100 mb-2">
-                  {t('dialectic.dashboard.group.participants')}
+                  {t('shared.common.participants')}
                 </h4>
                 <div className="space-y-1">
                   {group.participants.map((participant) => (
@@ -323,7 +323,7 @@ export const GroupManagementDashboard: React.FC<GroupManagementDashboardProps> =
               {groups.reduce((total, group) => total + group.participants.length, 0)}
             </div>
             <div className="text-sm text-secondary-600 dark:text-secondary-400">
-              {t('dialectic.dashboard.summary.totalParticipants')}
+              {t('shared.common.totalParticipants')}
             </div>
           </div>
         </div>

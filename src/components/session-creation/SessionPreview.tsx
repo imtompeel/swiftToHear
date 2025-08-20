@@ -38,7 +38,7 @@ const SessionPreview: React.FC<SessionPreviewProps> = ({
         <p>{t('dialectic.creation.preview.roundLength', { minutes: formatDuration(selectedDuration) })}</p>
         <p>{t('dialectic.creation.preview.estimatedTotal', { minutes: Math.round(calculateTotalSessionTime(formatDuration(selectedDuration)) * (sessionType === 'in-person' ? maxParticipants / 3 : 1)) })}</p>
         <p>{t('dialectic.creation.preview.format')}</p>
-        <p>{t('dialectic.creation.preview.hostRole', { role: hostRole === 'participant' ? t('dialectic.creation.hostRole.participant.title') : t('dialectic.creation.hostRole.observer.title') })}</p>
+        <p>{t('dialectic.creation.preview.hostRole', { role: hostRole === 'participant' ? t('dialectic.creation.hostRole.participant.title') : t('shared.common.permanentObserver') })}</p>
         <p>{t('dialectic.creation.preview.groupConfig', { 
           size: t('dialectic.creation.groupConfig.groupSize.mixed'),
           strategy: t('dialectic.creation.groupConfig.observerStrategy.distribute.title')

@@ -4,7 +4,8 @@
       "speaker": "Speaker",
       "listener": "Listener",
       "scribe": "Scribe",
-      "observer": "Observer"
+      "observer": "Observer",
+      "participant": "Participant"
     },
     "actions": {
       "startSession": "Start Session",
@@ -22,7 +23,22 @@
       "delete": "Delete",
       "confirm": "Confirm",
       "signIn": "Sign in",
-      "signingIn": "Signing in..."
+      "signingIn": "Signing in...",
+      "joinSession": "Join Session",
+      "joining": "Joining...",
+      "signOut": "Sign out",
+      "backToAdmin": "Back to Admin Panel",
+      "joinPracticeSession": "Join Practice Session",
+      "startReflection": "Start Reflection",
+      "captureInsight": "Capture Insight",
+      "nextRound": "Next Round",
+      "completeRound": "Complete Round",
+      "createNewSession": "Create New Session",
+      "pauseSession": "Pause Session",
+      "continueToSession": "Continue to Session",
+      "quickAddTopics": "Quick Add Topics",
+      "copyLink": "Copy Link",
+      "endTimeout": "End Timeout"
     },
     "common": {
       "email": "Email address",
@@ -38,7 +54,46 @@
       "siteName": "Swift to Hear",
       "videoCall": "Video Call",
       "chooseRole": "Choose Your Role",
-      "signedInAs": "Signed in as"
+      "signedInAs": "Signed in as",
+      "participants": "Participants",
+      "dialecticSession": "Dialectic Session",
+      "sessionName": "Session Name",
+      "duration": "Duration",
+      "practice": "Practice",
+      "adminLogin": "Admin Login",
+      "invalidCredentials": "Invalid email or password",
+      
+      "adminDashboard": "Admin Dashboard",
+      "whyUseFormat": "Why Use This Format?",
+      "platformGuide": "Platform Guide",
+      "switchingRoles": "Switching roles",
+      "roundProgress": "Round {{current}} of {{total}}",
+      "timeRemaining": "Time Remaining",
+      "whatIsAlive": "What is alive in you right now?",
+      "sessionNotFound": "Session Not Found",
+      "sessionNotFoundDescription": "The session you're looking for doesn't exist or has ended.",
+      "freeFlowingDialogue": "Free-flowing Dialogue",
+      "taken": "Taken",
+      "yourRole": "Your Role",
+      "permanentObserver": "Permanent Observer",
+      "sessionType": "Session Type",
+      "roundLength": "Round Length",
+      "giveSessionMemorableName": "Give your session a memorable name",
+      "welcomeToDialectic": "Welcome to dialectic listening practice!",
+      "minutes": "minutes",
+      "host": "Host",
+      "topic": "Topic",
+      "created": "Created",
+      "currentParticipants": "Current Participants",
+      "participantCount": "{{current}} of {{total}} participants",
+      "sessionInProgress": "Session is currently in progress",
+      "estimatedStartTime": "Estimated start time",
+      "sessionId": "Session ID",
+      "topicSuggestions": "Topic Suggestions",
+      "sessionInformation": "Session Information",
+      "groupName": "Group {{name}}",
+      "totalParticipants": "Total Participants",
+      "timeoutActive": "Timeout Active"
     },
     "guidance": {
       "takeTime": "Take time to think",
@@ -47,11 +102,19 @@
       "reflectBack": "Reflect back what you heard",
       "shareHeart": "Share what's on your heart",
       "noticeThemes": "Notice themes emerging",
-      "observeDynamics": "Observe the listening dynamics"
+      "observeDynamics": "Observe the listening dynamics",
+      "whatDidYouHear": "What did you hear?",
+      "whatIHeard": "What I heard was...",
+      "whatSurprised": "What surprised me...",
+      "whatSeemedImportant": "What seemed important to you...",
+      "shareWhatIsAlive": "Share what's alive in you right now",
+      "captureKeyInsights": "Capture key insights and themes"
     },
     "placeholders": {
       "enterEmail": "Enter your email",
-      "enterPassword": "Enter your password"
+      "enterPassword": "Enter your password",
+      "adminEmail": "admin@example.com",
+      "passwordDots": "••••••••"
     },
     "scripture": {
       "james119": "Let every person be quick to hear, slow to speak, slow to anger.",
@@ -59,8 +122,7 @@
     }
   },
   "navigation": {
-    "home": "Home",
-    "practice": "Practice"
+    "home": "Home"
   },
   "auth": {
     "signUp": {
@@ -104,7 +166,10 @@
     "scripture": {
       "title": "Called to Listen",
       "verses": {
-        "james": {},
+        "james1": {
+          "text": "Let every person be quick to hear, slow to speak, slow to anger.",
+          "reference": "James 1:19"
+        },
         "proverbs18": {
           "text": "If one gives an answer before he hears, it is his folly and shame.",
           "reference": "Proverbs 18:13"
@@ -151,8 +216,8 @@
       "faith": "This practice is not about asserting control over words or ideas, but about cultivating faith in the conversation itself—faith that when we \"submit to one another out of reverence for Christ\" (Ephesians 5:21), something deeper than individual insight can emerge. We begin, as 2 Timothy 2:24–25 teaches, to \"patiently endure,\" \"correct with gentleness,\" and leave room for \"God [to] perhaps grant them repentance leading to a knowledge of the truth.\""
     },
     "format": {
-      "title": "Why Use This Format?",
-      "expandButton": "Why Use This Format?",
+      
+      
       "showMore": "Read more about this format",
       "showLess": "Show less",
       "intro1": "The specific structure—Speaker, Listener, Scribe—has no direct precedent in Scripture, it is a newer technology. But many of our current practices are. The early church had no hymn books, Sunday schools, or digital tools. We use these because they help us live out the principles of Scripture.",
@@ -207,7 +272,7 @@
       "form": {
         "emailPlaceholder": "Enter your email address",
         "submitButton": "Join Waiting List",
-        "submitting": "Joining...",
+
         "involvementLevel": {
           "keepUpdated": {
             "title": "Keep me updated",
@@ -231,23 +296,20 @@
   },
   "admin": {
     "title": "Admin Panel",
-    "login": {
-      "title": "Admin Login",
-      "emailPlaceholder": "admin@example.com",
-      "passwordPlaceholder": "••••••••",
-      "invalidCredentials": "Invalid email or password",
-      "logoutFailed": "Failed to logout",
+            "login": {
+          
+          
+          
+
       "signInButton": "Sign In",
       "signingIn": "Signing In..."
     },
     "dashboard": {
-      "title": "Admin Dashboard",
-      "signOut": "Sign out",
+
       "welcome": "Welcome to the Admin Panel",
       "logoutButton": "Logout",
       "emailSignups": {
         "title": "Email Signups",
-        "description": "All email addresses that have signed up for the mailing list.",
         "count": "Total signups: {{count}}",
         "table": {
           "email": "Email",
@@ -268,9 +330,7 @@
         "loadingError": "Error loading email signups. Please try again."
       },
       "guide": {
-        "title": "Platform Guide",
         "subtitle": "A comprehensive guide to using the Swift to Hear listening practice platform for both video and in-person sessions.",
-        "backToAdmin": "Back to Admin Panel",
         "tableOfContents": "Table of Contents",
         "overview": {
           "title": "Platform Overview",
@@ -326,7 +386,6 @@
           "action": "Start Session →"
         },
         "platformGuide": {
-          "title": "Platform Guide",
           "description": "Comprehensive instructions and best practices for using the Swift to Hear platform effectively.",
           "action": "View Guide →"
         },
@@ -344,7 +403,6 @@
       "superadmin": {
         "title": "Superadmin Dashboard",
         "subtitle": "Swift to Hear - Complete Admin Access",
-        "backToAdmin": "Back to Admin Panel",
         "superadminLabel": "Superadmin",
         "accessDenied": {
           "title": "Access Denied",
@@ -353,7 +411,7 @@
         },
         "emailSignups": {
           "title": "Email Signups Management",
-          "description": "All email addresses that have signed up for the mailing list.",
+  
           "totalSignups": "Total Email Signups",
           "loading": "Loading signups...",
           "noSignups": "No signups yet.",
@@ -362,15 +420,14 @@
         }
       },
       "login": {
-        "title": "Admin Login",
-        "emailPlaceholder": "admin@example.com",
-        "passwordPlaceholder": "••••••••",
-        "invalidCredentials": "Invalid email or password",
+
+
+
+
         "logoutFailed": "Failed to logout"
       },
       "dashboard": {
-        "title": "Admin Dashboard",
-        "signOut": "Sign out"
+
       }
     }
   },
@@ -378,7 +435,7 @@
     "sessionSetup": {
       "title": "Three-User Practice Session",
       "subtitle": "Practising the Art of Listening Together",
-      "joinSession": "Join Practice Session",
+
       "threeParticipantsNeeded": "Three participants needed",
       "waitingForParticipants": "Waiting for participants to join...",
       "waitingForThird": "Waiting for third participant...",
@@ -393,7 +450,7 @@
         "title": "Speaker Role",
         "description": "Share what's on your heart without interruption",
         "guidance": {
-          "takeTime": "Take time to think",
+  
           "pausesWelcome": "Pauses are welcome - the group is with you",
           "listenerReady": "The listener is ready when you are",
           "shareHeart": "Share what's on your heart"
@@ -404,17 +461,12 @@
         "title": "Listener Role",
         "description": "Reflect back what you heard without adding your own thoughts",
         "guidance": {
-          "listenWithout": "Listen without preparing your response",
           "noticeImpulse": "Ask speaker to pause so you can reflect back",
-          "readyReflect": "Ready to reflect back what you heard?",
-          "whatHeard": "What did you hear?"
+          "readyReflect": "Ready to reflect back what you heard?"
         },
         "reflectionStarters": {
-          "whatIHeard": "What I heard was...",
-          "whatSurprised": "What surprised me...",
-          "whatImportant": "What seemed important to you..."
+  
         },
-        "startReflection": "Start Reflection",
         "completeReflection": "Complete Reflection"
       },
       "scribe": {
@@ -429,7 +481,7 @@
           "noteArea": "Note-taking area",
           "quickPhrases": "Quick phrase capture",
           "themeTag": "Add theme",
-          "captureInsight": "Capture Insight",
+
           "generateSummary": "Generate Summary"
         },
         "quickButtons": {
@@ -440,7 +492,6 @@
         }
       },
       "participant": {
-        "title": "Participant",
         "description": "Active participant in the conversation"
       },
       "observer": {
@@ -452,15 +503,13 @@
         "waiting": "Waiting for participants",
         "preparation": "Preparing for session",
         "listening": "Listening in progress",
-        "transition": "Switching roles",
+
         "reflection": "Session reflection",
         "completed": "Session completed"
       },
       "rounds": {
-        "current": "Round {{current}} of 3",
-        "switching": "Switching roles...",
-        "nextRound": "Next Round",
-        "complete": "Complete Round"
+                "current": "Round {{current}} of 3",
+        "switching": "Switching roles..."
       },
       "timing": {
         "timeRemaining": "{{minutes}} minutes remaining",
@@ -498,12 +547,9 @@
       "title": "Dialectic Listening Session",
       "description": "Experience deep listening through structured conversation with role-based guidance.",
       "videoReady": "Video connection ready",
-      "sessionTitle": "Dialectic Session",
-      "round": "Round {{current}} of {{total}}",
-      "timeRemaining": "Time Remaining",
+      
       "videoActive": "Video Call Active",
-      "defaultTopic": "What is alive in you right now?",
-      "switchingRoles": "Switching roles",
+
       "transitionMessage": "Preparing for the next round... Take a moment to transition into your new role.",
       "sessionComplete": "Session Complete",
       "reflectionPrompt": "Take a moment to reflect on your practice together.",
@@ -511,22 +557,16 @@
       "loading": "Initialising session...",
       "waitingForRoleAssignment": "Waiting for Role Assignment",
       "sessionError": "Session Error",
-      "createNewSession": "Create New Session",
-      "sessionNotFound": "Session Not Found",
-      "sessionNotFoundDescription": "The session you're looking for doesn't exist or has ended.",
       "sessionNotStarted": "Session Not Started",
       "sessionNotStartedDescription": "This session hasn't started yet. Please wait for the host to begin.",
       "returnToLobby": "Return to Lobby",
       "helloCheckIn": {
         "title": "Hello & Check-in",
         "description": "Take a moment to introduce yourselves and share what's alive in you right now.",
-        "timeRemaining": "Time remaining",
-        "participants": "Participants",
         "complete": "Complete Check-in",
         "guidelines": {
           "title": "Check-in Guidelines",
           "introduce": "Introduce yourself briefly",
-          "share": "Share what's alive in you right now",
           "listen": "Listen attentively to others",
           "respect": "Respect each person's sharing"
         }
@@ -534,7 +574,6 @@
       "scribeFeedback": {
         "title": "Scribe Feedback",
         "description": "{{scribe}} will share insights from Round {{round}}",
-        "timeRemaining": "Time remaining",
         "notesTitle": "Scribe's Notes",
         "complete": "Complete Feedback",
         "guidelines": {
@@ -563,7 +602,6 @@
           "button": "Continue Rounds"
         },
         "freeDialogue": {
-          "title": "Free-flowing Dialogue",
           "description": "Switch to unstructured conversation",
           "button": "Start Free Dialogue"
         },
@@ -572,7 +610,6 @@
         }
       },
       "freeDialogue": {
-        "title": "Free-flowing Dialogue",
         "description": "Continue your conversation in an unstructured format. Share insights, explore topics, and practice deep listening together.",
         "guidance": {
           "title": "Dialogue Guidelines",
@@ -583,7 +620,14 @@
         },
         "participants": {
           "title": "Active Participants"
-        }
+        },
+        "notes": {
+          "title": "Session Notes",
+          "description": "Capture any insights or observations from your free dialogue",
+          "placeholder": "Share any thoughts, insights, or observations from your conversation..."
+        },
+        "endSession": "End Session",
+        "hostControl": "The host will control when to end this phase"
       },
       "inPerson": {
         "title": "In-Person Session",
@@ -596,9 +640,8 @@
         },
         "controls": {
           "title": "Session Controls",
-          "startSession": "Start Session",
-          "nextPhase": "Next Phase",
-          "pause": "Pause Session"
+                    "startSession": "Start Session",
+          "nextPhase": "Next Phase"
         },
         "phase": {
           "waiting": "Waiting to Start",
@@ -614,7 +657,6 @@
           "title": "Before Starting the Session",
           "remember": "Remember to check-in with each other:",
           "introduce": "Take a moment to introduce yourselves if you haven't met",
-          "share": "Share what's alive in you right now",
           "intentions": "Set any intentions for the session",
           "ready": "Ensure everyone feels ready to begin"
         },
@@ -646,15 +688,11 @@
             "description": "Practice deep, attentive listening"
           },
           "scribe": {
-            "description": "Capture key insights and themes"
           },
-          "taken": "Taken",
+
           "allRolesTaken": "⚠️ All roles are currently taken. Please wait for a role to become available."
         },
         "controlButtons": {
-          "completeRound": "Complete Round",
-          "nextRound": "Next Round",
-          "pauseSession": "Pause Session"
         },
         "copyLink": "Copy",
         "copyLinkTitle": "Copy link to clipboard"
@@ -662,8 +700,7 @@
       "mobile": {
         "waiting": {
           "title": "Waiting for Session",
-          "message": "The host will start the session soon",
-          "role": "Your Role"
+          "message": "The host will start the session soon"
         }
       },
       "notes": {
@@ -677,7 +714,7 @@
       "title": "Popular Topics",
       "description": "Here are the most suggested topics for today's session (all anonymous). Click on any topic to select it, or continue to start the session.",
       "noTopics": "No topics were suggested for this session.",
-      "continue": "Continue to Session",
+
       "legend": "Showing {{displayed}} of {{total}} suggested topics"
     },
     "topicSelection": {
@@ -698,7 +735,7 @@
       }
     },
     "samplePrompts": {
-      "whatIsAlive": "What is alive in you right now?",
+
       "whatChallenge": "What challenge are you currently facing?",
       "whatTransition": "What transition are you navigating?",
       "whatRelationship": "What relationship is calling for your attention?",
@@ -719,7 +756,7 @@
         "description": "Capture insights, themes, and key moments as they emerge."
       },
       "observer": {
-        "title": "Observer",
+
         "description": "Watch the listening dynamics and learn from the process.",
         "temporary": {
           "title": "Temporary Observer",
@@ -727,7 +764,6 @@
           "badge": "Temporary"
         },
         "permanent": {
-          "title": "Permanent Observer",
           "description": "Observe the entire session without participating",
           "badge": "Permanent"
         }
@@ -737,7 +773,7 @@
       "title": "Create Practice Session",
       "description": "Set up a new dialectic listening session for your group",
       "sessionType": {
-        "label": "Session Type",
+
         "description": "Choose how participants will join and interact in your session",
         "video": {
           "description": "Participants join via video call with real-time audio and video"
@@ -752,7 +788,7 @@
         }
       },
       "duration": {
-        "label": "Round Length",
+
         "description": "How long should each speaking round be?",
         "help": "Choose the round length that works best for your group. Total session time includes check-in and feedback periods.",
         "options": {
@@ -777,8 +813,8 @@
         "optional": "(Optional - you can set this later)"
       },
       "sessionName": {
-        "label": "Session Name",
-        "description": "Give your session a memorable name",
+
+
         "help": "This helps participants identify your session",
         "placeholder": "Enter session name...",
         "required": "Session name is required"
@@ -788,44 +824,37 @@
         "description": "Choose whether you want to participate actively or observe the session",
         "participant": {
           "title": "Active Participant",
-          "description": "Join the rotation and participate in all roles",
-          "badge": "Participant"
+          "description": "Join the rotation and participate in all roles"
         },
         "observer": {
-          "title": "Permanent Observer",
-          "description": "Observe the session and manage the flow without participating",
-          "badge": "Observer"
+          "description": "Observe the session and manage the flow without participating"
         }
       },
 
       "join": {
-        "title": "Join Session",
-        "sessionNotFound": "Session Not Found",
-        "sessionNotFoundDescription": "The session you're looking for doesn't exist or has ended.",
-        "backToCreate": "Back to Create Session",
+
         "error": "Failed to join session. Please try again.",
         "sessionFull": "Session is Full",
         "sessionFullDescription": "This session has reached its maximum number of participants.",
-        "firstTimeWelcome": "Welcome to dialectic listening practice!",
+
         "firstTimeDescription": "This is a structured way to practice deep listening and authentic sharing.",
         "welcomeTitle": "Welcome to the Session",
         "welcomeDescription": "You're about to join a dialectic listening session. Take a moment to choose your role and review the session details.",
-        "duration": "Duration",
-        "minutes": "minutes",
-        "host": "Host",
-        "topic": "Topic",
+
+
+
         "noTopicSet": "No topic set",
-        "created": "Created",
-        "currentParticipants": "Current Participants",
-        "participantCount": "{{current}} of {{total}} participants",
+
+
+
         "waitingToStart": "Waiting for the host to start the session",
-        "sessionInProgress": "Session is currently in progress",
+
         "roleGuidance": "Role Guidance",
         "roleGuidanceDescription": "Choose a role that feels right for you. You can change your role later if needed.",
-        "joining": "Joining...",
-        "joinSession": "Join Session",
-        "estimatedStartTime": "Estimated start time",
-        "sessionId": "Session ID",
+
+
+
+
         "sessionStarted": "Session has started",
         "chooseRole": "Choose Your Role",
         "onlyObserverAvailable": "Only observer roles are available. All active participation roles have been taken."
@@ -833,7 +862,6 @@
       "hostTopics": {
         "placeholder": "Add a topic suggestion...",
         "add": "Add",
-        "sampleTopics": "Quick Add Topics",
         "currentSuggestions": "Your Topic Suggestions"
       },
       "preview": {
@@ -853,7 +881,6 @@
         "recommended": "Recommended",
         "maximum": "Maximum",
         "splitSessions": "Consider splitting sessions!",
-        "participants": "participants",
         "custom": {
           "label": "Custom number",
           "placeholder": "Enter 3-10",
@@ -879,16 +906,15 @@
           "benefit1": "Full group experience",
           "benefit2": "Observers can rotate in"
         },
-        "cancel": "Cancel",
         "confirm": "Confirm Choice"
       },
       "create": "Create Session",
       "creating": "Creating session...",
-      "defaultSessionName": "Dialectic Session",
+      
       "shareLink": {
         "title": "Session Created!",
         "description": "Share this link with participants to join:",
-        "copy": "Copy Link",
+
         "copied": "Link copied to clipboard!",
         "qrCode": "QR Code for easy sharing"
       },
@@ -920,15 +946,15 @@
         }
       },
       "steps": {
-        "sessionType": "Session Type",
+
         "sessionTypeDesc": "Choose how participants will join your session",
-        "duration": "Round Length",
+
         "durationDesc": "Set how long each speaking round will be",
-        "topics": "Topic Suggestions",
+
         "topicsDesc": "Add topics you'd like to explore together",
-        "sessionName": "Session Name",
-        "sessionNameDesc": "Give your session a memorable name",
-        "hostRole": "Your Role",
+
+
+
         "hostRoleDesc": "Choose whether to participate or observe",
         "participantLimits": "Participant Limits",
         "participantLimitsDesc": "Set maximum participants for in-person sessions",
@@ -945,37 +971,28 @@
       }
     },
     "join": {
-      "title": "Join Practice Session",
+  
       "welcomeTitle": "Welcome to the Session!",
       "welcomeDescription": "Choose your role and join the session. Once you're in the lobby, you can suggest topics and interact with other participants.",
-      "sessionInfo": "Session Information",
+
       "noTopicSet": "Topic will be set during the session",
-      "currentParticipants": "Current Participants",
       "onlyObserverAvailable": "Only observer role is available - all primary roles are taken",
       "waitingToStart": "Waiting for host to start session",
-      "sessionInProgress": "Session is currently in progress",
       "sessionFull": "This session is full",
       "sessionFullDescription": "This session has reached its maximum capacity.",
       "sessionNotFound": "Session not found or has ended",
       "sessionNotFoundDescription": "This session may have ended or the link may be incorrect.",
       "joining": "Joining session...",
-      "joinSession": "Join Session",
+      
       "error": "Unable to join session. Please try again.",
       "sessionStarted": "Session has started!",
-      "firstTimeWelcome": "Welcome to dialectic listening practice!",
+      
       "firstTimeDescription": "Welcome to dialectic listening practice! This is a structured way to practice deep listening and authentic sharing.",
       "roleGuidance": "Each role offers a unique way to practice deep listening",
       "roleGuidanceDescription": "Each role offers a unique way to practice deep listening. Choose the role that feels right for you in this moment.",
-      "roleTaken": "Taken",
+      
       "backToCreate": "Create New Session",
-      "duration": "Duration",
-      "minutes": "minutes",
-      "host": "Host",
-      "topic": "Topic",
-      "created": "Created",
-      "participantCount": "{{current}} of {{total}} participants",
-      "estimatedStartTime": "Estimated start time",
-      "sessionId": "Session ID"
+      "duration": "Duration"
     },
     "lobby": {
       "title": "Session Lobby",
@@ -999,12 +1016,12 @@
         "format": "Each participant will experience all roles"
       },
       "topicSuggestions": {
-        "title": "Topic Suggestions",
+
         "description": "Add topics you'd like to explore together. All suggestions are anonymous and will appear in the word cloud when the session starts.",
         "placeholder": "Suggest a topic to discuss...",
         "add": "Add Suggestion",
         "adding": "Adding...",
-        "sampleTopics": "Quick Add Topics",
+
         "currentSuggestions": "Current Suggestions",
         "noSuggestions": "No suggestions yet. Be the first to suggest a topic!",
         "votes": "votes",
@@ -1016,9 +1033,8 @@
         "description": "Review group assignments and prepare for your session"
       },
       "sessionInfo": {
-        "title": "Session Information",
-        "name": "Session Name",
-        "participants": "Participants",
+
+
         "mode": "Session Mode"
       },
       "participantStatus": {
@@ -1027,7 +1043,7 @@
       },
       "actions": {
         "title": "Actions",
-        "copyLink": "Copy Link",
+
         "shuffleGroups": "Shuffle Groups",
         "shuffling": "Shuffling...",
         "ready": "I'm Ready",
@@ -1036,18 +1052,16 @@
       },
       "groupPreview": {
         "title": "Group Assignment Preview",
-        "groupName": "Group {{name}}",
+
         "participants": "participants"
       },
-      "participantList": "Participants",
+      
       "you": "You",
       "confirmStart": {
-        "description": "Are you ready to begin the group session? All participants will be moved to their assigned groups.",
-        "cancel": "Cancel"
+        "description": "Are you ready to begin the group session? All participants will be moved to their assigned groups."
       },
       "confirmLeave": {
-        "description": "Are you sure you want to leave? This will cancel the session for all participants.",
-        "cancel": "Cancel"
+        "description": "Are you sure you want to leave? This will cancel the session for all participants."
       }
     },
     "dashboard": {
@@ -1055,9 +1069,7 @@
       "showDashboard": "View Dashboard",
       "hideDashboard": "Hide Dashboard",
       "sessionInfo": {
-        "duration": "Duration",
-        "groups": "Groups",
-        "totalParticipants": "Total Participants"
+        "groups": "Groups"
       },
       "groupStatus": {
         "active": "Active",
@@ -1071,10 +1083,8 @@
         "endAll": "End All"
       },
       "group": {
-        "title": "Group {{name}}",
-        "participants": "participants",
+
         "phase": "Phase: {{phase}}",
-        "round": "Round {{current}} of {{total}}",
         "progress": "Progress",
         "actions": {
           "monitor": "Monitor",
@@ -1088,16 +1098,15 @@
         "title": "Session Summary",
         "activeGroups": "Active Groups",
         "pausedGroups": "Paused Groups",
-        "completedGroups": "Completed Groups",
-        "totalParticipants": "Total Participants"
-      }
+                "completedGroups": "Completed Groups"
+        }
     },
     "preparation": {
       "title": "Session Preparation",
       "description": "Let's prepare you for an excellent dialectic listening practice",
       "steps": {
         "orientation": "Orientation",
-        "practice": "Practice",
+
         "techCheck": "Tech Check",
         "ready": "Ready"
       },
@@ -1191,7 +1200,7 @@
         "someIssues": "⚠️ Some devices aren't working. You can still continue, but the experience may be limited.",
         "checkAgain": "Check Again",
         "continueAnyway": "Continue Anyway",
-        "continueSession": "Continue to Session",
+
         "retry": "Retry"
       },
       "ready": {
@@ -1203,7 +1212,7 @@
     "assistance": {
       "speaker": {
         "mainGuidance": "Take time to explore slowly through your ideas, leave gaps for the listener to reflect back",
-        "comfortPrompt": "Take time to think",
+
         "pauseComfort": "Pauses are welcome",
         "durationPrompt": "Consider pausing to let the listener reflect",
         "continuousSpeaking": "Speaking: {{duration}}",
@@ -1213,10 +1222,12 @@
         "completeSpeaking": "Complete Speaking",
         "guidance": {
           "title": "Speaker Guidance",
-          "speakSlowly": "Speak slowly and clearly",
-          "pauseBetween": "Pause between thoughts",
-          "allowSpace": "Allow space for reflection",
-          "shareGenuine": "Share your genuine thoughts"
+          "exploreIdeas": "Explore ideas - you don't need a perfectly formed thesis",
+          "whatIsAlive": "Start with what is 'alive' in you right now",
+          "startWrongPlace": "You can start at the 'wrong' place and feel your way forward",
+          "embraceSilence": "Embrace silence - don't feel pressured to fill gaps",
+          "listenToYourself": "Listen to yourself as you speak",
+          "respectBoundaries": "Share only what you're comfortable with"
         },
         "reminders": {
           "title": "Gentle Reminders"
@@ -1230,17 +1241,15 @@
       },
       "listener": {
         "mainGuidance": "Offer your full presence and attention without preparing responses or trying to help",
-        "listeningGuidance": "Listen without preparing your response",
         "impulseReminder": "Notice your impulse to respond",
-        "reflectionPrompt": "What did you hear?",
-        "startReflection": "Start Reflection",
+
         "reflectionActive": "Reflection in progress",
         "guidance": {
           "title": "Listener Guidance",
-          "listenWithout": "Listen without preparing your response",
-          "noticeImpulse": "Pause the speaker to reflect back what you heard",
-          "offerPresence": "Try: What I heard you say was...",
-          "reflectBack": "Don't try to help, tell stories, ask leading questions, or share your own experiences",
+          "fullPresence": "Offer your full presence without preparing responses",
+          "noticeImpulse": "Notice your impulse to respond or help",
+          "reflectBack": "Reflect back what you heard - not a memory test",
+          "notMemoryTest": "Share what resonated with you, not perfect recall",
           "interruptIfNeeded": "Interrupt if speaker isn't leaving space for reflection"
         },
         "interactions": {
@@ -1250,9 +1259,13 @@
           "notMemoryTest": "Reflection is not a test of memory - share what resonated with you"
         },
         "reflectionStarters": {
-          "whatHeard": "What I heard was...",
-          "whatSurprised": "What surprised me...",
+  
+  
           "whatImportant": "What seemed important to you..."
+        },
+        "roundTransition": {
+          "title": "Round Transition",
+          "guidance": "Now state what you appreciated from what the Speaker said and also what you feel remains un-answered ready to take us into the next round."
         }
       },
       "scribe": {
@@ -1262,27 +1275,22 @@
         "themeTagging": "Theme tagging",
         "guidance": {
           "title": "Scribe Guidance",
-          "captureInsights": "Capture key insights and themes",
-          "avoidTranscription": "Avoid transcribing word-for-word",
-          "lookForPatterns": "Look for patterns and emotions",
-          "noteEmerging": "Note what emerges naturally",
-          "listenCarefully": "Listen carefully to capture the essence of what's being shared",
-          "captureKey": "Capture key insights and themes as they emerge",
-          "noteThemes": "Note recurring themes and patterns in the conversation",
-          "recordQuestions": "Record questions that arise and areas for deeper exploration",
+          "notTranscript": "It's not a transcript - focus on insights and themes",
+          "plotFlow": "Note where speaker started, moved to, and ended up",
+          "noteDynamics": "Notice dynamics between speaker and listener",
+          "whatUnsaid": "Pay attention to what is unsaid",
           "notesWillBePassed": "Your notes will be passed to the next scribe to build upon"
         },
         "tools": {
           "notesPlaceholder": "Capture what you're hearing...",
           "previousNotesPlaceholder": "Write your fresh notes here, building on the insights above...",
           "title": "Scribe Tools",
-          "realTime": "Real-time note-taking during the conversation",
-          "focusOn": "Focus on insights rather than word-for-word transcription",
-          "avoidInterrupting": "Avoid interrupting the flow of conversation",
-          "readyToShare": "Be ready to share your insights during feedback time"
+          "timerDuty": "You're in charge of the timer - give 30 second warnings",
+          "usePromptSheet": "Use the non-verbal prompt sheet if needed",
+          "feedbackOpportunity": "You'll have a chance to feedback on flow and unsaid things",
+          "freeFlowingEnd": "Last scribe leads to free-flowing conversation"
         },
         "actions": {
-          "captureInsight": "Capture Insight"
         }
       },
       "observer": {
@@ -1315,14 +1323,13 @@
   },
   "safety": {
     "timeout": {
-      "title": "Timeout Active",
-      "active": "Timeout Active",
+  
+      
       "button": "Timeout",
-      "end": "End Timeout",
+      
       "requestTooltip": "Request a safety timeout",
       "endTooltip": "End the safety timeout",
-      "timeRemaining": "Time Remaining",
-      "endEarly": "End Timeout",
+      
       "endEarlyMessage": "You can end this timeout when you're ready to continue.",
       "autoEndMessage": "Take as much time as you need.",
       "takeCare": {

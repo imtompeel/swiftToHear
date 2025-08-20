@@ -71,7 +71,7 @@ export const SessionCompletion: React.FC<SessionCompletionProps> = ({
                 <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-lg p-6 border-2 border-green-200 dark:border-green-700 hover:border-green-300 dark:hover:border-green-600 transition-colors">
                   <div className="text-4xl mb-4">💬</div>
                   <h3 className="font-semibold text-green-900 dark:text-green-100 mb-2">
-                    {t('dialectic.session.completion.freeDialogue.title')}
+                    {t('shared.common.freeFlowingDialogue')}
                   </h3>
                   <p className="text-sm text-green-700 dark:text-green-300 mb-4">
                     {t('dialectic.session.completion.freeDialogue.description')}

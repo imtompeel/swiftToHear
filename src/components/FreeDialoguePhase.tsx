@@ -19,14 +19,14 @@ export const FreeDialoguePhase: React.FC<FreeDialoguePhaseProps> = ({
       <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-secondary-900 dark:text-secondary-100 mb-4">
-            {t('dialectic.session.freeDialogue.title')}
+            {t('shared.common.freeFlowingDialogue')}
           </h1>
           <p className="text-lg text-secondary-600 dark:text-secondary-400">
             {t('dialectic.session.freeDialogue.description')}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="space-y-6">
           {/* Guidance Card */}
           <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-lg p-6 border-2 border-green-200 dark:border-green-700">
             <h3 className="text-xl font-semibold text-green-900 dark:text-green-100 mb-4">

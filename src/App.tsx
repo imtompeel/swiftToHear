@@ -23,6 +23,10 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import './i18n/config'; // Initialize i18n
 
+// Import timer components
+import { QuickTimer } from './components/QuickTimer';
+import { CustomTimer } from './components/CustomTimer';
+
 // Import step-by-step session creation
 import StepByStepSessionCreationWrapper from './components/session-creation/StepByStepSessionCreationWrapper';
 
@@ -74,6 +78,10 @@ function App() {
               <Route path="/test/advanced" element={<AdvancedSessionTestPage />} />
               <Route path="/test/groups" element={<GroupSessionTestPage />} />
               <Route path="/test/in-person" element={<InPersonDemo />} />
+              
+              {/* Timer Routes */}
+              <Route path="/timer/custom" element={<CustomTimer />} />
+              <Route path="/timer/:duration" element={<QuickTimer />} />
             </Routes>
           </div>
         </Router>

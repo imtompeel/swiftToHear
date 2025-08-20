@@ -370,10 +370,10 @@ export const GroupSession: React.FC<GroupSessionProps> = ({
       <div className="min-h-screen bg-secondary-50 dark:bg-secondary-900 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-red-600 dark:text-red-400 mb-2">
-            {t('dialectic.session.sessionNotFound')}
+            {t('shared.common.sessionNotFound')}
           </h2>
           <p className="text-secondary-600 dark:text-secondary-400 mb-4">
-            {t('dialectic.session.sessionNotFoundDescription')}
+            {t('shared.common.sessionNotFoundDescription')}
           </p>
           <button
             onClick={onLeaveSession}
@@ -595,7 +595,7 @@ export const GroupSession: React.FC<GroupSessionProps> = ({
                 {session.sessionName} - {t('dialectic.dashboard.group.title', { name: groupId.replace('group-', '') })}
               </h1>
               <p className="text-xs sm:text-sm text-secondary-600 dark:text-secondary-400">
-                {t('dialectic.session.round', { current: currentGroup.roundNumber, total: currentGroup.participants.length === 2 ? 2 : currentGroup.participants.length === 3 ? 3 : 4 })}
+                {t('shared.common.roundProgress', { current: currentGroup.roundNumber, total: currentGroup.participants.length === 2 ? 2 : currentGroup.participants.length === 3 ? 3 : 4 })}
               </p>
               {initialSession && initialCurrentGroup && (
                 <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">

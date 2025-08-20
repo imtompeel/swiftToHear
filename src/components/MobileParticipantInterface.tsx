@@ -289,7 +289,7 @@ export const MobileParticipantInterface: React.FC<MobileParticipantInterfaceProp
           </p>
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {t('dialectic.session.mobile.waiting.role')}: {currentRole ? t(`dialectic.roles.${currentRole}.title`) : 'No Role'}
+              {t('shared.common.yourRole')}: {currentRole ? (currentRole === 'observer' ? t('shared.roles.observer') : t(`dialectic.roles.${currentRole}.title`)) : 'No Role'}
             </p>
             {/* Show current phase and round if session is active */}
             {liveSession.currentPhase && liveSession.currentPhase !== 'waiting' && (
@@ -327,7 +327,7 @@ export const MobileParticipantInterface: React.FC<MobileParticipantInterfaceProp
             </div>
             <div className="text-right">
               <div className="text-xs text-gray-500 dark:text-gray-400">
-                {currentRole ? t(`dialectic.roles.${currentRole}.title`) : 'No Role'}
+                {currentRole ? (currentRole === 'observer' ? t('shared.roles.observer') : t(`dialectic.roles.${currentRole}.title`)) : 'No Role'}
               </div>
               {/* Show current phase and round */}
               {liveSession.currentPhase && liveSession.currentPhase !== 'waiting' && (

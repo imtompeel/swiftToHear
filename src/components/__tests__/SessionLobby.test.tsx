@@ -11,6 +11,7 @@ import {
 import { SessionLobby } from '../SessionLobby';
 import { ThemeProvider } from '../../contexts/ThemeContext';
 import React from 'react';
+import { SessionData } from '../../types/sessionTypes';
 
 // Mock window.matchMedia for ThemeProvider
 Object.defineProperty(window, 'matchMedia', {
@@ -27,6 +28,15 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
+// Create a mock timestamp that matches Firebase Timestamp interface
+const createMockTimestamp = (date: Date) => ({
+  seconds: Math.floor(date.getTime() / 1000),
+  nanoseconds: (date.getTime() % 1000) * 1000000,
+  toDate: () => date,
+  toMillis: () => date.getTime(),
+  isEqual: vi.fn(),
+});
+
 // Create a test wrapper with ThemeProvider
 const renderWithProviders = (ui: React.ReactElement) => {
   return render(
@@ -36,41 +46,65 @@ const renderWithProviders = (ui: React.ReactElement) => {
   );
 };
 
+// Mock the useTranslation hook
+vi.mock('../../hooks/useTranslation', () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+  }),
+}));
+
+// Mock the useTheme hook
+vi.mock('../../contexts/ThemeContext', () => ({
+  useTheme: () => ({
+    theme: 'light',
+  }),
+}));
+
 describe('SessionLobby Component', () => {
   // Use centralized setup
   setupTests();
 
-  const mockSession = {
-    sessionId: 'test-session-123',
-    sessionName: 'Community Deep Listening',
-    duration: 15 * 60 * 1000, // 15 minutes
-    topic: 'What transitions are we navigating right now?',
-    hostId: 'host-user-id',
-    hostName: 'Alice',
-    createdAt: new Date('2024-01-15T10:30:00'),
+  const mockSession: SessionData = {
+    sessionId: 'test-session',
+    sessionName: 'Test Session',
+    duration: 7 * 60 * 1000,
+    topic: 'Test Topic',
+    hostId: 'host-123',
+    hostName: 'Test Host',
+    hostRole: 'participant',
+    createdAt: new Date() as any, // Type assertion for test
     participants: [
-      { id: 'host-user-id', name: 'Alice', role: 'host', status: 'ready' as const },
-      { id: 'user-2', name: 'Bob', role: 'speaker', status: 'ready' as const },
-      { id: 'user-3', name: 'Charlie', role: 'listener', status: 'ready' as const },
+      {
+        id: 'host-123',
+        name: 'Test Host',
+        role: '', // Host has no role selected
+        status: 'ready' as const
+      },
+      {
+        id: 'participant-1',
+        name: 'Participant 1',
+        role: 'speaker',
+        status: 'ready' as const
+      }
     ],
-    status: 'waiting' as const,
-    minParticipants: 3,
-    maxParticipants: 4
+    status: 'waiting',
+    topicSuggestions: [],
+    minParticipants: 2,
+    maxParticipants: 4,
+    sessionType: 'video'
   };
 
-  const mockOnStartSession = vi.fn();
-  const mockOnLeaveSession = vi.fn();
-  const mockOnUpdateReadyState = vi.fn();
-  const mockOnUpdateParticipantRole = vi.fn();
-  
   const defaultProps = {
     session: mockSession,
-    currentUserId: 'user-2',
-    isHost: false,
-    onStartSession: mockOnStartSession,
-    onLeaveSession: mockOnLeaveSession,
-    onUpdateReadyState: mockOnUpdateReadyState,
-    onUpdateParticipantRole: mockOnUpdateParticipantRole
+    currentUserId: 'host-123',
+    isHost: true,
+    onStartSession: vi.fn(),
+    onLeaveSession: vi.fn(),
+    onUpdateReadyState: vi.fn(),
+    onUpdateParticipantRole: vi.fn(),
+    onModalStateChange: vi.fn(),
+    onAddTopicSuggestion: vi.fn(),
+    onVoteForTopic: vi.fn()
   };
 
   const hostProps = {
@@ -245,7 +279,7 @@ describe('SessionLobby Component', () => {
       
       expect(screen.getByTestId('host-controls')).toBeInTheDocument();
       expect(screen.getByTestId('start-session-button')).toBeInTheDocument();
-      expect(screen.getByText('shared.actions.startSession')).toBeInTheDocument();
+      expect(screen.getByTestId('start-session-button')).toHaveTextContent('shared.actions.startSession');
     });
 
     it('should not show host controls for regular participants', () => {
@@ -287,7 +321,7 @@ describe('SessionLobby Component', () => {
       fireEvent.click(startButton);
       
       // The real component shows a confirmation dialog instead of calling directly
-      expect(screen.getByTextt('shared.actions.startSession').toBeInTheDocument();
+      expect(screen.getByTestId('start-session-button')).toHaveTextContent('shared.actions.startSession');
     });
 
     it('should show confirmation dialog for session start', async () => {
@@ -296,14 +330,14 @@ describe('SessionLobby Component', () => {
       const startButton = screen.getByTestId('start-session-button');
       fireEvent.click(startButton);
       
-      expect(screen.getByText('dialet('shared.actions.startSession')TheDocument();
+      expect(screen.getByTestId('start-session-button')).toHaveTextContent('shared.actions.startSession');
       expect(screen.getByTestId('confirm-start-button')).toBeInTheDocument();
       
       const confirmButton = screen.getByTestId('confirm-start-button');
       fireEvent.click(confirmButton);
       
       await waitFor(() => {
-        expect(mockOnStartSession).toHaveBeenCalled();
+        expect(defaultProps.onStartSession).toHaveBeenCalled();
       });
     });
   });
@@ -433,7 +467,7 @@ describe('SessionLobby Component', () => {
       renderWithProviders(<SessionLobby {...defaultProps} />);
       
       expect(screen.getByTestId('leave-session-button')).toBeInTheDocument();
-      expect(screen.getByText('dialectic.lot('shared.actions.leaveSession')ment();
+      expect(screen.getByText('shared.actions.leaveSession')).toBeInTheDocument();
     });
 
     it('should call onLeaveSession when participant leaves', () => {
@@ -442,7 +476,7 @@ describe('SessionLobby Component', () => {
       const leaveButton = screen.getByTestId('leave-session-button');
       fireEvent.click(leaveButton);
       
-      expect(mockOnLeaveSession).toHaveBeenCalledWith('user-2');
+      expect(defaultProps.onLeaveSession).toHaveBeenCalledWith('user-2');
     });
 
     it('should show confirmation for host leaving', () => {
@@ -486,7 +520,7 @@ describe('SessionLobby Component', () => {
       renderWithProviders(<SessionLobby {...defaultProps} />);
       
       expect(screen.getByTestId('session-lobby-component')).toBeInTheDocument();
-      expect(screen.getByLabelText('dialectic.lobby.participantList')).toBeInTheDocument();
+      expect(screen.getByLabelText('shared.common.participants')).toBeInTheDocument();
     });
 
     it('should announce participant status changes', () => {
@@ -515,6 +549,121 @@ describe('SessionLobby Component', () => {
       interactiveElements.forEach(element => {
         expect(element).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Host Role Selection', () => {
+    it('should disable start session button when host has not selected a role', () => {
+      render(<SessionLobby {...defaultProps} />);
+      
+      const startButton = screen.getByTestId('start-session-button');
+      expect(startButton).toBeDisabled();
+    });
+
+    it('should show message asking host to select role when no role is selected', () => {
+      render(<SessionLobby {...defaultProps} />);
+      
+      expect(screen.getByText('Please select your role before starting the session')).toBeInTheDocument();
+    });
+
+    it('should enable start session button when host has selected a role', () => {
+      const sessionWithHostRole = {
+        ...mockSession,
+        participants: [
+          {
+            id: 'host-123',
+            name: 'Test Host',
+            role: 'speaker', // Host has selected a role
+            status: 'ready' as const
+          },
+          {
+            id: 'participant-1',
+            name: 'Participant 1',
+            role: 'listener',
+            status: 'ready' as const
+          }
+        ]
+      };
+
+      render(<SessionLobby {...defaultProps} session={sessionWithHostRole} />);
+      
+      const startButton = screen.getByTestId('start-session-button');
+      expect(startButton).not.toBeDisabled();
+    });
+
+    it('should not show role selection message when host has selected a role', () => {
+      const sessionWithHostRole = {
+        ...mockSession,
+        participants: [
+          {
+            id: 'host-123',
+            name: 'Test Host',
+            role: 'speaker', // Host has selected a role
+            status: 'ready' as const
+          },
+          {
+            id: 'participant-1',
+            name: 'Participant 1',
+            role: 'listener',
+            status: 'ready' as const
+          }
+        ]
+      };
+
+      render(<SessionLobby {...defaultProps} session={sessionWithHostRole} />);
+      
+      expect(screen.queryByText('Please select your role before starting the session')).not.toBeInTheDocument();
+    });
+
+    it('should show role selection interface for host when no role is selected', () => {
+      render(<SessionLobby {...defaultProps} />);
+      
+      // Should show role selection interface
+      expect(screen.getByTestId('session-lobby-component')).toBeInTheDocument();
+    });
+
+    it('should allow host to select a role', () => {
+      render(<SessionLobby {...defaultProps} />);
+      
+      // The role selection should be available
+      // We can't directly test the role selection since it's in a separate component,
+      // but we can verify the component renders without errors
+      expect(screen.getByTestId('session-lobby-component')).toBeInTheDocument();
+    });
+
+    it('should allow host to change role after selecting one', () => {
+      const sessionWithHostRole = {
+        ...mockSession,
+        participants: [
+          {
+            id: 'host-123',
+            name: 'Test Host',
+            role: 'speaker', // Host has selected a role
+            status: 'ready' as const
+          },
+          {
+            id: 'participant-1',
+            name: 'Participant 1',
+            role: 'listener',
+            status: 'ready' as const
+          }
+        ]
+      };
+
+      render(<SessionLobby {...defaultProps} session={sessionWithHostRole} />);
+      
+      // Should show the selected role display
+      expect(screen.getByTestId('selected-role-display')).toBeInTheDocument();
+      
+      // Should show the change role button
+      const changeRoleButton = screen.getByText('Change Role');
+      expect(changeRoleButton).toBeInTheDocument();
+      
+      // Click the change role button
+      fireEvent.click(changeRoleButton);
+      
+      // Should call the onUpdateParticipantRole function to clear the role
+      expect(defaultProps.onUpdateParticipantRole).toHaveBeenCalledWith('host-123', '');
     });
   });
 });

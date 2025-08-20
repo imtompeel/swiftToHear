@@ -101,42 +101,17 @@ export class FirestoreSessionService {
         }
       }
 
-      // For in-person sessions, handle participant limits and observer assignment
+      // For in-person sessions, allow joining without a role (participants will choose later)
       if (session.sessionType === 'in-person') {
         const mobileParticipants = session.participants.filter(p => p.id !== session.hostId);
         const participantCount = mobileParticipants.length;
-        let assignedRole = joinData.role || '';
-
-        // Check what roles are currently taken
-        const takenRoles = mobileParticipants.map(p => p.role);
-        const activeRoles = ['speaker', 'listener', 'scribe'];
-        const availableActiveRoles = activeRoles.filter(role => !takenRoles.includes(role));
-
-        // If user selected a role, validate it's available
-        if (assignedRole) {
-          if (availableActiveRoles.includes(assignedRole)) {
-            // User's selected role is available, use it
-          } else if (takenRoles.includes(assignedRole)) {
-            // User's selected role is taken, assign an available active role
-            assignedRole = availableActiveRoles[0] || 'observer';
-          } else {
-            // User selected an invalid role, assign an available active role
-            assignedRole = availableActiveRoles[0] || 'observer';
-          }
-        } else {
-          // No role selected, assign an available active role
-          if (availableActiveRoles.length > 0) {
-            assignedRole = availableActiveRoles[0];
-          } else {
-            // All active roles are taken, assign observer
-            assignedRole = 'observer';
-          }
-        }
-
+        
+        // For in-person sessions, always join without a role initially
+        // Participants will choose their role after joining
         const participant: Participant = {
           id: joinData.userId,
           name: joinData.userName,
-          role: assignedRole,
+          role: '', // Empty role - will be chosen later
           status: 'not-ready'
         };
 
@@ -152,56 +127,25 @@ export class FirestoreSessionService {
         };
       }
 
-      // For video/hybrid sessions, use existing logic
-      if (session.groupConfiguration?.autoAssignRoles) {
-        // Add participant without role (will be assigned later)
-        const participant: Participant = {
-          id: joinData.userId,
-          name: joinData.userName,
-          role: '', // Empty role - will be auto-assigned when session starts
-          status: 'not-ready'
-        };
+      // For video/hybrid sessions, allow joining without a role (participants will choose in lobby)
+      // This matches the simplified in-person approach
+      const participant: Participant = {
+        id: joinData.userId,
+        name: joinData.userName,
+        role: joinData.role || '', // Allow empty role - will be chosen in lobby
+        status: 'not-ready'
+      };
 
-        const updatedParticipants = [...session.participants, participant];
-        
-        await updateDoc(doc(db, this.COLLECTION_NAME, joinData.sessionId), {
-          participants: updatedParticipants
-        });
+      const updatedParticipants = [...session.participants, participant];
+      
+      await updateDoc(doc(db, this.COLLECTION_NAME, joinData.sessionId), {
+        participants: updatedParticipants
+      });
 
-        return {
-          ...session,
-          participants: updatedParticipants
-        };
-      } else {
-        // Manual role assignment - check if role is available
-        if (!joinData.role) {
-          throw new Error('Role is required when auto-assign is disabled');
-        }
-        
-        const availableRoles = this.getAvailableRoles(session);
-        if (!availableRoles.includes(joinData.role)) {
-          throw new Error('Role not available');
-        }
-
-        // Add participant with specified role
-        const participant: Participant = {
-          id: joinData.userId,
-          name: joinData.userName,
-          role: joinData.role,
-          status: 'not-ready'
-        };
-
-        const updatedParticipants = [...session.participants, participant];
-        
-        await updateDoc(doc(db, this.COLLECTION_NAME, joinData.sessionId), {
-          participants: updatedParticipants
-        });
-
-        return {
-          ...session,
-          participants: updatedParticipants
-        };
-      }
+      return {
+        ...session,
+        participants: updatedParticipants
+      };
     } catch (error) {
       console.error('Error joining session:', error);
       throw error;
@@ -245,11 +189,11 @@ export class FirestoreSessionService {
 
       console.log('Current session participants:', session.participants);
 
-      // Check if role is available
-      const availableRoles = this.getAvailableRoles(session);
+      // Check if role is available (allow empty string for clearing roles)
+      const availableRoles = this.getAvailableRoles(session) || [];
       console.log('Available roles:', availableRoles);
       
-      if (!availableRoles.includes(role)) {
+      if (role !== '' && !availableRoles.includes(role)) {
         console.error('updateParticipantRole: Role not available:', role);
         throw new Error('Role not available');
       }
@@ -464,6 +408,9 @@ export class FirestoreSessionService {
       await this.accumulateScribeNotes(sessionId);
       
       console.log('FirestoreSessionService.continueInPersonRounds: Rotating roles for new round set');      
+      // Rotate roles for the new round set
+      await this.rotateRoles(sessionId);
+      
       // Reset to round 1
       await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
         currentPhase: 'round',
@@ -586,14 +533,20 @@ export class FirestoreSessionService {
 
   // Get available roles for a session
   static getAvailableRoles(session: SessionData): string[] {
-    const allRoles = ['speaker', 'listener', 'scribe', 'observer'];
+    // For in-person sessions, only show active roles (no permanent observer)
+    const allRoles = session.sessionType === 'in-person' 
+      ? ['speaker', 'listener', 'scribe', 'observer-temporary']
+      : ['speaker', 'listener', 'scribe', 'observer'];
     
     // For in-person sessions, exclude the host from role availability calculation
     const relevantParticipants = session.sessionType === 'in-person' 
       ? session.participants.filter(p => p.id !== session.hostId)
       : session.participants;
     
-    const takenRoles = relevantParticipants.map(p => p.role).filter(role => role !== ''); // Filter out empty roles
+    // Filter out empty, null, or undefined roles
+    const takenRoles = relevantParticipants
+      .map(p => p.role)
+      .filter(role => role && role !== '' && role !== null && role !== undefined);
     
     console.log('getAvailableRoles:', {
       sessionType: session.sessionType,
@@ -784,6 +737,11 @@ export class FirestoreSessionService {
       
       if (round !== undefined) {
         updateData.currentRound = round;
+      }
+      
+      // If this is the first phase (starting the session), also update status to 'active'
+      if (phase === 'round' && round === 1) {
+        updateData.status = 'active';
       }
       
       await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), updateData);
@@ -1016,6 +974,81 @@ export class FirestoreSessionService {
             if (session.accumulatedScribeNotes) {
               console.log('FirestoreSessionService.rotateRoles: Passing accumulated scribe notes to new scribe:', listener.name);
               // The accumulated notes will be available to the new scribe
+            }
+          }
+        }
+      } else {
+        // Handle 4+ participants with flexible role rotation
+        console.log('FirestoreSessionService.rotateRoles: Performing flexible rotation for', roleParticipants.length, 'participants');
+        
+        // Get all participants with active roles (speaker, listener, scribe)
+        const activeRoleParticipants = roleParticipants.filter(p => ['speaker', 'listener', 'scribe'].includes(p.role));
+        const observerParticipants = participants.filter(p => p.role === 'observer');
+        
+        console.log('FirestoreSessionService.rotateRoles: Active role participants:', activeRoleParticipants.map(p => ({ name: p.name, role: p.role })));
+        console.log('FirestoreSessionService.rotateRoles: Observer participants:', observerParticipants.map(p => ({ name: p.name, role: p.role })));
+        
+        if (activeRoleParticipants.length >= 3) {
+          // We have at least speaker, listener, and scribe - rotate the active roles
+          const speaker = activeRoleParticipants.find(p => p.role === 'speaker');
+          const listener = activeRoleParticipants.find(p => p.role === 'listener');
+          const scribe = activeRoleParticipants.find(p => p.role === 'scribe');
+          
+          if (speaker && listener && scribe) {
+            const speakerIndex = updatedParticipants.findIndex(p => p.id === speaker.id);
+            const listenerIndex = updatedParticipants.findIndex(p => p.id === listener.id);
+            const scribeIndex = updatedParticipants.findIndex(p => p.id === scribe.id);
+            
+            console.log('FirestoreSessionService.rotateRoles: Rotating active roles - Speaker:', speaker.name, 'Listener:', listener.name, 'Scribe:', scribe.name);
+            
+            if (speakerIndex !== -1 && listenerIndex !== -1 && scribeIndex !== -1) {
+              // Rotate active roles: speaker → listener → scribe → speaker
+              updatedParticipants[speakerIndex] = { ...speaker, role: 'listener' };
+              updatedParticipants[listenerIndex] = { ...listener, role: 'scribe' };
+              updatedParticipants[scribeIndex] = { ...scribe, role: 'speaker' };
+              
+              // If there are observers, rotate one observer into the active role cycle
+              if (observerParticipants.length > 0) {
+                // Find the first observer and rotate them into the scribe role
+                const firstObserver = observerParticipants[0];
+                const firstObserverIndex = updatedParticipants.findIndex(p => p.id === firstObserver.id);
+                
+                if (firstObserverIndex !== -1) {
+                  // Move the current scribe to observer, and the first observer becomes scribe
+                  updatedParticipants[scribeIndex] = { ...scribe, role: 'observer' };
+                  updatedParticipants[firstObserverIndex] = { ...firstObserver, role: 'scribe' };
+                  
+                  console.log('FirestoreSessionService.rotateRoles: Rotated observer into active role -', firstObserver.name, 'is now scribe');
+                }
+              }
+              
+              console.log('FirestoreSessionService.rotateRoles: Flexible rotation completed successfully');
+              
+              // Accumulate the current scribe's notes before rotating roles
+              console.log('FirestoreSessionService.rotateRoles: Accumulating current scribe notes before role rotation');
+              await this.accumulateScribeNotes(sessionId);
+              
+              // Pass accumulated scribe notes to the new scribe
+              if (session.accumulatedScribeNotes) {
+                const newScribe = observerParticipants.length > 0 ? observerParticipants[0] : listener;
+                console.log('FirestoreSessionService.rotateRoles: Passing accumulated scribe notes to new scribe:', newScribe.name);
+              }
+            }
+          }
+        } else if (activeRoleParticipants.length === 2) {
+          // Fallback to 2-person rotation if we only have speaker and listener
+          console.log('FirestoreSessionService.rotateRoles: Falling back to 2-person rotation');
+          const speaker = activeRoleParticipants.find(p => p.role === 'speaker');
+          const listener = activeRoleParticipants.find(p => p.role === 'listener');
+          
+          if (speaker && listener) {
+            const speakerIndex = updatedParticipants.findIndex(p => p.id === speaker.id);
+            const listenerIndex = updatedParticipants.findIndex(p => p.id === listener.id);
+            
+            if (speakerIndex !== -1 && listenerIndex !== -1) {
+              updatedParticipants[speakerIndex] = { ...speaker, role: 'listener' };
+              updatedParticipants[listenerIndex] = { ...listener, role: 'speaker' };
+              console.log('FirestoreSessionService.rotateRoles: 2-person fallback rotation completed');
             }
           }
         }

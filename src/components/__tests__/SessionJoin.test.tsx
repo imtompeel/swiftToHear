@@ -98,7 +98,7 @@ describe('SessionJoin Component', () => {
       render(<SessionJoin {...defaultProps} />);
       
       expect(screen.getByTestId('current-participants')).toBeInTheDocument();
-      expect(screen.getByText('dialectic.join.currentParticipants')).toBeInTheDocument();
+      expect(screen.getByText('shared.common.currentParticipants')).toBeInTheDocument();
       expect(screen.getByText('Alice (Host)')).toBeInTheDocument();
       expect(screen.getByText('Bob (Speaker)')).toBeInTheDocument();
     });
@@ -219,7 +219,7 @@ describe('SessionJoin Component', () => {
       render(<SessionJoin {...defaultProps} session={activeSession} />);
       
       expect(screen.getByTestId('session-status-active')).toBeInTheDocument();
-      expect(screen.getByText('dialectic.join.sessionInProgress')).toBeInTheDocument();
+      expect(screen.getByText('shared.common.sessionInProgress')).toBeInTheDocument();
     });
 
     it('should handle session that is full', () => {
@@ -352,7 +352,7 @@ describe('SessionJoin Component', () => {
       render(<SessionJoin {...newUserProps} />);
       
       expect(screen.getByTestId('first-time-guidance')).toBeInTheDocument();
-      expect(screen.getByText('dialectic.join.firstTimeWelcome')).toBeInTheDocument();
+      expect(screen.getByText('shared.common.welcomeToDialectic')).toBeInTheDocument();
     });
 
     it('should provide role guidance and tips', () => {

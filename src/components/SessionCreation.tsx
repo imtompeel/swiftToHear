@@ -56,9 +56,9 @@ const SessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) =>
   const [customMaxParticipants, setCustomMaxParticipants] = useState<string>('');
   
   // Group session state - will be determined dynamically as participants join
-  const [groupConfiguration, setGroupConfiguration] = useState<GroupConfiguration>({
+  const [groupConfiguration,] = useState<GroupConfiguration>({
     groupSize: 'mixed',
-    autoAssignRoles: true,
+    autoAssignRoles: false, // Simplified approach: manual role selection for all sessions
     groupRotation: 'balanced',
     observerStrategy: 'distribute'
   });
@@ -75,10 +75,6 @@ const SessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) =>
 
   const sampleTopics = [
     'What is alive in you right now?',
-    'What challenge are you facing?',
-    'What transition are you navigating?',
-    'What are you learning about yourself?',
-    'What matters most to you in this moment?'
   ];
 
   // Generate default session name with timestamp
@@ -282,7 +278,7 @@ const SessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) =>
               onClick={copySessionLink}
               className="px-4 py-2 bg-accent-500 text-white rounded hover:bg-accent-600 transition-colors"
             >
-              {t('dialectic.creation.shareLink.copy')}
+              {t('shared.actions.copyLink')}
             </button>
           </div>
           
@@ -325,7 +321,7 @@ const SessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) =>
         <div className="space-y-4" data-testid="session-type-selector">
           <div>
             <label className="block text-lg font-medium text-primary-900 dark:text-primary-100 mb-2">
-              {t('dialectic.creation.sessionType.label')}
+              {t('shared.common.sessionType')}
             </label>
             <p className="text-secondary-600 dark:text-secondary-400 mb-4">
               {t('dialectic.creation.sessionType.description')}
@@ -413,7 +409,7 @@ const SessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) =>
         <div className="space-y-4" data-testid="duration-selector">
           <div>
             <label className="block text-lg font-medium text-primary-900 dark:text-primary-100 mb-2">
-              {t('dialectic.creation.duration.label')}
+              {t('shared.common.roundLength')}
             </label>
             <p className="text-secondary-600 dark:text-secondary-400 mb-4">
               {t('dialectic.creation.duration.description')}
@@ -509,7 +505,7 @@ const SessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) =>
           {/* Sample topics for quick addition */}
           <div className="space-y-2">
             <p className="text-sm font-medium text-primary-700 dark:text-primary-300">
-              {t('dialectic.creation.hostTopics.sampleTopics')}
+              {t('shared.actions.quickAddTopics')}
             </p>
             <div className="flex flex-wrap gap-2">
               {sampleTopics.map((sampleTopic, index) => (
@@ -561,10 +557,10 @@ const SessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) =>
         <div className="space-y-4">
           <div>
             <label className="block text-lg font-medium text-primary-900 dark:text-primary-100 mb-2">
-              {t('dialectic.creation.sessionName.label')}
+              {t('shared.common.sessionName')}
             </label>
             <p className="text-secondary-600 dark:text-secondary-400 mb-2">
-              {t('dialectic.creation.sessionName.description')}
+              {t('shared.common.giveSessionMemorableName')}
             </p>
             <p className="text-sm text-secondary-500 dark:text-secondary-400 mb-4">
               {t('dialectic.creation.sessionName.help')}
@@ -615,7 +611,7 @@ const SessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) =>
                     {t('dialectic.creation.hostRole.participant.title')}
                   </div>
                   <div className="text-xs text-accent-600 dark:text-accent-400">
-                    {t('dialectic.creation.hostRole.participant.badge')}
+                    {t('shared.roles.participant')}
                   </div>
                 </div>
               </div>
@@ -637,10 +633,10 @@ const SessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) =>
                 <span className="text-2xl mr-3">👁️</span>
                 <div>
                   <div className="font-semibold text-primary-900 dark:text-primary-100">
-                    {t('dialectic.creation.hostRole.observer.title')}
+                    {t('shared.common.permanentObserver')}
                   </div>
                   <div className="text-xs px-2 py-1 rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-                    {t('dialectic.creation.hostRole.observer.badge')}
+                    {t('shared.roles.observer')}
                   </div>
                 </div>
               </div>
@@ -695,7 +691,7 @@ const SessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) =>
                         ? 'text-gray-700 dark:text-gray-300'
                         : 'text-secondary-600 dark:text-secondary-400'
                     }`}>
-                      {num === 4 ? t('dialectic.creation.participantLimits.recommended') : num === 5 ? t('dialectic.creation.participantLimits.maximum') : num === 6 ? t('dialectic.creation.participantLimits.splitSessions') : t('dialectic.creation.participantLimits.participants')}
+                      {num === 4 ? t('dialectic.creation.participantLimits.recommended') : num === 5 ? t('dialectic.creation.participantLimits.maximum') : num === 6 ? t('dialectic.creation.participantLimits.splitSessions') : t('shared.common.participants')}
                     </div>
                     <div className={`text-xs mt-1 ${
                       maxParticipants === num
@@ -754,43 +750,7 @@ const SessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) =>
           </div>
         )}
 
-        {/* Group Configuration - Always show since session type is adaptive */}
-        {(
-          <div className="space-y-4">
-            <div>
-              <label className="block text-lg font-medium text-primary-900 dark:text-primary-100 mb-2">
-                {t('dialectic.creation.groupConfig.label')}
-              </label>
-              <p className="text-secondary-600 dark:text-secondary-400 mb-4">
-                {t('dialectic.creation.groupConfig.description')}
-              </p>
-            </div>
 
-
-
-            {/* Auto-assign Roles */}
-            <div className="space-y-3">
-              <label className="block text-sm font-medium text-primary-900 dark:text-primary-100">
-                {t('dialectic.creation.groupConfig.autoAssign.label')}
-              </label>
-              <div className="flex items-center space-x-4">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={groupConfiguration.autoAssignRoles}
-                    onChange={(e) => setGroupConfiguration(prev => ({ ...prev, autoAssignRoles: e.target.checked }))}
-                    className="mr-2"
-                  />
-                  <span className="text-sm text-secondary-600 dark:text-secondary-400">
-                    {t('dialectic.creation.groupConfig.autoAssign.description')}
-                  </span>
-                </label>
-              </div>
-            </div>
-
-
-          </div>
-        )}
 
         {/* Session Preview */}
         <div className="bg-secondary-50 dark:bg-secondary-800 rounded-lg p-4 space-y-2" data-testid="session-preview">
@@ -802,12 +762,9 @@ const SessionCreation: React.FC<SessionCreationProps> = ({ onSessionCreate }) =>
             <p>{t('dialectic.creation.preview.roundLength', { minutes: formatDuration(selectedDuration) })}</p>
             <p>{t('dialectic.creation.preview.estimatedTotal', { minutes: Math.round(calculateTotalSessionTime(formatDuration(selectedDuration)) * (sessionType === 'in-person' ? maxParticipants / 3 : 1)) })}</p>
             <p>{t('dialectic.creation.preview.format')}</p>
-            <p>{t('dialectic.creation.preview.hostRole', { role: hostRole === 'participant' ? t('dialectic.creation.hostRole.participant.title') : t('dialectic.creation.hostRole.observer.title') })}</p>
+            <p>{t('dialectic.creation.preview.hostRole', { role: hostRole === 'participant' ? t('dialectic.creation.hostRole.participant.title') : t('shared.common.permanentObserver') })}</p>
 
-            <p>{t('dialectic.creation.preview.groupConfig', { 
-              size: t('dialectic.creation.groupConfig.groupSize.mixed'),
-              strategy: t('dialectic.creation.groupConfig.observerStrategy.distribute.title')
-            })}</p>
+
             {sessionType === 'in-person' && (
               <p><strong>{t('dialectic.creation.participantLimits.preview', { count: maxParticipants })}</strong></p>
             )}

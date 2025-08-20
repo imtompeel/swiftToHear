@@ -353,7 +353,7 @@ describe('DialecticSession Component - Updated Flow', () => {
       
       // Should work with available data
       expect(screen.getByText('15:00')).toBeInTheDocument();
-      expect(screen.getByTestId('topic-display')).toHaveTextContent('dialectic.session.defaultTopic');
+      expect(screen.getByTestId('topic-display')).toHaveTextContent('shared.common.whatIsAlive');
     });
 
     it('should validate session data integrity', () => {

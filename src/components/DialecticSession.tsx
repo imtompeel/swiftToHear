@@ -50,7 +50,6 @@ const useIsolatedTimer = (sessionPhase: string, sessionStartTime: number | null,
     // Only count down during active session phases and when not in timeout
     const isActivePhase = sessionPhase === 'listening' || 
                          sessionPhase === 'hello-checkin' || 
-                         sessionPhase === 'transition' ||
                          sessionPhase === 'free-dialogue';
     
     if (!isActivePhase || !sessionStartTime || isTimeoutActive) {
@@ -106,13 +105,13 @@ const SessionHeader = React.memo<{
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold">
-            {t('dialectic.session.sessionTitle')}
+            {t('shared.common.dialecticSession')}
           </h1>
           <p className="text-accent-100">
             {sessionState.selectedRole && ['speaker', 'listener', 'scribe', 'observer'].includes(sessionState.selectedRole) 
-              ? t(`dialectic.roles.${sessionState.selectedRole}.title`)
+              ? (sessionState.selectedRole === 'observer' ? t('shared.roles.observer') : t(`dialectic.roles.${sessionState.selectedRole}.title`))
               : 'No Role Selected'
-            } • {t('dialectic.session.round', { current: sessionState.roundNumber, total: roleRotation.getTotalRounds() })}
+            } • {t('shared.common.roundProgress', { current: sessionState.roundNumber, total: roleRotation.getTotalRounds() })}
           </p>
         </div>
         <div className="text-right">
@@ -132,8 +131,8 @@ const SessionHeader = React.memo<{
                 {videoCall.isConnected ? 'Video Connected' : videoCall.isConnecting ? 'Connecting...' : 'Video Disconnected'}
               </span>
             </div>
-            {/* Hide main timer during check-in phase */}
-            {sessionPhase !== 'hello-checkin' && (
+            {/* Hide main timer during check-in and transition (scribe feedback) phases */}
+            {sessionPhase !== 'hello-checkin' && sessionPhase !== 'transition' && (
               <TimerDisplay timeRemaining={currentTimeRemaining} />
             )}
           </div>
@@ -945,7 +944,7 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
                           onClick={() => setShowWordCloud(false)}
                           className="px-4 py-2 bg-secondary-200 dark:bg-secondary-600 text-secondary-700 dark:text-secondary-300 rounded-lg hover:bg-secondary-300 dark:hover:bg-secondary-500 transition-colors"
                         >
-                          {t('dialectic.wordCloud.continue')}
+                          {t('shared.actions.continueToSession')}
                         </button>
                       </div>
                     </div>
@@ -993,7 +992,6 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
                       currentUserId={currentUser?.id || ''}
                       currentUserName={currentUser?.name || 'Unknown'}
                       participants={session?.participants || []}
-                      videoCall={videoCall}
                       onComplete={completeScribeFeedback}
                       isHost={isHost}
                       notes={sessionState.getAllScribeNotes()}
@@ -1101,7 +1099,7 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
             onClick={() => window.location.href = '/practice/create'}
             className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
           >
-            {t('dialectic.session.createNewSession')}
+            {t('shared.actions.createNewSession')}
           </button>
         </div>
       </div>
@@ -1114,16 +1112,16 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
       <div data-testid="dialectic-session" className="max-w-none mx-auto p-6 xl:px-12 2xl:px-16">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-secondary-900 dark:text-secondary-100 mb-4">
-            {t('dialectic.session.sessionNotFound')}
+            {t('shared.common.sessionNotFound')}
           </h1>
           <p className="text-secondary-600 dark:text-secondary-400 mb-4">
-            {t('dialectic.session.sessionNotFoundDescription')}
+            {t('shared.common.sessionNotFoundDescription')}
           </p>
                       <button 
               onClick={() => window.location.href = '/practice/create'}
               className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
             >
-              {t('dialectic.session.createNewSession')}
+              {t('shared.actions.createNewSession')}
             </button>
         </div>
       </div>

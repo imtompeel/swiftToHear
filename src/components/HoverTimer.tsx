@@ -1,5 +1,78 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
+
+// Audio player for singing bowl chime
+class ChimePlayer {
+  private audio: HTMLAudioElement | null = null;
+  private isLoaded = false;
+  private hasUserInteracted = false;
+  private isPlaying = false;
+
+  constructor() {
+    this.loadAudio();
+    this.setupUserInteraction();
+  }
+
+  private loadAudio() {
+    this.audio = new Audio('/48325__monkay__singingbowl.wav');
+    this.audio.preload = 'auto';
+    this.audio.volume = 0.6;
+    
+    // Mobile-specific audio settings
+    this.audio.muted = false;
+    this.audio.autoplay = false;
+    
+    this.audio.addEventListener('canplaythrough', () => {
+      this.isLoaded = true;
+    });
+    
+    this.audio.addEventListener('ended', () => {
+      this.isPlaying = false;
+    });
+    
+    this.audio.addEventListener('error', (e) => {
+      console.error('Failed to load audio file:', e);
+      this.isPlaying = false;
+    });
+  }
+
+  private setupUserInteraction() {
+    // Listen for any user interaction to enable audio
+    const enableAudio = () => {
+      this.hasUserInteracted = true;
+      // Try to play and immediately pause to unlock audio context
+      if (this.audio) {
+        this.audio.play().then(() => {
+          this.audio!.pause();
+          this.audio!.currentTime = 0;
+        }).catch(() => {
+          // Ignore errors, just trying to unlock audio
+        });
+      }
+      // Remove listeners after first interaction
+      document.removeEventListener('touchstart', enableAudio);
+      document.removeEventListener('click', enableAudio);
+    };
+
+    document.addEventListener('touchstart', enableAudio, { once: true });
+    document.addEventListener('click', enableAudio, { once: true });
+  }
+
+  play() {
+    if (this.audio && this.isLoaded && this.hasUserInteracted && !this.isPlaying) {
+      this.isPlaying = true;
+      // Reset to beginning and play
+      this.audio.currentTime = 0;
+      this.audio.play().catch(error => {
+        console.log('Audio play failed:', error);
+        this.isPlaying = false;
+      });
+    }
+  }
+}
+
+// Create a single instance to reuse
+const chimePlayer = new ChimePlayer();
 
 interface HoverTimerProps {
   timeRemaining: number; // in milliseconds
@@ -15,14 +88,41 @@ export const HoverTimer: React.FC<HoverTimerProps> = ({
   const { t } = useTranslation();
   const [isAlwaysVisible, setIsAlwaysVisible] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [hasPlayedWarning, setHasPlayedWarning] = useState(false);
+  const [hasPlayedEnd, setHasPlayedEnd] = useState(false);
+  const prevTimeRemaining = useRef(timeRemaining);
 
-  // Auto-show timer when 10 seconds or less remain
+  // Auto-show timer when 10 seconds or less remain and handle sound notifications
   useEffect(() => {
     const tenSeconds = 10 * 1000; // 10 seconds in milliseconds
     if (timeRemaining <= tenSeconds && timeRemaining > 0) {
       setIsAlwaysVisible(true);
     }
-  }, [timeRemaining]);
+
+    // Check for 30-second warning (more precise timing)
+    if (timeRemaining <= 30000 && timeRemaining > 29900 && !hasPlayedWarning) {
+      setTimeout(() => {
+        chimePlayer.play();
+      }, 100); // Small delay to ensure stable state
+      setHasPlayedWarning(true);
+    }
+
+    // Check for timer end (more precise timing)
+    if (timeRemaining <= 0 && timeRemaining > -1000 && !hasPlayedEnd) {
+      setTimeout(() => {
+        chimePlayer.play();
+      }, 100); // Small delay to ensure stable state
+      setHasPlayedEnd(true);
+    }
+
+    // Reset flags when timer resets
+    if (timeRemaining > prevTimeRemaining.current) {
+      setHasPlayedWarning(false);
+      setHasPlayedEnd(false);
+    }
+
+    prevTimeRemaining.current = timeRemaining;
+  }, [timeRemaining, hasPlayedWarning, hasPlayedEnd]);
 
   const formatTime = (ms: number) => {
     const minutes = Math.floor(ms / 60000);
@@ -89,7 +189,7 @@ export const HoverTimer: React.FC<HoverTimerProps> = ({
             {formatTime(timeRemaining)}
           </div>
           <div className="text-xs opacity-90 leading-tight">
-            {t('dialectic.session.timeRemaining')}
+            {t('shared.common.timeRemaining')}
           </div>
         </button>
       )}

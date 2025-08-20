@@ -51,7 +51,7 @@ const SuperadminPanel: React.FC = () => {
     try {
       await signOut(auth);
     } catch (err) {
-      setError(t('admin.login.logoutFailed'));
+      setError(t('shared.common.logoutFailed'));
     }
   };
 
@@ -99,7 +99,7 @@ const SuperadminPanel: React.FC = () => {
                 onClick={handleLogout}
                 className="w-full flex justify-center py-2 px-4 border border-secondary-300 dark:border-secondary-600 text-sm font-medium rounded-md text-secondary-700 dark:text-secondary-300 bg-white dark:bg-secondary-800 hover:bg-secondary-50 dark:hover:bg-secondary-700 transition-colors duration-200"
               >
-                {t('admin.dashboard.signOut')}
+                {t('shared.actions.signOut')}
               </button>
           </div>
         </div>

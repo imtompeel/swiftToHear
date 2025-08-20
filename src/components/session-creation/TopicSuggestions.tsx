@@ -55,7 +55,7 @@ const TopicSuggestions: React.FC<TopicSuggestionsProps> = ({
       {/* Sample topics for quick addition */}
       <div className="space-y-2">
         <p className="text-sm font-medium text-primary-700 dark:text-primary-300">
-          {t('dialectic.creation.hostTopics.sampleTopics')}
+          {t('shared.actions.quickAddTopics')}
         </p>
         <div className="flex flex-wrap gap-2">
           {sampleTopics.map((sampleTopic, index) => (

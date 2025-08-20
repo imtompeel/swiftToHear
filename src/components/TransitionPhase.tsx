@@ -19,7 +19,7 @@ export const TransitionPhase: React.FC<TransitionPhaseProps> = ({
       <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-8">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-secondary-900 dark:text-secondary-100 mb-4">
-            {t('dialectic.session.switchingRoles')}
+            {t('shared.common.switchingRoles')}
           </h1>
           <div data-testid="transition-guidance" className="space-y-4">
             <p className="text-lg text-secondary-600 dark:text-secondary-400">
