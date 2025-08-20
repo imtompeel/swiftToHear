@@ -27,7 +27,7 @@ export const MobileListenerInterface: React.FC<MobileListenerInterfaceProps> = (
   phaseDuration = 0
 }) => {
   const { t } = useTranslation();
-  const [reflectionActive, setReflectionActive] = React.useState(false);
+  const [, setReflectionActive] = React.useState(false);
 
   // Extract data from session context
   const speakerActive = true; // This would be determined from session state
@@ -72,6 +72,44 @@ export const MobileListenerInterface: React.FC<MobileListenerInterfaceProps> = (
             {t('dialectic.assistance.listener.mainGuidance')}
           </p>
         </div>
+
+        {/* Scribe Feedback Phase Indicator */}
+        {_session.currentPhase === 'scribe-feedback' && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-orange-400 to-red-500 rounded-xl shadow-lg border-2 border-orange-300">
+            <div className="text-center">
+              <div className="text-2xl mb-2">📝</div>
+              <h2 className="text-lg font-bold text-white mb-1">
+                {t('dialectic.session.scribeFeedback.title')}
+              </h2>
+              <p className="text-orange-100 text-sm">
+                {t('dialectic.session.scribeFeedback.listenerMessage', { round: _session.currentRound || 1 })}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Listener Round Transition Guidance - Show during scribe feedback, but not on the last round */}
+        {_session.currentPhase === 'scribe-feedback' && (() => {
+          // Calculate max rounds based on participants with roles (excluding observers)
+          const roleParticipants = _participants.filter(p => p.role && p.role !== 'observer');
+          const maxRounds = roleParticipants.length;
+          const currentRound = _session.currentRound || 1;
+          const isLastRound = currentRound >= maxRounds;
+          
+          return !isLastRound ? (
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-4">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                <span className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold mr-2">
+                  L
+                </span>
+                {t('dialectic.assistance.listener.roundTransition.title')}
+              </h3>
+              <div className="text-sm text-gray-700 dark:text-gray-300">
+                {t('dialectic.assistance.listener.roundTransition.guidance')}
+              </div>
+            </div>
+          ) : null;
+        })()}
 
         {/* Status Section */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-4">

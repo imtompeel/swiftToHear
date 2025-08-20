@@ -572,8 +572,11 @@
         }
       },
       "scribeFeedback": {
-        "title": "Scribe Feedback",
+        "title": "Scribe Feedback Phase",
         "description": "{{scribe}} will share insights from Round {{round}}",
+        "listenerMessage": "Round {{round}} - Listen to the scribe's notes",
+        "speakerMessage": "Round {{round}} - Listen to the scribe's notes",
+        "scribeMessage": "Round {{round}} - Time to share your notes with the group!",
         "notesTitle": "Scribe's Notes",
         "complete": "Complete Feedback",
         "guidelines": {
@@ -626,7 +629,6 @@
           "description": "Capture any insights or observations from your free dialogue",
           "placeholder": "Share any thoughts, insights, or observations from your conversation..."
         },
-        "endSession": "End Session",
         "hostControl": "The host will control when to end this phase"
       },
       "inPerson": {
@@ -641,7 +643,8 @@
         "controls": {
           "title": "Session Controls",
                     "startSession": "Start Session",
-          "nextPhase": "Next Phase"
+          "nextPhase": "Next Phase",
+          "launchNewSession": "Launch New Session"
         },
         "phase": {
           "waiting": "Waiting to Start",
@@ -679,6 +682,17 @@
           "repeatRounds": "Repeat Rounds (Roles Will Rotate)",
           "repeatRoundsDescription": "Start a new set of rounds with rotated roles so everyone experiences different positions",
           "startDialogos": "Start Dialogos"
+        },
+        "dialogos": {
+          "welcome": "Welcome to Dialogos!",
+          "description": "You've completed the structured dialectic practice. Now you're entering a free-flowing conversation where you can:",
+          "benefits": {
+            "shareInsights": "Share insights from your structured practice",
+            "exploreTopics": "Explore topics that emerged during the session",
+            "deepListening": "Continue practising deep listening together",
+            "openConversation": "Have open, unstructured conversation"
+          },
+          "noRestrictions": "No more role restrictions! Everyone can speak freely and naturally."
         },
         "roleSelection": {
           "speaker": {
@@ -762,6 +776,9 @@
           "title": "Temporary Observer",
           "description": "Wait for your turn to participate actively",
           "badge": "Temporary"
+        },
+        "observer-temporary": {
+          "title": "Temporary Observer"
         },
         "permanent": {
           "description": "Observe the entire session without participating",
@@ -1265,7 +1282,7 @@
         },
         "roundTransition": {
           "title": "Round Transition",
-          "guidance": "Now state what you appreciated from what the Speaker said and also what you feel remains un-answered ready to take us into the next round."
+          "guidance": "When the Scribe has finished their feedback state what you appreciated from what the Speaker said and also what you anticipate, this could be what you feel remains un-addressed. This sets us up ready to take us into the next round."
         }
       },
       "scribe": {

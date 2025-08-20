@@ -66,6 +66,21 @@ export const MobileScribeInterface: React.FC<MobileScribeInterfaceProps> = ({
           </p>
         </div>
 
+        {/* Scribe Feedback Phase Indicator */}
+        {session.currentPhase === 'scribe-feedback' && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-orange-400 to-red-500 rounded-xl shadow-lg border-2 border-orange-300">
+            <div className="text-center">
+              <div className="text-2xl mb-2">📝</div>
+              <h2 className="text-lg font-bold text-white mb-1">
+                {t('dialectic.session.scribeFeedback.title')}
+              </h2>
+              <p className="text-orange-100 text-sm">
+                {t('dialectic.session.scribeFeedback.scribeMessage', { round: roundNumber })}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Previous Scribe Notes Section */}
         {initialNotes && initialNotes.trim() && roundNumber > 1 && (session.currentPhase === 'round' || session.currentPhase === 'scribe-feedback') && (
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl shadow-lg p-4 mb-4 border border-blue-200 dark:border-blue-700">

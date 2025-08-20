@@ -3,7 +3,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { SessionContext, SessionParticipant } from '../types/sessionContext';
 import { QRCodeSVG } from 'qrcode.react';
 import { FirestoreSessionService } from '../services/firestoreSessionService';
-import { ScribeFeedback } from './ScribeFeedback';
+import { useNavigate } from 'react-router-dom';
 
 interface InPersonSessionProps {
   session: SessionContext;
@@ -17,6 +17,7 @@ export const InPersonSession: React.FC<InPersonSessionProps> = ({
   session,
   participants}) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   
   // Helper function to get only mobile participants (excluding the host)
   const getMobileParticipants = () => {
@@ -33,7 +34,7 @@ export const InPersonSession: React.FC<InPersonSessionProps> = ({
   const hasListener = participants.some(p => p.role === 'listener');
   const canStartSession = hasSpeaker && hasListener;
   const [currentRound, setCurrentRound] = useState<number>(1);
-  const [currentPhase, setCurrentPhase] = useState<'waiting' | 'round' | 'scribe-feedback' | 'round-complete' | 'free-dialogue' | 'completed'>('waiting');
+  const [currentPhase, setCurrentPhase] = useState<'waiting' | 'round' | 'scribe-feedback' | 'round-complete' | 'free-dialogue' | 'completed' | 'reflection'>('waiting');
   const [sessionQRCode, setSessionQRCode] = useState<string>('');
   const [showRoundOptions, setShowRoundOptions] = useState<boolean>(false);
 
@@ -150,8 +151,11 @@ export const InPersonSession: React.FC<InPersonSessionProps> = ({
   const handleEndSession = async () => {
     try {
       // End the session
-      await FirestoreSessionService.endSession(session.sessionId, session.hostId);
-      setCurrentPhase('completed');
+      const updatedSession = await FirestoreSessionService.endSession(session.sessionId, session.hostId);
+      if (updatedSession) {
+        const newPhase = updatedSession.currentPhase || 'completed';
+        setCurrentPhase(newPhase as 'waiting' | 'round' | 'scribe-feedback' | 'round-complete' | 'free-dialogue' | 'completed' | 'reflection');
+      }
       setShowRoundOptions(false);
     } catch (error) {
       console.error('Failed to end session:', error);
@@ -233,21 +237,6 @@ export const InPersonSession: React.FC<InPersonSessionProps> = ({
               <li>{t('dialectic.session.inPerson.checkIn.ready')}</li>
             </ul>
           </div>
-        </div>
-      )}
-
-      {/* Scribe Feedback Phase */}
-      {currentPhase === 'scribe-feedback' && (
-        <div className="mb-6">
-          <ScribeFeedback
-            session={session}
-            currentUserId={session.hostId}
-            currentUserName={session.hostName}
-            participants={participants}
-            onComplete={handleNextPhase}
-            isHost={true}
-            notes={session.scribeNotes?.[currentRound] || ''}
-          />
         </div>
       )}
 
@@ -372,9 +361,22 @@ export const InPersonSession: React.FC<InPersonSessionProps> = ({
                 onClick={handleEndSession}
                 className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
               >
-                {t('dialectic.session.inPerson.controlButtons.endSession')}
+                {t('shared.actions.endSession')}
               </button>
             )}
+
+            {currentPhase === 'completed' && (
+              <div className="text-center space-y-4">
+                <button
+                  onClick={() => navigate('/practice/create')}
+                  className="px-6 py-3 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors"
+                >
+                  {t('dialectic.session.inPerson.controls.launchNewSession')}
+                </button>
+              </div>
+            )}
+
+
           </div>
         </div>
       </div>
@@ -414,3 +416,4 @@ export const InPersonSession: React.FC<InPersonSessionProps> = ({
     </div>
   );
 };
+

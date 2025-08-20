@@ -79,7 +79,7 @@ export const FreeDialoguePhase: React.FC<FreeDialoguePhaseProps> = ({
               onClick={onEndSession}
               className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
             >
-              {t('dialectic.session.freeDialogue.endSession')}
+              {t('shared.actions.endSession')}
             </button>
           )}
         </div>

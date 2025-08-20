@@ -5,6 +5,8 @@ import { FirestoreSessionService } from '../services/firestoreSessionService';
 import { MobileSpeakerInterface } from './mobile/MobileSpeakerInterface';
 import { MobileListenerInterface } from './mobile/MobileListenerInterface';
 import { MobileScribeInterface } from './mobile/MobileScribeInterface';
+import { MobileObserverInterface } from './mobile/MobileObserverInterface';
+import { MobileDialogosInterface } from './mobile/MobileDialogosInterface';
 
 interface MobileParticipantInterfaceProps {
   session: SessionContext;
@@ -221,58 +223,15 @@ export const MobileParticipantInterface: React.FC<MobileParticipantInterfaceProp
             roundNumber={liveSession.currentRound || 1}
           />
         );
+      case 'observer':
+      case 'observer-temporary':
+        return <MobileObserverInterface {...commonProps} />;
       default:
         return <WaitingInterface />;
     }
   };
 
-  const DialogosInterface = () => (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 p-4">
-      <div className="max-w-md mx-auto">
-        <div className="text-center space-y-6">
-          <div className="animate-pulse">
-            <div className="w-16 h-16 bg-green-500 rounded-full mx-auto mb-4 flex items-center justify-center">
-              <span className="text-white text-2xl">💬</span>
-            </div>
-          </div>
-          <h1 className="text-2xl font-bold text-green-900 dark:text-green-100">
-            Free Dialogue (Dialogos)
-          </h1>
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg space-y-4">
-            <p className="text-green-800 dark:text-green-200 text-lg font-medium">
-              Welcome to Dialogos!
-            </p>
-            <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
-              You've completed the structured dialectic practice. Now you're entering a free-flowing conversation where you can:
-            </p>
-            <ul className="text-left space-y-2 text-sm text-gray-600 dark:text-gray-400">
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">•</span>
-                Share insights from your structured practice
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">•</span>
-                Explore topics that emerged during the session
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">•</span>
-                Continue practising deep listening together
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">•</span>
-                Have open, unstructured conversation
-              </li>
-            </ul>
-            <div className="mt-6 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <p className="text-sm text-green-700 dark:text-green-300">
-                <strong>No more role restrictions!</strong> Everyone can speak freely and naturally.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  const DialogosInterface = () => <MobileDialogosInterface />;
 
   const WaitingInterface = () => (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4">
@@ -289,7 +248,11 @@ export const MobileParticipantInterface: React.FC<MobileParticipantInterfaceProp
           </p>
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {t('shared.common.yourRole')}: {currentRole ? (currentRole === 'observer' ? t('shared.roles.observer') : t(`dialectic.roles.${currentRole}.title`)) : 'No Role'}
+              {t('shared.common.yourRole')}: {currentRole ? (
+                currentRole === 'observer' ? t('shared.roles.observer') :
+                currentRole === 'observer-temporary' ? t('shared.roles.observer') :
+                t(`dialectic.roles.${currentRole}.title`)
+              ) : 'No Role'}
             </p>
             {/* Show current phase and round if session is active */}
             {liveSession.currentPhase && liveSession.currentPhase !== 'waiting' && (
@@ -327,7 +290,11 @@ export const MobileParticipantInterface: React.FC<MobileParticipantInterfaceProp
             </div>
             <div className="text-right">
               <div className="text-xs text-gray-500 dark:text-gray-400">
-                {currentRole ? (currentRole === 'observer' ? t('shared.roles.observer') : t(`dialectic.roles.${currentRole}.title`)) : 'No Role'}
+                {currentRole ? (
+                  currentRole === 'observer' || currentRole === 'observer-temporary' || currentRole === 'observer-permanent' 
+                    ? t('shared.roles.observer') 
+                    : t(`dialectic.roles.${currentRole}.title`)
+                ) : 'No Role'}
               </div>
               {/* Show current phase and round */}
               {liveSession.currentPhase && liveSession.currentPhase !== 'waiting' && (

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
-import { SessionData, JoinData } from '../types/sessionTypes';
+import { SessionData } from '../types/sessionTypes';
 import { FirestoreSessionService } from '../services/firestoreSessionService';
 
 interface InPersonRoleSelectionProps {

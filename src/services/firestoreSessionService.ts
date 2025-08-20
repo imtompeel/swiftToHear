@@ -103,8 +103,6 @@ export class FirestoreSessionService {
 
       // For in-person sessions, allow joining without a role (participants will choose later)
       if (session.sessionType === 'in-person') {
-        const mobileParticipants = session.participants.filter(p => p.id !== session.hostId);
-        const participantCount = mobileParticipants.length;
         
         // For in-person sessions, always join without a role initially
         // Participants will choose their role after joining
@@ -488,9 +486,12 @@ export class FirestoreSessionService {
         throw new Error('Only the host can end the session');
       }
 
-      // Move to reflection phase
+      // For in-person sessions, move to completed phase
+      // For video sessions, move to reflection phase
+      const targetPhase = session.sessionType === 'in-person' ? 'completed' : 'reflection';
+      
       await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
-        currentPhase: 'reflection',
+        currentPhase: targetPhase,
         phaseStartTime: serverTimestamp()
       });
 

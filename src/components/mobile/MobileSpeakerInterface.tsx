@@ -72,6 +72,21 @@ export const MobileSpeakerInterface: React.FC<MobileSpeakerInterfaceProps> = ({
           </p>
         </div>
 
+        {/* Scribe Feedback Phase Indicator */}
+        {session.currentPhase === 'scribe-feedback' && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-orange-400 to-red-500 rounded-xl shadow-lg border-2 border-orange-300">
+            <div className="text-center">
+              <div className="text-2xl mb-2">📝</div>
+              <h2 className="text-lg font-bold text-white mb-1">
+                {t('dialectic.session.scribeFeedback.title')}
+              </h2>
+              <p className="text-orange-100 text-sm">
+                {t('dialectic.session.scribeFeedback.speakerMessage', { round: session.currentRound || 1 })}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Topic Section */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-4">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">

@@ -5,6 +5,7 @@ import { SessionData, JoinData } from '../types/sessionTypes';
 interface SessionJoinProps {
   session: SessionData | null;
   onJoinSession: (joinData: JoinData) => void;
+  onRoleSelect: (role: string) => void;
   currentUserId: string;
   currentUserName: string;
   isFirstTime?: boolean;

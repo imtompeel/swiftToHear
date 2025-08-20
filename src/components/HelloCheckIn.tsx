@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
-import { VideoCall } from './VideoCall';
 import { HoverTimer } from './HoverTimer';
 
 import { SessionContext, SessionParticipant } from '../types/sessionContext';
@@ -16,13 +15,9 @@ interface HelloCheckInProps {
 }
 
 export const HelloCheckIn: React.FC<HelloCheckInProps> = ({
-  session,
   participants,
   onComplete,
-  currentUserId,
-  currentUserName,
   isHost = false,
-  hideVideo = false
 }) => {
   const { t } = useTranslation();
   const duration = 2 * 60 * 1000; // 2 minutes default
