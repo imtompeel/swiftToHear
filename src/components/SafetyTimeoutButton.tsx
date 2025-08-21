@@ -5,35 +5,60 @@ interface SafetyTimeoutButtonProps {
   onRequestTimeout: () => void;
   onEndTimeout: () => void;
   isTimeoutActive: boolean;
+  canEndTimeout?: boolean;
   className?: string;
+  onToggleVideo?: () => void; // Optional video toggle function
 }
 
 export const SafetyTimeoutButton: React.FC<SafetyTimeoutButtonProps> = ({
   onRequestTimeout,
   onEndTimeout,
   isTimeoutActive,
-  className = ''
+  canEndTimeout = false,
+  className = '',
+  onToggleVideo
 }) => {
   const { t } = useTranslation();
 
   if (isTimeoutActive) {
-    return (
-      <button
-        onClick={onEndTimeout}
-        className={`flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white rounded-lg transition-colors duration-200 ${className}`}
-        title={t('safety.timeout.endTooltip')}
-      >
-        <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
-        <span className="text-white text-sm font-medium">
-          {t('shared.actions.endTimeout')}
-        </span>
-      </button>
-    );
+    if (canEndTimeout) {
+      return (
+        <button
+          onClick={onEndTimeout}
+          className={`flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white rounded-lg transition-colors duration-200 ${className}`}
+          title={t('safety.timeout.endTooltip')}
+        >
+          <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+          <span className="text-white text-sm font-medium">
+            {t('shared.actions.endTimeout')}
+          </span>
+        </button>
+      );
+    } else {
+      return (
+        <div className={`flex items-center space-x-2 px-4 py-2 bg-gray-500 text-white rounded-lg ${className}`}>
+          <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+          <span className="text-white text-sm font-medium">
+            {t('shared.common.timeoutActive')}
+          </span>
+        </div>
+      );
+    }
   }
+
+  const handleRequestTimeout = () => {
+    // First toggle video off if function is provided
+    if (onToggleVideo) {
+      console.log('Safety timeout button: Toggling video off');
+      onToggleVideo();
+    }
+    // Then request the timeout
+    onRequestTimeout();
+  };
 
   return (
     <button
-      onClick={onRequestTimeout}
+      onClick={handleRequestTimeout}
       className={`flex items-center space-x-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 ${className}`}
       title={t('safety.timeout.requestTooltip')}
     >

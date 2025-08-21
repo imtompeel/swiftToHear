@@ -4,6 +4,7 @@ import { FirestoreSessionService } from '../services/firestoreSessionService';
 export interface TimeoutState {
   isActive: boolean;
   requestedBy: string | null;
+  requestedByUserName: string | null;
   startTime: number | null;
   isVideoDisabled: boolean;
 }
@@ -12,6 +13,7 @@ export interface UseSafetyTimeoutProps {
   sessionId: string;
   currentUserId: string;
   currentUserName: string;
+  isHost?: boolean;
   sessionTimeoutState?: {
     isActive: boolean;
     requestedBy: string | null;
@@ -25,12 +27,14 @@ export const useSafetyTimeout = ({
   sessionId,
   currentUserId,
   currentUserName,
+  isHost = false,
   sessionTimeoutState,
   onTimeoutStateChange
 }: UseSafetyTimeoutProps) => {
   const [timeoutState, setTimeoutState] = useState<TimeoutState>({
     isActive: false,
     requestedBy: null,
+    requestedByUserName: null,
     startTime: null,
     isVideoDisabled: false
   });
@@ -41,9 +45,15 @@ export const useSafetyTimeout = ({
       const newState: TimeoutState = {
         isActive: sessionTimeoutState.isActive,
         requestedBy: sessionTimeoutState.requestedBy,
+        requestedByUserName: sessionTimeoutState.requestedByUserName,
         startTime: sessionTimeoutState.startTime ? new Date(sessionTimeoutState.startTime.seconds * 1000).getTime() : null,
         isVideoDisabled: sessionTimeoutState.requestedBy === currentUserId && sessionTimeoutState.isActive
       };
+      console.log('useSafetyTimeout: Syncing with session state:', {
+        sessionTimeoutState,
+        currentUserId,
+        newState
+      });
       setTimeoutState(newState);
     }
   }, [sessionTimeoutState, currentUserId]);
@@ -74,14 +84,26 @@ export const useSafetyTimeout = ({
   // End the timeout early
   const endTimeout = useCallback(async () => {
     try {
+      // Check if current user can end the timeout
+      const canEndTimeout = isHost || timeoutState.requestedBy === currentUserId;
+      
+      if (!canEndTimeout) {
+        console.warn('Safety timeout: User not authorized to end timeout', {
+          currentUserId,
+          isHost,
+          requestedBy: timeoutState.requestedBy
+        });
+        return;
+      }
+      
       // End timeout through session service
       await FirestoreSessionService.endSafetyTimeout(sessionId);
-      console.log('Safety timeout ended by:', currentUserName);
+      console.log('Safety timeout ended by:', currentUserName, 'isHost:', isHost);
 
     } catch (error) {
       console.error('Failed to end safety timeout:', error);
     }
-  }, [sessionId, currentUserName]);
+  }, [sessionId, currentUserName, isHost, timeoutState.requestedBy, currentUserId]);
 
   // No automatic timer - timeout ends only when user chooses to end it
   const startTimeoutTimer = useCallback(() => {
@@ -96,6 +118,7 @@ export const useSafetyTimeout = ({
     updateTimeoutState({
       isActive: true,
       requestedBy: requestingUserId,
+      requestedByUserName: requestingUserName,
       startTime: Date.now(),
       isVideoDisabled: requestingUserId === currentUserId // Only disable video for the requesting user
     });
@@ -115,6 +138,7 @@ export const useSafetyTimeout = ({
     updateTimeoutState({
       isActive: false,
       requestedBy: null,
+      requestedByUserName: null,
       startTime: null,
       isVideoDisabled: false
     });
@@ -132,6 +156,19 @@ export const useSafetyTimeout = ({
 
 
 
+  // Check if current user can end the timeout
+  const canEndTimeout = isHost || timeoutState.requestedBy === currentUserId;
+  
+  // Log permission check for debugging
+  if (timeoutState.isActive) {
+    console.log('Safety timeout permission check:', {
+      currentUserId,
+      isHost,
+      requestedBy: timeoutState.requestedBy,
+      canEndTimeout
+    });
+  }
+
   return {
     // State
     timeoutState,
@@ -147,6 +184,7 @@ export const useSafetyTimeout = ({
     // Utilities
     isTimeoutActive: timeoutState.isActive,
     isVideoDisabled: timeoutState.isVideoDisabled,
-    requestedByMe: timeoutState.requestedBy === currentUserId
+    requestedByMe: timeoutState.requestedBy === currentUserId,
+    canEndTimeout
   };
 };

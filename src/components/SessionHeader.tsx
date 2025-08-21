@@ -54,7 +54,9 @@ export const SessionHeader: React.FC<SessionHeaderProps> = React.memo(({
               onRequestTimeout={safetyTimeout.requestTimeout}
               onEndTimeout={safetyTimeout.endTimeout}
               isTimeoutActive={safetyTimeout.isTimeoutActive}
+              canEndTimeout={safetyTimeout.canEndTimeout}
               className="text-white"
+              onToggleVideo={videoCall.toggleVideo}
             />
             
             {/* Video Connection Status */}

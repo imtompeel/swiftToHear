@@ -24,6 +24,7 @@ import { SessionControls } from './SessionControls';
 import { SessionVideo } from './SessionVideo';
 import { RoleInterface } from './RoleInterface';
 import { SessionErrorDisplay } from './SessionErrorDisplay';
+import { WebRTCService } from '../services/webrtcService';
 // MUI Icons
 import { 
   DragIndicator
@@ -276,17 +277,58 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
     sessionId: session?.sessionId || '',
     currentUserId: currentUser?.id || '',
     currentUserName: currentUser?.name || 'Unknown',
-    sessionTimeoutState: session?.safetyTimeout,
-    onTimeoutStateChange: (timeoutState) => {
-      // Handle timeout state changes - could integrate with video call to disable video
-      console.log('Safety timeout state changed:', timeoutState);
+    isHost: isHost,
+    sessionTimeoutState: session?.safetyTimeout
+  });
+
+  // Function to get user name from user ID
+  const getUserNameById = React.useCallback((userId: string | null): string => {
+    if (!userId || !session?.participants) return 'A participant';
+    
+    const participant = session.participants.find(p => p.id === userId);
+    return participant?.name || 'A participant';
+  }, [session?.participants]);
+
+  // Effect to handle video state changes based on safety timeout
+  React.useEffect(() => {
+    // Only control video if this user requested the timeout
+    if (safetyTimeout.timeoutState.requestedBy === currentUser?.id) {
+      const shouldVideoBeDisabled = safetyTimeout.timeoutState.isVideoDisabled;
+      const isVideoCurrentlyEnabled = videoCall.isVideoEnabled;
       
-      // Disable video for the requesting user during timeout
-      if (timeoutState.isVideoDisabled && videoCall.toggleVideo) {
-        videoCall.toggleVideo();
+      console.log('Safety timeout effect:', {
+        shouldVideoBeDisabled,
+        isVideoCurrentlyEnabled,
+        timeoutState: safetyTimeout.timeoutState,
+        videoCallConnected: videoCall.isConnected,
+        hasToggleVideo: !!videoCall.toggleVideo
+      });
+      
+      // Try to use video call hook first
+      if (videoCall.toggleVideo && videoCall.isConnected) {
+        if (shouldVideoBeDisabled && isVideoCurrentlyEnabled) {
+          // Disable video when timeout starts
+          console.log('Safety timeout: Disabling video for requesting user via video call hook');
+          videoCall.toggleVideo();
+        } else if (!shouldVideoBeDisabled && !isVideoCurrentlyEnabled) {
+          // Re-enable video when timeout ends
+          console.log('Safety timeout: Re-enabling video for requesting user via video call hook');
+          videoCall.toggleVideo();
+        }
+      } else {
+        // Fallback: try to access WebRTC service directly
+        try {
+          const webrtcService = WebRTCService.getInstance();
+          if (webrtcService) {
+            console.log('Safety timeout: Using direct WebRTC service access');
+            webrtcService.toggleVideo(!shouldVideoBeDisabled);
+          }
+        } catch (error) {
+          console.error('Safety timeout: Failed to access WebRTC service directly:', error);
+        }
       }
     }
-  });
+  }, [safetyTimeout.timeoutState.isVideoDisabled, safetyTimeout.timeoutState.requestedBy, videoCall.isVideoEnabled, videoCall.toggleVideo, videoCall.isConnected, currentUser?.id]);
 
   // Use the isolated timer hook
   const currentTimeRemaining = useIsolatedTimer(
@@ -415,7 +457,7 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
                   />
                 ) : (
                   <SafetyTimeoutOtherParticipants
-                    requestedBy={safetyTimeout.timeoutState.requestedBy || 'A participant'}
+                    requestedBy={safetyTimeout.timeoutState.requestedByUserName || getUserNameById(safetyTimeout.timeoutState.requestedBy)}
                   />
                 )}
               </div>
