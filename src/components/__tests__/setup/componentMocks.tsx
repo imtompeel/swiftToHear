@@ -61,8 +61,7 @@ export const SessionCreation: React.FC<any> = (props) => {
           <input data-testid="custom-topic-input" />
           <p>dialectic.creation.topic.suggestions</p>
           <button data-testid="sample-topic-1">What is alive in you right now?</button>
-          <button data-testid="sample-topic-2">What challenge are you facing?</button>
-          <button data-testid="sample-topic-3">What transition are you navigating?</button>
+
         </div>
         
         {/* Session Name */}

@@ -22,10 +22,6 @@ const TopicSuggestions: React.FC<TopicSuggestionsProps> = ({
 
   const sampleTopics = [
     'What is alive in you right now?',
-    'What challenge are you facing?',
-    'What transition are you navigating?',
-    'What are you learning about yourself?',
-    'What matters most to you in this moment?'
   ];
 
   return (

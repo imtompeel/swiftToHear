@@ -634,6 +634,7 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
     endSession,
     completeHelloCheckIn,
     completeScribeFeedback,
+    updateParticipantRole,
     isHost
   } = useSession();
   
@@ -913,7 +914,6 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
             
 
               
-              {/* Hide role interfaces during safety timeout */}
               {!safetyTimeout.isTimeoutActive && session?.currentPhase === 'hello-checkin' && (
                 <HelloCheckIn
                   session={sessionContext!}
@@ -923,6 +923,7 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
                   isHost={isHost}
                   onComplete={completeHelloCheckIn}
                   hideVideo={true} // Hide video since it's now in the persistent area
+                  onUpdateParticipantRole={(userId, role) => updateParticipantRole(role)}
                 />
               )}
 

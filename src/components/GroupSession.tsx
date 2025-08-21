@@ -324,6 +324,8 @@ export const GroupSession: React.FC<GroupSessionProps> = ({
     }
   };
 
+
+
   const handleMonitorGroup = (groupId: string) => {
     // For now, just log - in a real implementation, this might navigate to the group
     console.log('Monitoring group:', groupId);
@@ -508,7 +510,6 @@ export const GroupSession: React.FC<GroupSessionProps> = ({
             participants={currentGroup.participants}
             currentUserId={currentUserId}
             currentUserName={currentUserName}
-            videoCall={videoCall}
             onComplete={() => {
               if (isHost) {
                 FirestoreGroupSessionService.updateGroupPhase(sessionId, groupId, 'listening');

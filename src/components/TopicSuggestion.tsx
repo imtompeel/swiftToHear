@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
-import { useTheme } from '../contexts/ThemeContext';
 import { TopicSuggestion as TopicSuggestionType } from '../types/sessionTypes';
 
 interface TopicSuggestionProps {
@@ -17,7 +16,6 @@ const TopicSuggestion: React.FC<TopicSuggestionProps> = ({
   onVoteForTopic
 }) => {
   const { t } = useTranslation();
-  const { theme } = useTheme();
   const [newTopic, setNewTopic] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -52,13 +50,6 @@ const TopicSuggestion: React.FC<TopicSuggestionProps> = ({
 
   const sampleTopics = [
     'What is alive in you right now?',
-    'What challenge are you facing?',
-    'What transition are you navigating?',
-    'What are you learning about yourself?',
-    'What matters most to you in this moment?',
-    'What would you like to explore today?',
-    'What question is calling to you?',
-    'What are you curious about?'
   ];
 
   return (

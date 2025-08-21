@@ -46,6 +46,8 @@ export class SessionPhaseService {
     }
   }
 
+
+
   // Complete hello check-in phase (only host can call this)
   static async completeHelloCheckIn(sessionId: string, hostId: string): Promise<SessionData | null> {
     try {

@@ -21,10 +21,6 @@ const TopicSuggestions: React.FC<TopicSuggestionsProps> = ({
   // Sample topics for quick addition
   const sampleTopics = [
     'What is alive in you right now?',
-    'What challenge are you facing?',
-    'What transition are you navigating?',
-    'What are you learning about yourself?',
-    'What matters most to you in this moment?'
   ];
 
   const handleAddTopicSuggestion = async () => {

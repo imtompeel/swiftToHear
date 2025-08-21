@@ -16,6 +16,7 @@
       "continue": "Continue",
       "back": "Back",
       "next": "Next",
+      "previous": "Previous",
       "finish": "Finish",
       "close": "Close",
       "save": "Save",
@@ -38,7 +39,11 @@
       "continueToSession": "Continue to Session",
       "quickAddTopics": "Quick Add Topics",
       "copyLink": "Copy Link",
-      "endTimeout": "End Timeout"
+      "endTimeout": "End Timeout",
+      "mute": "Mute",
+      "unmute": "Unmute",
+      "startVideo": "Start Video",
+      "stopVideo": "Stop Video"
     },
     "common": {
       "email": "Email address",
@@ -873,7 +878,6 @@
 
 
         "sessionStarted": "Session has started",
-        "chooseRole": "Choose Your Role",
         "onlyObserverAvailable": "Only observer roles are available. All active participation roles have been taken."
       },
       "hostTopics": {
@@ -1048,6 +1052,16 @@
       "groupSession": {
         "title": "Group Session Lobby",
         "description": "Review group assignments and prepare for your session"
+      },
+      "videoLobby": {
+        "title": "Video Lobby",
+        "description": "Test your video and audio connection before the session begins",
+        "technicalCheck": "Technical Check",
+        "technicalCheckDescription": "Ensure your camera and microphone are working properly. You can see all participants and they can see you.",
+        "startSession": "Start Session",
+        "connected": "Connected",
+        "connecting": "Connecting...",
+        "connectionError": "Connection Error"
       },
       "sessionInfo": {
 

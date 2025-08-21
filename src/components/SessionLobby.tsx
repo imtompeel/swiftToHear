@@ -3,7 +3,8 @@ import { useTranslation } from '../hooks/useTranslation';
 import { useTheme } from '../contexts/ThemeContext';
 import { SessionData } from '../types/sessionTypes';
 import { FivePersonGroupingChoice } from './FivePersonGroupingChoice';
-import { RoleSelection, SelectedRoleDisplay, TopicSuggestions } from './lobby';
+import { TopicSuggestions } from './lobby';
+import { VideoLobby } from './VideoLobby';
 
 interface SessionLobbyProps {
   session: SessionData;
@@ -38,37 +39,11 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
   const [showStartConfirmation, setShowStartConfirmation] = useState(false);
   const [showHostLeaveConfirmation, setShowHostLeaveConfirmation] = useState(false);
   const [showFivePersonChoice, setShowFivePersonChoice] = useState(false);
-  const [isClearingRole, setIsClearingRole] = useState(false);
 
   // Get current participant
   const currentParticipant = session.participants.find(p => p.id === currentUserId);
-  
-  // Use session data for role state, but respect the clearing flag
-  const hasRole = isClearingRole ? false : (currentParticipant?.role && currentParticipant.role !== '');
-  
-  // Reset clearing flag when session data updates
-  React.useEffect(() => {
-    if (isClearingRole && currentParticipant?.role === '') {
-      setIsClearingRole(false);
-    }
-  }, [currentParticipant?.role, isClearingRole]);
 
-  // Get available roles - handle both temporary and permanent observers
-  const totalParticipants = session.participants.length + (session.hostRole === 'participant' ? 1 : 0);
-  
-  // For 2-person sessions, only speaker and listener roles are available (no scribe)
-  const baseRoles = totalParticipants === 2 ? ['speaker', 'listener'] : ['speaker', 'listener', 'scribe'];
-  const observerRoles = ['observer-temporary', 'observer-permanent'];
-  
-  // Check if any observer role is taken (including host if they're an observer)
-  const hasObserver = session.participants.some(p => 
-    p.role === 'observer' || p.role === 'observer-temporary' || p.role === 'observer-permanent'
-  ) || session.hostRole === 'observer-permanent';
-  
-  const availableRoles = [
-    ...baseRoles.filter(role => !session.participants.some(p => p.role === role && p.role !== '')),
-    ...(hasObserver ? [] : observerRoles)
-  ];
+
 
   const readyParticipants = session.participants.filter(p => p.status === 'ready');
   // For hosts, we only count non-host participants as ready
@@ -77,21 +52,13 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
   // Host can start session if all non-host participants are ready, or if they're the only participant
   const allNonHostParticipantsReady = readyNonHostParticipants.length === nonHostParticipants.length && nonHostParticipants.length > 0;
   
-  // For in-person sessions, check if there's at least one speaker and one listener
-  const hasSpeaker = session.participants.some(p => p.role === 'speaker');
-  const hasListener = session.participants.some(p => p.role === 'listener');
-  const hasRequiredRoles = session.sessionType === 'in-person' ? (hasSpeaker && hasListener) : true;
-  
-  const canStartSession = isHost && hasRole && hasRequiredRoles && (allNonHostParticipantsReady || session.participants.length === 1);
+  const canStartSession = isHost && (allNonHostParticipantsReady || session.participants.length === 1);
 
 
   // Debug logging
   console.log('SessionLobby Debug:', {
     currentUserId,
     currentParticipant,
-    hasRole,
-    isClearingRole,
-    availableRoles,
     isHost,
     sessionHostId: session.hostId,
     sessionType: session.sessionType,
@@ -100,18 +67,10 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
     readyNonHostParticipants: readyNonHostParticipants.length,
     nonHostParticipants: nonHostParticipants.length,
     allNonHostParticipantsReady,
-    hasSpeaker,
-    hasListener,
-    hasRequiredRoles,
-    canStartSession,
-    hostHasRole: hasRole
+    canStartSession
   });
 
-  const handleRoleSelect = (role: string) => {
-    console.log('Role selected:', role, 'for user:', currentUserId);
-    setIsClearingRole(false);
-    onUpdateParticipantRole(currentUserId, role);
-  };
+
 
   const handleReadyToggle = () => {
     const newReadyState = !isReady;
@@ -150,6 +109,8 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
     setShowFivePersonChoice(false);
     onModalStateChange?.(false);
   };
+
+
 
   const handleLeaveSession = () => {
     if (isHost) {
@@ -194,31 +155,62 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
 
 
 
-  const getRoleTips = () => {
-    const currentParticipant = session.participants.find(p => p.id === currentUserId);
-    if (!currentParticipant) return '';
 
-    switch (currentParticipant.role) {
-      case 'speaker':
-        return t('dialectic.lobby.speakerTips');
-      case 'listener':
-        return t('dialectic.lobby.listenerTips');
-      case 'scribe':
-        return t('dialectic.lobby.scribeTips');
-      case 'observer':
-        return t('shared.guidance.observeDynamics');
-      default:
-        return '';
-    }
-  };
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8" data-testid="session-lobby-component">
-      <div className="text-center space-y-2">
+      <div className="text-center space-y-4">
         <h1 className="text-3xl font-bold text-primary-900 dark:text-primary-100">
           {t('dialectic.lobby.title')}
         </h1>
+        
+        {/* Session Information - Moved to top */}
+        <div className="bg-secondary-50 dark:bg-secondary-800 rounded-lg p-4 space-y-3" data-testid="session-lobby-info">
+          <h2 className="text-xl font-semibold text-primary-900 dark:text-primary-100">
+            {session.sessionName}
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="font-medium text-primary-700 dark:text-primary-300">Duration:</span>
+              <span className="ml-2 text-secondary-600 dark:text-secondary-400">{calculateTotalSessionTime(formatDuration(session.duration))} minutes</span>
+            </div>
+            
+            <div>
+              <span className="font-medium text-primary-700 dark:text-primary-300">Host:</span>
+              <span className="ml-2 text-secondary-600 dark:text-secondary-400">{session.hostName}</span>
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Video Lobby - Show for video sessions */}
+      {session.sessionType === 'video' && (
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg shadow-lg p-4 mb-6 border border-blue-200 dark:border-blue-700">
+          <div className="mb-4">
+            <div className="flex items-center space-x-2 mb-2">
+              <span className="text-2xl">📹</span>
+              <h2 className="text-lg font-semibold text-primary-900 dark:text-primary-100">
+                {t('dialectic.lobby.videoLobby.title')}
+              </h2>
+            </div>
+            <p className="text-sm text-secondary-600 dark:text-secondary-400">
+              {t('dialectic.lobby.videoLobby.description')}
+            </p>
+          </div>
+          
+          <VideoLobby
+            sessionId={session.sessionId}
+            groupId="lobby"
+            currentUserId={currentUserId}
+            currentUserName={currentParticipant?.name || 'Unknown'}
+            participants={session.participants}
+            isHost={isHost}
+            onStartSession={() => {}} // No-op since we're in the lobby
+            onLeaveSession={() => {}} // No-op since we're in the lobby
+          />
+        </div>
+      )}
 
       {/* Host Controls - Moved to top */}
       {isHost && (
@@ -233,21 +225,9 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
               {t('shared.actions.startSession')}
             </button>
             
-            {!hasRole && isHost && (
-              <p className="text-sm text-secondary-600 dark:text-secondary-400 mt-2">
-                Please select your role before starting the session
-              </p>
-            )}
-            {!allNonHostParticipantsReady && nonHostParticipants.length > 0 && hasRole && (
+            {!allNonHostParticipantsReady && nonHostParticipants.length > 0 && (
               <p className="text-sm text-secondary-600 dark:text-secondary-400 mt-2">
                 Waiting for {nonHostParticipants.length - readyNonHostParticipants.length} more participant{nonHostParticipants.length - readyNonHostParticipants.length === 1 ? '' : 's'} to be ready
-              </p>
-            )}
-            {session.sessionType === 'in-person' && !hasRequiredRoles && hasRole && (
-              <p className="text-sm text-secondary-600 dark:text-secondary-400 mt-2">
-                {!hasSpeaker && !hasListener ? 'Need at least one speaker and one listener to start' :
-                 !hasSpeaker ? 'Need at least one speaker to start' :
-                 !hasListener ? 'Need at least one listener to start' : ''}
               </p>
             )}
           </div>
@@ -305,55 +285,15 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
         </div>
       )}
 
-      {/* Session Information */}
-      <div className="bg-secondary-50 dark:bg-secondary-800 rounded-lg p-6 space-y-4" data-testid="session-lobby-info">
-        <h2 className="text-xl font-semibold text-primary-900 dark:text-primary-100">
-          {session.sessionName}
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-          <div>
-            <span className="font-medium text-primary-700 dark:text-primary-300">Duration:</span>
-            <span className="ml-2 text-secondary-600 dark:text-secondary-400">{calculateTotalSessionTime(formatDuration(session.duration))} minutes</span>
-          </div>
-          
-          <div>
-            <span className="font-medium text-primary-700 dark:text-primary-300">Topic:</span>
-            <span className="ml-2 text-secondary-600 dark:text-secondary-400">{session.topic}</span>
-          </div>
-          
-          <div>
-            <span className="font-medium text-primary-700 dark:text-primary-300">Host:</span>
-            <span className="ml-2 text-secondary-600 dark:text-secondary-400">{session.hostName}</span>
-          </div>
-        </div>
-      </div>
 
-      {/* Dynamic Layout: Role Selection or Topic Suggestions */}
-      {(session.groupConfiguration?.autoAssignRoles !== true || !session.groupConfiguration) && (
-        <>
-          {/* Show Role Selection when no role is selected */}
-          {!hasRole && (
-            <RoleSelection
-              currentParticipant={currentParticipant}
-              availableRoles={availableRoles}
-              totalParticipants={session.participants.length + (session.hostRole === 'participant' ? 1 : 0)}
-              onRoleSelect={handleRoleSelect}
-              hasRole={!!hasRole}
-            />
-          )}
 
-          {/* Show Topic Suggestions when role is selected */}
-          {hasRole && (
-            <TopicSuggestions
-              session={session}
-              currentUserId={currentUserId}
-              onAddTopicSuggestion={onAddTopicSuggestion}
-              onVoteForTopic={onVoteForTopic}
-            />
-          )}
-        </>
-      )}
+      {/* Topic Suggestions - Always show in lobby */}
+      <TopicSuggestions
+        session={session}
+        currentUserId={currentUserId}
+        onAddTopicSuggestion={onAddTopicSuggestion}
+        onVoteForTopic={onVoteForTopic}
+      />
 
       {/* Auto-assign roles message */}
       {session.groupConfiguration?.autoAssignRoles && (
@@ -374,65 +314,11 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
 
 
 
-      {/* Countdown and Status */}
-      <div className="text-center space-y-4">
-        <div className="text-sm text-secondary-600 dark:text-secondary-400" data-testid="participants-readiness">
-          {readyNonHostParticipants.length} participants ready
-        </div>
-      </div>
 
-      {/* Selected Role Display - Show above participants when role is selected */}
-      {(session.groupConfiguration?.autoAssignRoles !== true || !session.groupConfiguration) && hasRole && (
-        <SelectedRoleDisplay
-          currentParticipant={currentParticipant}
-          onRoleChange={() => {
-            console.log('Change role clicked - clearing role');
-            // Clear the role to go back to role selection
-            setIsClearingRole(true);
-            onUpdateParticipantRole(currentUserId, '');
-          }}
-        />
-      )}
 
-      {/* Participant List */}
-      <div className="space-y-4" data-testid="participant-list" aria-label={t('shared.common.participants')}>
-        <h3 className="text-lg font-medium text-primary-900 dark:text-primary-100">
-          Participants
-        </h3>
-        
-        <div className="bg-white dark:bg-secondary-800 rounded-lg border border-secondary-200 dark:border-secondary-600 p-4 space-y-3">
-          {session.participants.map((participant) => (
-            <div key={participant.id} className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <span className="font-medium text-primary-900 dark:text-primary-100">{participant.name}</span>
-                <span className="text-secondary-500 dark:text-secondary-400">
-                  ({participant.role || 'No role selected'})
-                </span>
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <div 
-                  className={`w-3 h-3 rounded-full ${
-                    participant.status === 'ready' ? 'bg-green-500' : 
-                    participant.status === 'not-ready' ? 'bg-yellow-500' : 'bg-red-500'
-                  }`}
-                  data-testid={`participant-${participant.status}-${participant.id}`}
-                />
-                
-                {participant.connectionStatus && (
-                  <div 
-                    className={`w-2 h-2 rounded-full ${
-                      participant.connectionStatus === 'good' ? 'bg-green-400' : 
-                      participant.connectionStatus === 'poor' ? 'bg-yellow-400' : 'bg-red-400'
-                    }`}
-                    data-testid={`connection-status-${participant.connectionStatus}`}
-                  />
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+
+
+
 
       {/* Waiting for Participants */}
       {session.participants.length < session.minParticipants && (
@@ -464,13 +350,15 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
 
       {/* Preparation Tips - Improved Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Role Preparation Tips */}
-        <div className="bg-gradient-to-br from-accent-50 to-accent-100 dark:from-accent-900 dark:to-accent-800 rounded-xl p-6 border border-accent-200 dark:border-accent-700" data-testid="role-preparation-tips">
+        {/* General Preparation Tips */}
+        <div className="bg-gradient-to-br from-accent-50 to-accent-100 dark:from-accent-900 dark:to-accent-800 rounded-xl p-6 border border-accent-200 dark:border-accent-700" data-testid="preparation-tips">
           <div className="flex items-center mb-4">
             <span className="text-2xl mr-3">💡</span>
             <h4 className="font-semibold text-accent-900 dark:text-accent-100">Preparation Tips</h4>
           </div>
-          <p className="text-sm text-accent-700 dark:text-accent-200 leading-relaxed">{getRoleTips()}</p>
+          <p className="text-sm text-accent-700 dark:text-accent-200 leading-relaxed">
+            You'll be assigned a role at the start of the session. Focus on preparing for deep listening and authentic sharing.
+          </p>
         </div>
 
         {/* Tech Check */}

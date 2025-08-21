@@ -289,6 +289,8 @@ export const useSession = (externalUserId?: string, externalUserName?: string) =
     }
   }, [session, isHost, currentUserId]);
 
+
+
   // Complete scribe feedback phase (only host can call this)
   const completeScribeFeedback = useCallback(async () => {
     if (!session || !isHost) return;
