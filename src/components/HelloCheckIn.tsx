@@ -13,7 +13,7 @@ interface HelloCheckInProps {
   currentUserName: string;
   isHost?: boolean;
   hideVideo?: boolean;
-  onUpdateParticipantRole?: (userId: string, role: string) => void;
+  onUpdateParticipantRole?: (role: string) => void;
 }
 
 export const HelloCheckIn: React.FC<HelloCheckInProps> = ({
@@ -72,7 +72,7 @@ export const HelloCheckIn: React.FC<HelloCheckInProps> = ({
   // Handle role selection
   const handleRoleSelect = (role: string) => {
     if (onUpdateParticipantRole) {
-      onUpdateParticipantRole(currentUserId, role);
+      onUpdateParticipantRole(role);
     }
   };
 

@@ -72,7 +72,9 @@ export const useVideoCall = ({
           console.log('Participant left:', participantId);
           setState(prev => {
             const newPeerStreams = new Map(prev.peerStreams);
+            const hadStream = newPeerStreams.has(participantId);
             newPeerStreams.delete(participantId);
+            console.log('🟡 VIDEO - Removed peer stream for:', participantId, 'had stream:', hadStream);
             return { ...prev, peerStreams: newPeerStreams };
           });
         },
@@ -95,9 +97,11 @@ export const useVideoCall = ({
           }
         },
         onStreamReceived: (participantId: string, stream: MediaStream) => {
+          console.log('🟢 VIDEO - Stream received for participant:', participantId, 'stream active:', stream.active, 'tracks:', stream.getTracks().length);
           setState(prev => {
             const newPeerStreams = new Map(prev.peerStreams);
             newPeerStreams.set(participantId, stream);
+            console.log('🟢 VIDEO - Added peer stream for:', participantId, 'total streams:', newPeerStreams.size);
             return { ...prev, peerStreams: newPeerStreams };
           });
         }
@@ -115,7 +119,7 @@ export const useVideoCall = ({
           localStreamRef.current = localStream;
         }
 
-        // Join session
+        // Join session with current participants
         await webrtcService.current.joinSession(participants);
       }
     } catch (error) {
@@ -125,7 +129,7 @@ export const useVideoCall = ({
         error: error instanceof Error ? error.message : 'Failed to initialize video call'
       }));
     }
-  }, [sessionId, currentUserId, participants]); // Removed isActive and state dependencies
+  }, [sessionId, currentUserId, isActive, state.isVideoEnabled, state.isMuted]); // Removed participants dependency
 
   // Handle disconnection with auto-recovery
   const handleDisconnection = useCallback(() => {
@@ -161,6 +165,20 @@ export const useVideoCall = ({
       initializeWebRTC();
     }
   }, [sessionId, currentUserId]); // Removed isActive and initializeWebRTC from dependencies
+
+  // Handle participant updates without re-initializing WebRTC
+  useEffect(() => {
+    if (isInitialized.current && webrtcService.current && isActive && participants.length > 0) {
+      // Only update participants if we're already connected and have participants
+      // This prevents disrupting existing video connections when roles are updated
+      console.log('Updating participants list without re-initializing WebRTC:', participants.length, 'participants');
+      
+      // Use the new updateParticipants method that preserves existing connections
+      webrtcService.current.updateParticipants(participants).catch(error => {
+        console.error('Failed to update participants:', error);
+      });
+    }
+  }, [participants, isActive]); // Only depend on participants and isActive
 
   // Handle isActive state changes
   useEffect(() => {
@@ -237,6 +255,20 @@ export const useVideoCall = ({
             });
           }
         }
+
+        // Check peer stream health
+        state.peerStreams.forEach((stream, participantId) => {
+          if (!stream.active || stream.getTracks().length === 0) {
+            console.warn('Health check: Invalid peer stream detected for:', participantId, 'active:', stream.active, 'tracks:', stream.getTracks().length);
+            // Remove invalid stream
+            setState(prev => {
+              const newPeerStreams = new Map(prev.peerStreams);
+              newPeerStreams.delete(participantId);
+              console.log('🟡 VIDEO - Health check removed invalid stream for:', participantId);
+              return { ...prev, peerStreams: newPeerStreams };
+            });
+          }
+        });
       }, 5000); // Check every 5 seconds
       
       return () => {
@@ -246,7 +278,7 @@ export const useVideoCall = ({
         }
       };
     }
-  }, [isActive, state.isVideoEnabled, state.isMuted]);
+  }, [isActive, state.isVideoEnabled, state.isMuted, state.peerStreams]);
 
   // Separate cleanup effect that only runs on unmount
   useEffect(() => {
@@ -321,6 +353,15 @@ export const useVideoCall = ({
     return participant?.role || 'unknown';
   }, [participants]);
 
+  // Update participants without disrupting connections
+  const updateParticipants = useCallback((newParticipants: Array<{ id: string; name: string; role: string; status: 'ready' | 'not-ready' | 'connecting' }>) => {
+    if (webrtcService.current && isInitialized.current) {
+      webrtcService.current.updateParticipants(newParticipants).catch(error => {
+        console.error('Failed to update participants:', error);
+      });
+    }
+  }, []);
+
   return {
     // State
     ...state,
@@ -331,6 +372,7 @@ export const useVideoCall = ({
     toggleMute,
     toggleVideo,
     leaveCall,
+    updateParticipants,
     getParticipantDisplayName,
     getParticipantRole,
     

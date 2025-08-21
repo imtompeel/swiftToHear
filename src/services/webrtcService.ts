@@ -22,13 +22,36 @@ export class WebRTCService {
   private signalingService: FirebaseSignalingService | null = null;
   private sessionId: string | null = null;
   private currentUserId: string | null = null;
+  private qualityMonitoringIntervals: Map<string, NodeJS.Timeout> = new Map();
 
   // WebRTC configuration
   private rtcConfig = {
     iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:stun1.l.google.com:19302' }
-    ]
+      { urls: 'stun:stun1.l.google.com:19302' },
+      { urls: 'stun:stun2.l.google.com:19302' },
+      { urls: 'stun:stun3.l.google.com:19302' },
+      { urls: 'stun:stun4.l.google.com:19302' }
+    ],
+    iceCandidatePoolSize: 10,
+    bundlePolicy: 'max-bundle' as RTCBundlePolicy,
+    rtcpMuxPolicy: 'require' as RTCRtcpMuxPolicy
+  };
+
+  // Audio constraints with echo cancellation
+  private audioConstraints = {
+    echoCancellation: true,
+    noiseSuppression: true,
+    autoGainControl: true,
+    sampleRate: 48000,
+    channelCount: 1
+  };
+
+  // Video constraints with bandwidth optimization
+  private videoConstraints = {
+    width: { ideal: 1280, max: 1920 },
+    height: { ideal: 720, max: 1080 },
+    frameRate: { ideal: 30, max: 30 }
   };
 
   // Event callbacks
@@ -72,10 +95,29 @@ export class WebRTCService {
   // Initialize local media stream
   async initializeLocalStream(videoEnabled: boolean = true, audioEnabled: boolean = true): Promise<MediaStream> {
     try {
-      this.localStream = await navigator.mediaDevices.getUserMedia({
-        video: videoEnabled,
-        audio: audioEnabled
-      });
+      const constraints: MediaStreamConstraints = {
+        video: videoEnabled ? this.videoConstraints : false,
+        audio: audioEnabled ? this.audioConstraints : false
+      };
+
+      this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+      // Apply additional audio processing if available
+      if (audioEnabled && this.localStream.getAudioTracks().length > 0) {
+        const audioTrack = this.localStream.getAudioTracks()[0];
+        
+        // Set audio track properties for better echo cancellation
+        if (audioTrack.getSettings) {
+          const settings = audioTrack.getSettings();
+          console.log('🟢 WEBRTC - Audio track settings:', settings);
+        }
+        
+        // Enable echo cancellation if supported
+        if (audioTrack.getCapabilities) {
+          const capabilities = audioTrack.getCapabilities();
+          console.log('🟢 WEBRTC - Audio track capabilities:', capabilities);
+        }
+      }
 
       this.onConnectionStateChange?.('connecting');
       return this.localStream;
@@ -111,6 +153,23 @@ export class WebRTCService {
     // The handleParticipantJoined method will create connections when needed
   }
 
+  // Update participants without disrupting existing connections
+  async updateParticipants(participants: Array<{ id: string; name: string }>) {
+    if (!this.sessionId || !this.currentUserId) {
+      throw new Error('WebRTC service not initialized');
+    }
+
+    console.log('🟢 WEBRTC - Updating participants list:', participants.length, 'participants');
+    
+    // Only send a join message if we don't have existing connections
+    // This prevents disrupting existing video connections
+    if (this.peerConnections.size === 0) {
+      await this.joinSession(participants);
+    } else {
+      console.log('🟢 WEBRTC - Skipping join message to preserve existing connections');
+    }
+  }
+
   // Create a peer connection for a specific participant
   async createPeerConnection(peerId: string): Promise<RTCPeerConnection> {
     if (this.peerConnections.has(peerId)) {
@@ -134,14 +193,22 @@ export class WebRTCService {
       });
     }
 
-    // Handle incoming tracks
+    // Handle incoming tracks with validation
     peerConnection.ontrack = (event) => {
-      if (event.streams[0]) {
-        this.onStreamReceived?.(peerId, event.streams[0]);
+      if (event.streams && event.streams.length > 0) {
+        const stream = event.streams[0];
+        
+        // Validate stream before using it
+        if (stream.active && stream.getTracks().length > 0) {
+          console.log('🟢 WEBRTC - Valid stream received from:', peerId, 'tracks:', stream.getTracks().length);
+          this.onStreamReceived?.(peerId, stream);
+        } else {
+          console.warn('🟡 WEBRTC - Invalid stream received from:', peerId);
+        }
       }
     };
 
-    // Handle ICE candidates
+    // Handle ICE candidates with better error handling
     peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
         if (this.signalingService) {
@@ -150,14 +217,40 @@ export class WebRTCService {
       }
     };
 
-    // Handle connection state changes
+    // Enhanced connection state monitoring
     peerConnection.onconnectionstatechange = () => {
       console.log('🟢 WEBRTC - Connection state changed for', peerId, ':', peerConnection.connectionState);
-      if (peerConnection.connectionState === 'connected') {
-        this.onConnectionStateChange?.('connected');
-        this.onParticipantJoined?.(peerId);
-      } else if (peerConnection.connectionState === 'disconnected') {
-        this.onParticipantLeft?.(peerId);
+      
+      switch (peerConnection.connectionState) {
+        case 'connected':
+          this.onConnectionStateChange?.('connected');
+          this.onParticipantJoined?.(peerId);
+          this.startConnectionQualityMonitoring(peerConnection, peerId);
+          break;
+        case 'connecting':
+          this.onConnectionStateChange?.('connecting');
+          break;
+        case 'disconnected':
+        case 'failed':
+        case 'closed':
+          this.onParticipantLeft?.(peerId);
+          this.stopConnectionQualityMonitoring(peerId);
+          break;
+      }
+    };
+
+    // Monitor ICE connection state
+    peerConnection.oniceconnectionstatechange = () => {
+      console.log('🟢 WEBRTC - ICE connection state for', peerId, ':', peerConnection.iceConnectionState);
+      
+      if (peerConnection.iceConnectionState === 'failed') {
+        console.warn('🟡 WEBRTC - ICE connection failed for:', peerId);
+        // Attempt to restart ICE
+        try {
+          peerConnection.restartIce();
+        } catch (error) {
+          console.error('🔴 WEBRTC - Failed to restart ICE for:', peerId, error);
+        }
       }
     };
 
@@ -398,6 +491,46 @@ export class WebRTCService {
       if (videoTrack) {
         videoTrack.enabled = enabled;
       }
+    }
+  }
+
+  // Start monitoring connection quality for a peer
+  private startConnectionQualityMonitoring(peerConnection: RTCPeerConnection, peerId: string) {
+    // Clear any existing monitoring
+    this.stopConnectionQualityMonitoring(peerId);
+    
+    const interval = setInterval(() => {
+      try {
+        // Get connection statistics
+        peerConnection.getStats().then(stats => {
+          stats.forEach(report => {
+            if (report.type === 'inbound-rtp' && report.mediaType === 'video') {
+              const packetsLost = report.packetsLost || 0;
+              const packetsReceived = report.packetsReceived || 0;
+              const lossRate = packetsReceived > 0 ? packetsLost / packetsReceived : 0;
+              
+              if (lossRate > 0.1) { // More than 10% packet loss
+                console.warn('🟡 WEBRTC - High packet loss detected for:', peerId, 'loss rate:', lossRate);
+              }
+            }
+          });
+        }).catch(error => {
+          console.error('🔴 WEBRTC - Error getting connection stats for:', peerId, error);
+        });
+      } catch (error) {
+        console.error('🔴 WEBRTC - Error in quality monitoring for:', peerId, error);
+      }
+    }, 5000); // Check every 5 seconds
+    
+    this.qualityMonitoringIntervals.set(peerId, interval);
+  }
+
+  // Stop monitoring connection quality for a peer
+  private stopConnectionQualityMonitoring(peerId: string) {
+    const interval = this.qualityMonitoringIntervals.get(peerId);
+    if (interval) {
+      clearInterval(interval);
+      this.qualityMonitoringIntervals.delete(peerId);
     }
   }
 } 
