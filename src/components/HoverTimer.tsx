@@ -97,20 +97,24 @@ interface HoverTimerProps {
   timeRemaining: number; // in milliseconds
   phaseDuration?: number; // in milliseconds - for calculating color percentages
   className?: string;
+  isActive?: boolean; // whether the timer is in an active session
 }
 
 export const HoverTimer: React.FC<HoverTimerProps> = ({
   timeRemaining,
   phaseDuration,
-  className = ''
+  className = '',
+  isActive = true
 }) => {
   const { t } = useTranslation();
   const [isAlwaysVisible, setIsAlwaysVisible] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [hasPlayedStart, setHasPlayedStart] = useState(false);
   const [hasPlayedWarning, setHasPlayedWarning] = useState(false);
   const [hasPlayedEnd, setHasPlayedEnd] = useState(false);
   const [isMuted, setIsMuted] = useState(getMuteState());
   const prevTimeRemaining = useRef(timeRemaining);
+  const sessionStartTimeRef = useRef<number | null>(null);
 
   // Auto-show timer when 10 seconds or less remain and handle sound notifications
   useEffect(() => {
@@ -119,30 +123,52 @@ export const HoverTimer: React.FC<HoverTimerProps> = ({
       setIsAlwaysVisible(true);
     }
 
-    // Check for 30-second warning (more precise timing)
-    if (timeRemaining <= 30000 && timeRemaining > 29900 && !hasPlayedWarning && !isMuted) {
-      setTimeout(() => {
-        chimePlayer.play();
-      }, 100); // Small delay to ensure stable state
+    // Track when session starts (when timer first becomes active)
+    if (timeRemaining > 0 && sessionStartTimeRef.current === null) {
+      sessionStartTimeRef.current = Date.now();
+    }
+
+    // Only play chimes if timer is active and not muted
+    if (!isActive || isMuted) {
+      return;
+    }
+
+    // Check for start chime (1 second into the timer)
+    const oneSecond = 1000;
+    const sessionDuration = phaseDuration || (7 * 60 * 1000);
+    const timeElapsed = sessionDuration - timeRemaining;
+    
+    if (timeElapsed >= oneSecond && timeElapsed < oneSecond + 100 && !hasPlayedStart) {
+      console.log('Playing start chime at', timeElapsed, 'ms');
+      chimePlayer.play();
+      setHasPlayedStart(true);
+    }
+
+    // Check for 30-second warning (exactly at 30 seconds remaining)
+    if (timeRemaining <= 30000 && timeRemaining > 29950 && !hasPlayedWarning) {
+      console.log('Playing 30-second warning chime');
+      chimePlayer.play();
       setHasPlayedWarning(true);
     }
 
-    // Check for timer end (more precise timing)
-    if (timeRemaining <= 0 && timeRemaining > -1000 && !hasPlayedEnd && !isMuted) {
-      setTimeout(() => {
-        chimePlayer.play();
-      }, 100); // Small delay to ensure stable state
+    // Check for timer end (when timer reaches 0)
+    if (timeRemaining <= 0 && timeRemaining > -500 && !hasPlayedEnd) {
+      console.log('Playing end chime');
+      chimePlayer.play();
       setHasPlayedEnd(true);
     }
 
-    // Reset flags when timer resets
-    if (timeRemaining > prevTimeRemaining.current) {
+    // Reset flags when timer resets (when time increases, indicating a new session)
+    if (timeRemaining > prevTimeRemaining.current + 1000) {
+      console.log('Timer reset detected, clearing chime flags');
+      setHasPlayedStart(false);
       setHasPlayedWarning(false);
       setHasPlayedEnd(false);
+      sessionStartTimeRef.current = null;
     }
 
     prevTimeRemaining.current = timeRemaining;
-  }, [timeRemaining, hasPlayedWarning, hasPlayedEnd]);
+  }, [timeRemaining, hasPlayedStart, hasPlayedWarning, hasPlayedEnd, isMuted, phaseDuration, isActive]);
 
   const formatTime = (ms: number) => {
     const minutes = Math.floor(ms / 60000);

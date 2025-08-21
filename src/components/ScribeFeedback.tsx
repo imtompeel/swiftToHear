@@ -68,6 +68,7 @@ export const ScribeFeedback: React.FC<ScribeFeedbackProps> = ({
               <HoverTimer 
                 timeRemaining={timeRemaining}
                 className="mt-4 sm:mt-0 sm:ml-4"
+                isActive={false}
               />
             </div>
           </div>

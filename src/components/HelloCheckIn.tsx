@@ -184,6 +184,7 @@ export const HelloCheckIn: React.FC<HelloCheckInProps> = ({
             <HoverTimer 
               timeRemaining={timeRemaining}
               className="text-gray-900 dark:text-white"
+              isActive={false}
             />
           </div>
           
