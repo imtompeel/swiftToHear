@@ -100,6 +100,20 @@
       "title": "Enraciné dans la Parole",
       "content": "Nous fondons cette approche dans l'Écriture. Nous croyons qu'écouter n'est pas seulement une compétence de communication ; c'est une pratique spirituelle. Elle s'aligne avec la douceur et la patience que Paul a exhortées dans 2 Timothée. Elle crée les conditions où nous pouvons corriger sans quereller, et enseigner sans orgueil. C'est le sol dans lequel l'amour, la patience et la tolérance mutuelle peuvent grandir."
     },
+    "pdfResource": {
+      "title": "Téléchargez votre Guide d'Écoute",
+      "subtitle": "Une ressource complète pour approfondir votre pratique d'écoute",
+      "description": "Obtenez notre guide détaillé sur les trois rôles de la pratique d'écoute : Orateur, Auditeur et Scribe. Cette ressource vous aidera à comprendre chaque rôle en profondeur et à vous préparer pour des conversations significatives.",
+      "downloadButton": "Télécharger le Guide PDF",
+      "fileSize": "PDF • Téléchargement Gratuit",
+      "features": {
+        "title": "Ce qui est inclus :",
+        "speaker": "Orientation et préparation du rôle d'orateur",
+        "listener": "Techniques d'auditeur et méthodes de réflexion",
+        "scribe": "Responsabilités du scribe et capture d'insights",
+        "practice": "Exercices de pratique et amorces de conversation"
+      }
+    },
     "invitation": {
       "title": "Une invitation",
       "description": "Nous planifions un événement pilote pour explorer cette pratique d'écoute ensemble—ouvert à tous ceux qui veulent essayer. Que vous soyez confiant ou curieux, prudent ou sceptique, vous êtes les bienvenus.",

@@ -31,6 +31,32 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen">
+      {/* Top Banner */}
+      <section className="bg-accent-600 dark:bg-accent-700 py-3 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center space-x-3">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span className="text-white font-medium text-sm sm:text-base">
+                {t('landing.pdfResource.title')}
+              </span>
+            </div>
+            <a
+              href="/Listener, Speaker, Scribe.pdf"
+              download
+              className="inline-flex items-center bg-white text-accent-600 hover:bg-accent-50 font-semibold py-2 px-4 rounded-lg text-sm transition-colors duration-200 shadow-sm hover:shadow-md"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              {t('landing.pdfResource.downloadButton')}
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Hero Section */}
       <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-primary-900 dark:to-secondary-900 overflow-hidden transition-colors duration-200">
         <div className="max-w-4xl mx-auto text-center relative">
@@ -148,6 +174,30 @@ const LandingPage: React.FC = () => {
               </div>
             </div>
 
+            {/* PDF Download Call-to-Action */}
+            <div className="bg-accent-50 dark:bg-accent-900/20 rounded-lg p-6 mb-8 border border-accent-200 dark:border-accent-700">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100 mb-2">
+                    Want to learn more about these roles?
+                  </h3>
+                  <p className="text-secondary-600 dark:text-secondary-400 text-sm">
+                    Download our detailed guide to understand each role deeply and prepare for meaningful conversations.
+                  </p>
+                </div>
+                <a
+                  href="/Listener, Speaker, Scribe.pdf"
+                  download
+                  className="inline-flex items-center bg-accent-600 hover:bg-accent-700 dark:bg-accent-500 dark:hover:bg-accent-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  {t('landing.pdfResource.downloadButton')}
+                </a>
+              </div>
+            </div>
+
             <p className="text-lg text-secondary-700 dark:text-secondary-300 leading-relaxed mb-8">
               {t('landing.practising.rotation')}
             </p>
@@ -250,8 +300,109 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* PDF Resource Download Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary-100 to-accent-100 dark:from-primary-800 dark:to-accent-800 transition-colors duration-200">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold text-secondary-900 dark:text-secondary-100 mb-4">
+              {t('landing.pdfResource.title')}
+            </h2>
+            <p className="text-xl text-secondary-700 dark:text-secondary-300 mb-6">
+              {t('landing.pdfResource.subtitle')}
+            </p>
+            <p className="text-lg text-secondary-600 dark:text-secondary-400 max-w-2xl mx-auto">
+              {t('landing.pdfResource.description')}
+            </p>
+          </div>
 
+          <div className="grid lg:grid-cols-2 gap-8 items-center">
+            {/* Download Card */}
+            <div className="bg-white dark:bg-secondary-800 rounded-xl shadow-lg border border-accent-200 dark:border-accent-700 p-8 text-center">
+              <div className="mb-6">
+                <div className="w-16 h-16 bg-accent-100 dark:bg-accent-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-accent-600 dark:text-accent-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-2">
+                  Listener, Speaker, Scribe
+                </h3>
+                <p className="text-secondary-600 dark:text-secondary-400 text-sm mb-4">
+                  {t('landing.pdfResource.fileSize')}
+                </p>
+              </div>
+              
+              <a
+                href="/Listener, Speaker, Scribe.pdf"
+                download
+                className="inline-flex items-center justify-center w-full bg-accent-600 hover:bg-accent-700 dark:bg-accent-500 dark:hover:bg-accent-600 text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                {t('landing.pdfResource.downloadButton')}
+              </a>
+            </div>
 
+            {/* Features List */}
+            <div className="bg-white dark:bg-secondary-800 rounded-xl shadow-lg border border-accent-200 dark:border-accent-700 p-8">
+              <h3 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-6">
+                {t('landing.pdfResource.features.title')}
+              </h3>
+              <div className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 bg-accent-100 dark:bg-accent-800 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg className="w-3 h-3 text-accent-600 dark:text-accent-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-secondary-900 dark:text-secondary-100">{t('shared.roles.speaker')}</h4>
+                    <p className="text-sm text-secondary-600 dark:text-secondary-400">{t('landing.pdfResource.features.speaker')}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 bg-accent-100 dark:bg-accent-800 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg className="w-3 h-3 text-accent-600 dark:text-accent-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-secondary-900 dark:text-secondary-100">{t('shared.roles.listener')}</h4>
+                    <p className="text-sm text-secondary-600 dark:text-secondary-400">{t('landing.pdfResource.features.listener')}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 bg-accent-100 dark:bg-accent-800 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg className="w-3 h-3 text-accent-600 dark:text-accent-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-secondary-900 dark:text-secondary-100">{t('shared.roles.scribe')}</h4>
+                    <p className="text-sm text-secondary-600 dark:text-secondary-400">{t('landing.pdfResource.features.scribe')}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 bg-accent-100 dark:bg-accent-800 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg className="w-3 h-3 text-accent-600 dark:text-accent-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-secondary-900 dark:text-secondary-100">Practice Resources</h4>
+                    <p className="text-sm text-secondary-600 dark:text-secondary-400">{t('landing.pdfResource.features.practice')}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+          
 
 
       {/* Invitation Section */}
@@ -353,9 +504,7 @@ const LandingPage: React.FC = () => {
           <blockquote className="text-xl italic mb-4">
             {t('landing.footer.finalQuote.text')}
           </blockquote>
-          {t('landing.footer.finalQuote.reference') && (
-            <p className="text-secondary-400 dark:text-secondary-500 mb-8">— {t('landing.footer.finalQuote.reference')}</p>
-          )}
+        
           
           <p className="text-sm text-secondary-400 dark:text-secondary-500" style={{ marginTop: t('landing.footer.finalQuote.reference') ? '0' : '2rem' }}>
             {t('landing.footer.copyright')}

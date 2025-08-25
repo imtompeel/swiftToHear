@@ -100,6 +100,20 @@
       "title": "Enraizado en la Palabra",
       "content": "Estamos fundamentando este enfoque en las Escrituras. Creemos que escuchar no es solo una habilidad de comunicación; es una práctica espiritual. Se alinea con la gentileza y paciencia que Pablo instó en 2 Timoteo. Crea las condiciones donde podemos corregir sin pelear, y enseñar sin orgullo. Es el suelo en el que el amor, la paciencia y la tolerancia mutua pueden crecer."
     },
+    "pdfResource": {
+      "title": "Descarga tu Guía de Escucha",
+      "subtitle": "Un recurso completo para profundizar tu práctica de escucha",
+      "description": "Obtén nuestra guía detallada sobre los tres roles de la práctica de escucha: Orador, Oyente y Escriba. Este recurso te ayudará a entender cada rol profundamente y prepararte para conversaciones significativas.",
+      "downloadButton": "Descargar Guía PDF",
+      "fileSize": "PDF • Descarga Gratuita",
+      "features": {
+        "title": "Qué incluye:",
+        "speaker": "Orientación y preparación del rol de orador",
+        "listener": "Técnicas de oyente y métodos de reflexión",
+        "scribe": "Responsabilidades del escriba y captura de insights",
+        "practice": "Ejercicios de práctica y iniciadores de conversación"
+      }
+    },
     "invitation": {
       "title": "Una invitación",
       "description": "Estamos planeando un evento piloto para explorar esta práctica de escucha juntos—abierto a todos los que quieran intentar. Ya sea que estés confiado o curioso, cauteloso o escéptico, eres bienvenido.",
