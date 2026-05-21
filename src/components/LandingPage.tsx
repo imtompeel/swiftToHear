@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { addEmailSignup } from '../services/emailService';
+import { downloadTrackingService } from '../services/downloadTrackingService';
 import { useTranslation } from '../hooks/useTranslation';
 
 const LandingPage: React.FC = () => {
@@ -29,6 +30,16 @@ const LandingPage: React.FC = () => {
     }
   };
 
+  const handleDownload = async () => {
+    try {
+      // Track the download
+      await downloadTrackingService.trackDownload();
+    } catch (error) {
+      console.error('Error tracking download:', error);
+      // Don't prevent download if tracking fails
+    }
+  };
+
   return (
     <div className="min-h-screen">
       {/* Top Banner */}
@@ -46,6 +57,7 @@ const LandingPage: React.FC = () => {
             <a
               href="/Listener, Speaker, Scribe.pdf"
               download
+              onClick={handleDownload}
               className="inline-flex items-center bg-white text-accent-600 hover:bg-accent-50 font-semibold py-2 px-4 rounded-lg text-sm transition-colors duration-200 shadow-sm hover:shadow-md"
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,6 +200,7 @@ const LandingPage: React.FC = () => {
                 <a
                   href="/Listener, Speaker, Scribe.pdf"
                   download
+                  onClick={handleDownload}
                   className="inline-flex items-center bg-accent-600 hover:bg-accent-700 dark:bg-accent-500 dark:hover:bg-accent-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                 >
                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -215,7 +228,7 @@ const LandingPage: React.FC = () => {
             
             <button
               onClick={() => setIsFormatExpanded(!isFormatExpanded)}
-              className="text-accent-700 dark:text-accent-400 hover:text-accent-800 dark:hover:text-accent-300 font-medium mb-4 flex items-center gap-2 transition-colors"
+              className="text-accent-700 dark:text-accent-400 hover:text-accent-800 dark:hover:text-accent-300 font-extrabold mb-8 flex items-center gap-3 transition-colors text-2xl sm:text-3xl lg:text-3xl mx-auto"
             >
               <span>{isFormatExpanded ? t('landing.format.showLess') : t('landing.format.showMore')}</span>
               <svg 
@@ -257,7 +270,7 @@ const LandingPage: React.FC = () => {
                   {t('landing.format.pitfalls.title')}
                 </p>
                 
-                <ul className="list-disc list-inside space-y-2 text-secondary-700 dark:text-secondary-300">
+                <ul className="list-disc list-inside space-y-2 text-lg text-secondary-700 dark:text-secondary-300">
                   <li><strong>{t('landing.format.pitfalls.labels.reactiveness')}</strong> {t('landing.format.pitfalls.items.reactiveness')}</li>
                   <li><strong>{t('landing.format.pitfalls.labels.dominance')}</strong> {t('landing.format.pitfalls.items.dominance')}</li>
                   <li><strong>{t('landing.format.pitfalls.labels.losingInsight')}</strong> {t('landing.format.pitfalls.items.losingInsight')}</li>
@@ -270,6 +283,21 @@ const LandingPage: React.FC = () => {
                 <p className="text-lg text-secondary-700 dark:text-secondary-300 leading-relaxed">
                   {t('landing.format.discernment')}
                 </p>
+
+                {/* Protections List from article */}
+                <div className="mt-4">
+                  <h4 className="font-semibold text-secondary-900 dark:text-secondary-100 mb-2">
+                    {t('landing.format.protections.title')}
+                  </h4>
+                  <ul className="list-disc list-inside space-y-2 text-lg text-secondary-700 dark:text-secondary-300">
+                    <li>{t('landing.format.protections.items.trust')}</li>
+                    <li>{t('landing.format.protections.items.selfCorrection')}</li>
+                    <li>{t('landing.format.protections.items.smallGroups')}</li>
+                    <li>{t('landing.format.protections.items.scribing')}</li>
+                    <li>{t('landing.format.protections.items.pace')}</li>
+                    <li>{t('landing.format.protections.items.timeLimits')}</li>
+                  </ul>
+                </div>
               </div>
             )}
 
@@ -335,6 +363,7 @@ const LandingPage: React.FC = () => {
               <a
                 href="/Listener, Speaker, Scribe.pdf"
                 download
+                onClick={handleDownload}
                 className="inline-flex items-center justify-center w-full bg-accent-600 hover:bg-accent-700 dark:bg-accent-500 dark:hover:bg-accent-600 text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
               >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

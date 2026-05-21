@@ -165,7 +165,7 @@
   },
   "landing": {
     "hero": {
-      "subtitle": "The body of Christ is called to speak the truth in love. But how can we speak in love if we have not first learned to listen?",
+      "subtitle": "The body of Christ is called to speak the truth in love. But how can we speak the truth in love if we have not first learned to listen?",
       "description": "A Christadelphian community platform for practising the art of listening. Join us in recovering the spiritual discipline of attentive, compassionate listening through our three-part conversation practice."
     },
     "scripture": {
@@ -203,11 +203,11 @@
     },
     "practising": {
       "title": "Practising the art of listening",
-      "intro1": "If we are to become mature in Christ, we must recover the art of listening—not passive silence, but active, compassionate attention. The kind of listening that Jesus often invited through his poetic and enigmatic statements. His parables, questions, and open-ended encounters called others to listen more deeply—to themselves, to him, and to the movement of God in their lives. This kind of listening slows us down, draws us out, and opens a space where the Wisdom might speak.",
+      "intro1": "If we are to become mature in Christ, we must recover the art of listening—not passive silence, but active, compassionate attention. The kind of listening that Jesus often invited through his poetic and enigmatic statements. His parables, questions, and open-ended encounters called others to listen more deeply—to themselves, to him, and to the movement of God in their lives. This kind of listening slows us down, draws us out, and opens a space where Wisdom might speak.",
       "intro2": "To that end, a small group of us are beginning to experiment with a simple practice designed to help us listen better and trust more deeply in the process of godly conversation. It centres around three roles:",
       "roles": {
         "speaker": {
-          "description": "Shares what's on their heart without interruption, taking time to explore their thoughts and feelings."
+          "description": "Shares what's on their heart, taking time to explore their thoughts and feelings."
         },
         "listener": {
           "description": "Offers full attention and reflects back what they heard, without adding their own thoughts or advice."
@@ -216,9 +216,9 @@
           "description": "Captures key insights and themes that emerge, helping the group remember what was shared."
         }
       },
-      "rotation": "Crucially, these roles rotate. Everyone becomes a speaker, a listener, and a scribe after an allotted time. No one controls the outcome. Instead, we place faith in what can emerge when we listen together in love. As Proverbs 20:5 says, \"The purposes of a person's heart are deep waters, but one who has insight draws them out.\" This practice is a way of drawing out—not just others' words, but the meaning beneath them, even those meanings hidden from ourselves.",
+      "rotation": "Crucially, these roles rotate. Everyone becomes a speaker, a listener, and a scribe after an allotted time. No one controls the outcome. Instead, we place faith in what can emerge when we listen together in love. As Proverbs 20:5 says, \"The purpose in a man's heart is like deep water,but a man of understanding will draw it out.\" This practice is a way of drawing out—not just others' words, but the meaning beneath them, even those meanings hidden from ourselves.",
       "discovery": "As the conversation unfolds, it often leads us to discoveries none of us could have reached alone. As Paul reminds us in 1 Corinthians 13:12, \"For now we see through a glass, darkly; but then face to face: now I know in part; but then shall I know even as also I am known.\" Our understanding is always partial. But through mutual listening, we begin to uncover not only what we don't know, but what we don't know we don't know—the blind spots and assumptions that only another's voice can help illuminate.",
-      "faith": "This practice is not about asserting control over words or ideas, but about cultivating faith in the conversation itself—faith that when we \"submit to one another out of reverence for Christ\" (Ephesians 5:21), something deeper than individual insight can emerge. We begin, as 2 Timothy 2:24–25 teaches, to \"patiently endure,\" \"correct with gentleness,\" and leave room for \"God [to] perhaps grant them repentance leading to a knowledge of the truth.\""
+      "faith": "This practice is not about asserting control over words or ideas, but about cultivating faith in the conversation itself—faith that when we \"submit to one another out of reverence for Christ\" (Ephesians 5:21), something deeper than individual insight can emerge. We begin, as 2 Timothy 2:24–25 teaches, to \"patiently endure,\" \"correct with gentleness,\" and leave room for \"God [to] grant them [or us!] repentance leading to a knowledge of the truth.\""
     },
     "format": {
       
@@ -261,7 +261,18 @@
         }
       },
       "grounding": "This structure is a modern method, but by testing its spirit—discerning whether it aligns with godly wisdom—we find it grounded in Scripture. We are not seeking novelty for its own sake, but new ways to become what we are called to be: a people shaped by love, wisdom, and deep mutual care.",
-      "discernment": "Some may worry that careful listening opens us to harmful or misleading ideas. But to listen is not to agree. Adam's mistake was not listening to Eve—it was obeying against God's command. Throughout Scripture, God's people are called to discern, not dismiss; to test the spirit of what is said, not to fear hearing it. Listening creates the space for such discernment. Inquiry helps us hear more exactly what is being said—so often we react not to what was truly spoken, but to a misunderstanding. The practice of attentive listening slows us down and gives space for clarification, preventing unnecessary conflict and helping the body grow in truth and love."
+      "discernment": "Some may worry that careful listening opens us to harmful or misleading ideas. But to listen is not to agree. In Genesis 3:17 Adam is critiqued for listening to his wife and disobeying God—not for hearing her words, but for giving them authority over God's command. In other cases, like Rehoboam (1 Kings 12), the failure was choosing the wrong advisers. Scripture calls us to test what we hear, not to fear hearing it. Structured listening creates space to slow down, reflect, and weigh words against Scripture so that weak reasoning is realised and self-correction becomes possible. Even in more homogeneous groups, reflecting ideas back accurately and inviting gentle challenge can surface Scripture-shaped discernment and reduce reactive misunderstanding, helping the body grow in truth and love.",
+      "protections": {
+        "title": "Why this structure protects against error:",
+        "items": {
+          "trust": "Unlike debate, the space given to an idea builds trust; having been heard, proponents are more likely to receive correction during others' speaking time. The practice creates better conditions for correction by building trust first.",
+          "selfCorrection": "Ideas are drawn out and explored more completely, making flaws more apparent to the speaker or to others who can respond in their turn. The practice helps people self-correct, which is often more effective than external correction.",
+          "smallGroups": "Discussion occurs in smaller groups, allowing exploration and testing of ideas without involving everyone.",
+          "scribing": "Reflection and scribing create accountability and preserve clarity, preventing misleading claims, as well as good insights from going unnoticed.",
+          "pace": "The slowed pace and rotation of roles encourage discernment, humility, trust, and careful evaluation, helping participants move beyond initial emotional reactions to more thoughtful consideration.",
+          "timeLimits": "Time limits bring balance, preventing any one idea from overwhelming the group."
+        }
+      }
     },
     "rootedInWord": {
       "title": "Rooted in the Word",
@@ -363,10 +374,38 @@
             "title": "Video Sessions",
             "description": "Perfect for remote teams, online workshops, or when participants are geographically distributed."
           },
-          "inPerson": {
-            "title": "In-Person Sessions",
+          "inPersonDevice": {
+            "title": "In-Person (Device-Assisted)",
             "description": "Ideal for face-to-face workshops, team building, or classroom settings where participants are physically present."
+          },
+          "paperBased": {
+            "title": "In-Person (Paper-Based)",
+            "description": "Use the printable guide when devices are impractical. Ideal for small groups, workshops, or youth activities. The PDF includes QR codes that open simple timers on any phone."
           }
+        },
+        "sections": {
+          "gettingStarted": "Getting Started",
+          "duringSession": "During the Session",
+          "hostSetup": "Host Setup",
+          "participantExperience": "Participant Experience",
+          "tips": "Tips",
+          "commonIssues": "Common Issues",
+          "tipsForSuccess": "Tips for Success"
+        },
+        "resources": {
+          "title": "Resources",
+          "paperPdfTitle": "Listener, Speaker, Scribe (PDF)",
+          "paperPdfDescription": "Download the printable guide outlining the three roles and practice flow."
+        },
+        "labels": {
+          "backToAdmin": "Back to Admin Panel",
+          "videoSessions": "Video Sessions",
+          "createSession": "Create Session",
+          "startSession": "Start Session",
+          "roleRotation": "Role rotation",
+          "timer": "Timer",
+          "guidance": "Guidance",
+          "raiseHand": "Raise hand"
         },
         "roles": {
           "title": "Participant Roles",
@@ -467,7 +506,7 @@
       },
       "speaker": {
         "title": "Speaker Role",
-        "description": "Share what's on your heart without interruption",
+        "description": "Share what's on your heart",
         "guidance": {
   
           "pausesWelcome": "Pauses are welcome - the group is with you",

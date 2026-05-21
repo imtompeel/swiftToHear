@@ -20,7 +20,8 @@ class ChimePlayer {
     this.audio.volume = 0.6;
     
     // Mobile-specific audio settings
-    this.audio.muted = false;
+    // Start muted to avoid audible blip during unlock
+    this.audio.muted = true;
     this.audio.autoplay = false;
     
     this.audio.addEventListener('canplaythrough', () => {
@@ -38,9 +39,13 @@ class ChimePlayer {
       this.hasUserInteracted = true;
       // Try to play and immediately pause to unlock audio context
       if (this.audio) {
+        const previousVolume = this.audio.volume;
+        this.audio.volume = 0;
         this.audio.play().then(() => {
           this.audio!.pause();
           this.audio!.currentTime = 0;
+          this.audio!.volume = previousVolume;
+          this.audio!.muted = false;
         }).catch(() => {
           // Ignore errors, just trying to unlock audio
         });

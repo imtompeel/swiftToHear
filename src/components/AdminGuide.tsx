@@ -11,10 +11,10 @@ const AdminGuide: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-secondary-900 dark:text-secondary-100 mb-4">
-            Swift to Hear - Platform Guide
+            Swift to Hear - {t('admin.guide.tableOfContents')}
           </h1>
           <p className="text-lg text-secondary-600 dark:text-secondary-400 max-w-2xl mx-auto">
-            A comprehensive guide to using the Swift to Hear listening practice platform for both video and in-person sessions.
+            {t('admin.dashboard.guide.subtitle')}
           </p>
         </div>
 
@@ -27,28 +27,31 @@ const AdminGuide: React.FC = () => {
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back to Admin Panel
+            {t('admin.dashboard.guide.labels.backToAdmin', 'Back to Admin Panel')}
           </Link>
         </div>
 
         {/* Table of Contents */}
         <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-6 mb-8">
           <h2 className="text-2xl font-semibold text-secondary-900 dark:text-secondary-100 mb-4">
-            Table of Contents
+            {t('admin.dashboard.guide.tableOfContents')}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <a href="#overview" className="block text-accent-600 dark:text-accent-400 hover:text-accent-700 dark:hover:text-accent-300">
-                1. Platform Overview
+                1. {t('admin.dashboard.guide.overview.title')}
               </a>
               <a href="#session-types" className="block text-accent-600 dark:text-accent-400 hover:text-accent-700 dark:hover:text-accent-300">
-                2. Session Types
+                2. {t('admin.dashboard.guide.sessionTypes.title')}
               </a>
               <a href="#video-sessions" className="block text-accent-600 dark:text-accent-400 hover:text-accent-700 dark:hover:text-accent-300">
-                3. Video Sessions
+                3. {t('admin.dashboard.guide.sessionTypes.video.title')}
               </a>
-              <a href="#in-person-sessions" className="block text-accent-600 dark:text-accent-400 hover:text-accent-700 dark:hover:text-accent-300">
-                4. In-Person Sessions
+              <a href="#in-person-digital" className="block text-accent-600 dark:text-accent-400 hover:text-accent-700 dark:hover:text-accent-300">
+                4. {t('admin.dashboard.guide.sessionTypes.inPersonDevice.title')}
+              </a>
+              <a href="#paper-sessions" className="block text-accent-600 dark:text-accent-400 hover:text-accent-700 dark:hover:text-accent-300">
+                5. {t('admin.dashboard.guide.sessionTypes.paperBased.title')}
               </a>
             </div>
             <div className="space-y-2">
@@ -64,6 +67,9 @@ const AdminGuide: React.FC = () => {
               <a href="#troubleshooting" className="block text-accent-600 dark:text-accent-400 hover:text-accent-700 dark:hover:text-accent-300">
                 8. Troubleshooting
               </a>
+              <a href="#resources" className="block text-accent-600 dark:text-accent-400 hover:text-accent-700 dark:hover:text-accent-300">
+                9. Resources
+              </a>
             </div>
           </div>
         </div>
@@ -71,11 +77,11 @@ const AdminGuide: React.FC = () => {
         {/* Platform Overview */}
         <div id="overview" className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-6 mb-8">
           <h2 className="text-2xl font-semibold text-secondary-900 dark:text-secondary-100 mb-4">
-            1. Platform Overview
+            1. {t('admin.dashboard.guide.overview.title')}
           </h2>
           <div className="prose dark:prose-invert max-w-none">
             <p className="text-secondary-700 dark:text-secondary-300 mb-4">
-              Swift to Hear is a structured listening practice platform designed to help participants develop deep listening skills through guided conversations. The platform supports both video-based sessions (for remote participants) and in-person sessions (for face-to-face groups).
+              {t('admin.dashboard.guide.overview.description')}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
               <div className="bg-accent-50 dark:bg-accent-900/20 rounded-lg p-4">
@@ -105,18 +111,18 @@ const AdminGuide: React.FC = () => {
         {/* Session Types */}
         <div id="session-types" className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-6 mb-8">
           <h2 className="text-2xl font-semibold text-secondary-900 dark:text-secondary-100 mb-4">
-            2. Session Types
+            2. {t('admin.dashboard.guide.sessionTypes.title')}
           </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg p-6">
               <h3 className="text-xl font-semibold text-blue-900 dark:text-blue-100 mb-3 flex items-center">
                 <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
-                Video Sessions
+                {t('admin.dashboard.guide.sessionTypes.video.title')}
               </h3>
               <p className="text-blue-800 dark:text-blue-200 mb-4">
-                Perfect for remote teams, online workshops, or when participants are geographically distributed.
+                {t('admin.dashboard.guide.sessionTypes.video.description')}
               </p>
               <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-2">
                 <li>• <strong>Video calls</strong> with all participants visible</li>
@@ -131,10 +137,10 @@ const AdminGuide: React.FC = () => {
                 <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
-                In-Person Sessions
+                {t('admin.dashboard.guide.sessionTypes.inPersonDevice.title')}
               </h3>
               <p className="text-green-800 dark:text-green-200 mb-4">
-                Ideal for face-to-face workshops, team building, or classroom settings where participants are physically present.
+                {t('admin.dashboard.guide.sessionTypes.inPersonDevice.description')}
               </p>
               <ul className="text-sm text-green-700 dark:text-green-300 space-y-2">
                 <li>• <strong>QR code joining</strong> for easy participant access</li>
@@ -144,21 +150,38 @@ const AdminGuide: React.FC = () => {
                 <li>• <strong>No video required</strong> - face-to-face interaction</li>
               </ul>
             </div>
+            <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 rounded-lg p-6 md:col-span-2 md:max-w-xl md:mx-auto">
+              <h3 className="text-xl font-semibold text-amber-900 dark:text-amber-100 mb-3 flex items-center">
+                <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" />
+                </svg>
+                {t('admin.dashboard.guide.sessionTypes.paperBased.title')}
+              </h3>
+              <p className="text-amber-800 dark:text-amber-200 mb-4">
+                {t('admin.dashboard.guide.sessionTypes.paperBased.description')}
+              </p>
+              <ul className="text-sm text-amber-700 dark:text-amber-300 space-y-2">
+                <li>• <strong>Printable handout:</strong> <a href="/Listener, Speaker, Scribe.pdf" className="underline hover:no-underline">Listener, Speaker, Scribe (PDF)</a></li>
+                <li>• <strong>Simple timing:</strong> Use a phone or wall clock</li>
+                <li>• <strong>Role rotation:</strong> Rotate Speaker, Listener, Scribe each round</li>
+                <li>• <strong>Debrief:</strong> Share insights at the end</li>
+              </ul>
+            </div>
           </div>
         </div>
 
         {/* Video Sessions */}
         <div id="video-sessions" className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-6 mb-8">
           <h2 className="text-2xl font-semibold text-secondary-900 dark:text-secondary-100 mb-4">
-            3. Video Sessions
+            3. {t('admin.dashboard.guide.sessionTypes.video.title')}
           </h2>
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100 mb-3">
-                Getting Started
+                {t('admin.dashboard.guide.sections.gettingStarted')}
               </h3>
               <ol className="list-decimal list-inside space-y-2 text-secondary-700 dark:text-secondary-300">
-                <li>Navigate to <Link to="/practice/create" className="text-accent-600 dark:text-accent-400 hover:underline">Create Session</Link></li>
+                <li>{t('admin.dashboard.guide.labels.createSession')}: <Link to="/practice/create" className="text-accent-600 dark:text-accent-400 hover:underline">{t('admin.dashboard.guide.labels.createSession')}</Link></li>
                 <li>Select "Video Call" as the session type</li>
                 <li>Choose your round duration (5-15 minutes)</li>
                 <li>Click "Create Session" to generate a session link</li>
@@ -168,28 +191,28 @@ const AdminGuide: React.FC = () => {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100 mb-3">
-                During the Session
+                {t('admin.dashboard.guide.sections.duringSession')}
               </h3>
               <ul className="space-y-2 text-secondary-700 dark:text-secondary-300">
-                <li>• <strong>Host controls:</strong> Use the "Complete Round" button to progress through phases</li>
-                <li>• <strong>Role rotation:</strong> Roles automatically rotate between rounds</li>
-                <li>• <strong>Timer:</strong> Each participant sees a countdown timer for their speaking time</li>
-                <li>• <strong>Guidance:</strong> Role-specific prompts appear on each participant's screen</li>
-                <li>• <strong>Raise hand:</strong> Listeners can signal when they need the speaker to pause</li>
+                <li>• <strong>{t('admin.dashboard.guide.labels.videoSessions')}:</strong> {t('admin.dashboard.guide.sections.duringSession')}</li>
+                <li>• <strong>{t('admin.dashboard.guide.labels.roleRotation', 'Role rotation')}:</strong> Roles automatically rotate between rounds</li>
+                <li>• <strong>{t('admin.dashboard.guide.labels.timer', 'Timer')}:</strong> Each participant sees a countdown timer for their speaking time</li>
+                <li>• <strong>{t('admin.dashboard.guide.labels.guidance', 'Guidance')}:</strong> Role-specific prompts appear on each participant's screen</li>
+                <li>• <strong>{t('admin.dashboard.guide.labels.raiseHand', 'Raise hand')}:</strong> Listeners can signal when they need the speaker to pause</li>
               </ul>
             </div>
           </div>
         </div>
 
-        {/* In-Person Sessions */}
-        <div id="in-person-sessions" className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-6 mb-8">
+        {/* In-Person (Device-Assisted) */}
+        <div id="in-person-digital" className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-6 mb-8">
           <h2 className="text-2xl font-semibold text-secondary-900 dark:text-secondary-100 mb-4">
-            4. In-Person Sessions
+            4. {t('admin.dashboard.guide.sessionTypes.inPersonDevice.title')}
           </h2>
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100 mb-3">
-                Host Setup
+                {t('admin.dashboard.guide.sections.hostSetup')}
               </h3>
               <ol className="list-decimal list-inside space-y-2 text-secondary-700 dark:text-secondary-300">
                 <li>Navigate to <Link to="/practice/create" className="text-accent-600 dark:text-accent-400 hover:underline">Create Session</Link></li>
@@ -203,7 +226,7 @@ const AdminGuide: React.FC = () => {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100 mb-3">
-                Participant Experience
+                {t('admin.dashboard.guide.sections.participantExperience')}
               </h3>
               <ul className="space-y-2 text-secondary-700 dark:text-secondary-300">
                 <li>• <strong>Mobile interface:</strong> Optimized for phones and tablets</li>
@@ -212,6 +235,38 @@ const AdminGuide: React.FC = () => {
                 <li>• <strong>Guidance cards:</strong> Role-specific prompts and instructions</li>
                 <li>• <strong>Timer display:</strong> Countdown timer with color-coded progress</li>
                 <li>• <strong>Note-taking:</strong> Scribes can capture insights and themes</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Paper-Based Sessions */}
+        <div id="paper-sessions" className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-6 mb-8">
+          <h2 className="text-2xl font-semibold text-secondary-900 dark:text-secondary-100 mb-4">
+            5. {t('admin.dashboard.guide.sessionTypes.paperBased.title')}
+          </h2>
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100 mb-3">
+                Getting Started
+              </h3>
+              <ol className="list-decimal list-inside space-y-2 text-secondary-700 dark:text-secondary-300">
+                <li>Download the printable: <a href="/Listener, Speaker, Scribe.pdf" className="text-accent-600 dark:text-accent-400 hover:underline">Listener, Speaker, Scribe (PDF)</a></li>
+                <li>Choose your round duration (e.g., 5–10 minutes)</li>
+                <li>Assign initial roles (Speaker, Listener, Scribe)</li>
+                <li>Agree on a topic or short reading (optional) and confirm timing</li>
+                <li>Rotate roles each round; debrief at the end</li>
+              </ol>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100 mb-3">
+                Tips
+              </h3>
+              <ul className="space-y-2 text-secondary-700 dark:text-secondary-300">
+                <li>• Use a visible timer (phone, wall clock, or the PDF’s QR code timers)</li>
+                <li>• Scribe captures themes; share briefly after each round</li>
+                <li>• Keep role prompts visible (print or read aloud)</li>
+                <li>• End with a brief reflection and next steps</li>
               </ul>
             </div>
           </div>
@@ -398,6 +453,31 @@ const AdminGuide: React.FC = () => {
                 <li>• Encourage participants to use headphones for better audio quality</li>
                 <li>• Consider running a shorter practice session first</li>
               </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Resources */}
+        <div id="resources" className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-6 mb-8">
+          <h2 className="text-2xl font-semibold text-secondary-900 dark:text-secondary-100 mb-4">
+            9. {t('admin.dashboard.guide.resources.title', 'Resources')}
+          </h2>
+          <div className="space-y-4">
+            <div className="flex items-start justify-between gap-4 border border-accent-200 dark:border-accent-700 rounded-lg p-4">
+              <div>
+                <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100 mb-1">{t('admin.dashboard.guide.resources.paperPdfTitle', 'Listener, Speaker, Scribe (PDF)')}</h3>
+                <p className="text-secondary-700 dark:text-secondary-300 text-sm">{t('admin.dashboard.guide.resources.paperPdfDescription', 'Download the printable guide outlining the three roles and practice flow.')}</p>
+              </div>
+              <a
+                href="/Listener, Speaker, Scribe.pdf"
+                download
+                className="inline-flex items-center bg-accent-600 hover:bg-accent-700 text-white font-semibold px-4 py-2 rounded-md transition-colors"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Download PDF
+              </a>
             </div>
           </div>
         </div>

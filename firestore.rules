@@ -90,6 +90,22 @@ service cloud.firestore {
         request.auth.uid == resource.data.from;
     }
     
+    // Analytics collection for tracking downloads
+    match /analytics/{document} {
+      // Allow anyone to create download events (for tracking)
+      allow create: if true;
+      
+      // Only allow superadmins to read analytics data
+      allow read: if 
+        request.auth != null && 
+        exists(/databases/$(database)/documents/superadmins/$(request.auth.uid));
+      
+      // Allow superadmins to update analytics data
+      allow update: if 
+        request.auth != null && 
+        exists(/databases/$(database)/documents/superadmins/$(request.auth.uid));
+    }
+    
     // Deny all other access by default
     match /{document=**} {
       allow read, write: if false;

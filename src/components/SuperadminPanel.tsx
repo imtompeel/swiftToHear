@@ -4,6 +4,7 @@ import { auth } from '../firebase/config';
 import { signOut, onAuthStateChanged, User } from 'firebase/auth';
 import { getAllEmailSignups, EmailSignup } from '../services/emailService';
 import { SuperadminService, SuperadminUser } from '../services/superadminService';
+import { downloadTrackingService, DownloadStats, DownloadEvent } from '../services/downloadTrackingService';
 import SuperadminLogin from './SuperadminLogin';
 import PlatformFeaturesGrid from './PlatformFeaturesGrid';
 import { useTranslation } from '../hooks/useTranslation';
@@ -13,7 +14,10 @@ const SuperadminPanel: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [superadminUser, setSuperadminUser] = useState<SuperadminUser | null>(null);
   const [signups, setSignups] = useState<EmailSignup[]>([]);
+  const [downloadStats, setDownloadStats] = useState<DownloadStats | null>(null);
+  const [recentDownloads, setRecentDownloads] = useState<DownloadEvent[]>([]);
   const [loading, setLoading] = useState(false);
+  const [downloadsLoading, setDownloadsLoading] = useState(false);
   const [, setError] = useState('');
 
   useEffect(() => {
@@ -24,6 +28,7 @@ const SuperadminPanel: React.FC = () => {
         setSuperadminUser(superadmin);
         if (superadmin?.isSuperadmin) {
           loadSignups();
+          loadDownloadStats();
         }
       } else {
         setSuperadminUser(null);
@@ -42,6 +47,22 @@ const SuperadminPanel: React.FC = () => {
       setError(t('admin.dashboard.superadmin.emailSignups.loadingError'));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadDownloadStats = async () => {
+    try {
+      setDownloadsLoading(true);
+      const [stats, recent] = await Promise.all([
+        downloadTrackingService.getDownloadStats(),
+        downloadTrackingService.getRecentDownloads(5)
+      ]);
+      setDownloadStats(stats);
+      setRecentDownloads(recent);
+    } catch (err) {
+      console.error('Error loading download stats:', err);
+    } finally {
+      setDownloadsLoading(false);
     }
   };
 
@@ -124,22 +145,97 @@ const SuperadminPanel: React.FC = () => {
 
         {/* Stats */}
         <div className="px-4 py-6 sm:px-0">
-          <div className="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg transition-colors duration-200">
-            <div className="px-4 py-5 sm:p-6">
-              <dl>
-                <dt className="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">
-                  {t('admin.dashboard.superadmin.emailSignups.totalSignups')}
-                </dt>
-                <dd className="mt-1 text-3xl font-semibold text-secondary-900 dark:text-secondary-100">
-                  {signups.length}
-                </dd>
-              </dl>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg transition-colors duration-200">
+              <div className="px-4 py-5 sm:p-6">
+                <dl>
+                  <dt className="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">
+                    {t('admin.dashboard.superadmin.emailSignups.totalSignups')}
+                  </dt>
+                  <dd className="mt-1 text-3xl font-semibold text-secondary-900 dark:text-secondary-100">
+                    {signups.length}
+                  </dd>
+                </dl>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg transition-colors duration-200">
+              <div className="px-4 py-5 sm:p-6">
+                <dl>
+                  <dt className="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">
+                    PDF Downloads
+                  </dt>
+                  <dd className="mt-1 text-3xl font-semibold text-secondary-900 dark:text-secondary-100">
+                    {downloadsLoading ? '...' : (downloadStats?.totalDownloads || 0)}
+                  </dd>
+                  {downloadStats?.lastDownloaded && (
+                    <dd className="mt-1 text-sm text-secondary-500 dark:text-secondary-400">
+                      Last: {formatDate(downloadStats.lastDownloaded)}
+                    </dd>
+                  )}
+                </dl>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Platform Features */}
         <PlatformFeaturesGrid />
+
+        {/* Recent Downloads */}
+        <div className="px-4 py-6 sm:px-0">
+          <div className="bg-white dark:bg-secondary-800 shadow overflow-hidden sm:rounded-md transition-colors duration-200">
+            <div className="px-4 py-5 sm:px-6">
+              <h3 className="text-lg leading-6 font-medium text-secondary-900 dark:text-secondary-100">
+                Recent PDF Downloads
+              </h3>
+              <p className="mt-1 max-w-2xl text-sm text-secondary-500 dark:text-secondary-400">
+                Latest downloads of the "Listener, Speaker, Scribe" PDF guide
+              </p>
+            </div>
+            
+            {downloadsLoading ? (
+              <div className="px-4 py-8 text-center">
+                <p className="text-secondary-600 dark:text-secondary-400">Loading download data...</p>
+              </div>
+            ) : recentDownloads.length === 0 ? (
+              <div className="px-4 py-8 text-center">
+                <p className="text-secondary-600 dark:text-secondary-400">No downloads recorded yet</p>
+              </div>
+            ) : (
+              <ul className="divide-y divide-secondary-200 dark:divide-secondary-700">
+                {recentDownloads.map((download) => (
+                  <li key={download.id} className="px-4 py-4 sm:px-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-800 flex items-center justify-center">
+                            <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                          </div>
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-secondary-900 dark:text-secondary-100">
+                            PDF Download
+                          </div>
+                          <div className="text-sm text-secondary-500 dark:text-secondary-400">
+                            {formatDate(download.timestamp)}
+                          </div>
+                          {download.userAgent && (
+                            <div className="text-xs text-secondary-400 dark:text-secondary-500 mt-1 truncate max-w-xs">
+                              {download.userAgent.includes('Mobile') ? '📱 Mobile' : '💻 Desktop'}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
 
         {/* Email List */}
         <div className="px-4 py-6 sm:px-0">
