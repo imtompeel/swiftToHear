@@ -1,13 +1,6 @@
 import { FirebaseSignalingService, SignalingMessage } from './firebaseSignalingService';
-
-export interface WebRTCMessage {
-  type: 'offer' | 'answer' | 'ice-candidate' | 'join' | 'leave';
-  from: string;
-  to?: string;
-  data: any;
-  sessionId: string;
-  timestamp: number;
-}
+import { getIceServers } from './iceServers';
+import type { VideoProvider, VideoProviderCallbacks, VideoParticipant } from './video/types';
 
 export interface PeerConnection {
   peerId: string;
@@ -15,27 +8,27 @@ export interface PeerConnection {
   stream?: MediaStream;
 }
 
-export class WebRTCService {
+export class WebRTCService implements VideoProvider {
   private static instance: WebRTCService;
   private peerConnections: Map<string, PeerConnection> = new Map();
   private localStream: MediaStream | null = null;
   private signalingService: FirebaseSignalingService | null = null;
   private sessionId: string | null = null;
+  private baseSessionId: string | null = null;
   private currentUserId: string | null = null;
-  private qualityMonitoringIntervals: Map<string, NodeJS.Timeout> = new Map();
+  private qualityMonitoringIntervals: Map<string, ReturnType<typeof setInterval>> = new Map();
+  private pendingIceCandidates: Map<string, RTCIceCandidateInit[]> = new Map();
+  private makingOffer: Map<string, boolean> = new Map();
 
-  // WebRTC configuration
-  private rtcConfig = {
+  // WebRTC configuration — iceServers filled at initialize() via getIceServers()
+  private rtcConfig: RTCConfiguration = {
     iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:stun1.l.google.com:19302' },
-      { urls: 'stun:stun2.l.google.com:19302' },
-      { urls: 'stun:stun3.l.google.com:19302' },
-      { urls: 'stun:stun4.l.google.com:19302' }
+      { urls: 'stun:stun1.l.google.com:19302' }
     ],
     iceCandidatePoolSize: 10,
-    bundlePolicy: 'max-bundle' as RTCBundlePolicy,
-    rtcpMuxPolicy: 'require' as RTCRtcpMuxPolicy
+    bundlePolicy: 'max-bundle',
+    rtcpMuxPolicy: 'require'
   };
 
   // Audio constraints with echo cancellation
@@ -67,57 +60,63 @@ export class WebRTCService {
     return WebRTCService.instance;
   }
 
+  // Lower ID offers to higher ID — avoids glare when both peers join at once
+  private shouldOfferTo(peerId: string): boolean {
+    return (this.currentUserId || '') < peerId;
+  }
+
   // Initialize the WebRTC service
   async initialize(
     sessionId: string,
     currentUserId: string,
-    callbacks: {
-      onParticipantJoined?: (participantId: string) => void;
-      onParticipantLeft?: (participantId: string) => void;
-      onConnectionStateChange?: (state: 'connected' | 'connecting' | 'disconnected') => void;
-      onStreamReceived?: (participantId: string, stream: MediaStream) => void;
-    }
+    callbacks: VideoProviderCallbacks,
+    options?: { baseSessionId?: string }
   ) {
     // Cleanup existing connections but keep signaling service
     await this.cleanup();
     
     this.sessionId = sessionId;
+    this.baseSessionId = options?.baseSessionId || sessionId;
     this.currentUserId = currentUserId;
     this.onParticipantJoined = callbacks.onParticipantJoined;
     this.onParticipantLeft = callbacks.onParticipantLeft;
     this.onConnectionStateChange = callbacks.onConnectionStateChange;
     this.onStreamReceived = callbacks.onStreamReceived;
 
+    // Resolve STUN/TURN before opening peer connections
+    try {
+      this.rtcConfig = {
+        ...this.rtcConfig,
+        iceServers: await getIceServers()
+      };
+      console.log('🟢 WEBRTC - ICE servers ready:', this.rtcConfig.iceServers?.length);
+    } catch (error) {
+      console.warn('🟡 WEBRTC - Failed to load TURN config, using STUN only:', error);
+    }
+
     // Initialize Firebase signaling service
     await this.initializeSignaling();
+  }
+
+  private stopLocalTracks() {
+    if (this.localStream) {
+      this.localStream.getTracks().forEach(track => track.stop());
+      this.localStream = null;
+    }
   }
 
   // Initialize local media stream
   async initializeLocalStream(videoEnabled: boolean = true, audioEnabled: boolean = true): Promise<MediaStream> {
     try {
+      // Stop any previous tracks before reacquiring media
+      this.stopLocalTracks();
+
       const constraints: MediaStreamConstraints = {
         video: videoEnabled ? this.videoConstraints : false,
         audio: audioEnabled ? this.audioConstraints : false
       };
 
       this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
-
-      // Apply additional audio processing if available
-      if (audioEnabled && this.localStream.getAudioTracks().length > 0) {
-        const audioTrack = this.localStream.getAudioTracks()[0];
-        
-        // Set audio track properties for better echo cancellation
-        if (audioTrack.getSettings) {
-          const settings = audioTrack.getSettings();
-          console.log('🟢 WEBRTC - Audio track settings:', settings);
-        }
-        
-        // Enable echo cancellation if supported
-        if (audioTrack.getCapabilities) {
-          const capabilities = audioTrack.getCapabilities();
-          console.log('🟢 WEBRTC - Audio track capabilities:', capabilities);
-        }
-      }
 
       this.onConnectionStateChange?.('connecting');
       return this.localStream;
@@ -129,15 +128,11 @@ export class WebRTCService {
   }
 
   // Join the session
-  async joinSession(participants: Array<{ id: string; name: string }>) {
+  async joinSession(participants: VideoParticipant[]) {
     if (!this.sessionId || !this.currentUserId) {
       throw new Error('WebRTC service not initialized');
     }
 
-    // Wait a moment for signaling service to be fully initialized
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    // Send join message via Firebase signaling
     if (this.signalingService) {
       try {
         await this.signalingService.sendJoinMessage(participants);
@@ -148,13 +143,10 @@ export class WebRTCService {
     } else {
       console.warn('🟡 WEBRTC - No signaling service available');
     }
-
-    // Don't create peer connections here - let the signaling handle it
-    // The handleParticipantJoined method will create connections when needed
   }
 
   // Update participants without disrupting existing connections
-  async updateParticipants(participants: Array<{ id: string; name: string }>) {
+  async updateParticipants(participants: VideoParticipant[]) {
     if (!this.sessionId || !this.currentUserId) {
       throw new Error('WebRTC service not initialized');
     }
@@ -180,6 +172,8 @@ export class WebRTCService {
       } else {
         // Remove closed connection
         this.peerConnections.delete(peerId);
+        this.pendingIceCandidates.delete(peerId);
+        this.makingOffer.delete(peerId);
       }
     }
 
@@ -291,6 +285,12 @@ export class WebRTCService {
   // Handle participant joining
   private async handleParticipantJoined(participantId: string) {
     try {
+      // Only the lower ID peer creates the offer (avoids glare)
+      if (!this.shouldOfferTo(participantId)) {
+        console.log('🟢 WEBRTC - Waiting for offer from:', participantId);
+        return;
+      }
+
       // Check if we already have a connection for this participant
       if (this.peerConnections.has(participantId)) {
         const existingConnection = this.peerConnections.get(participantId)!.connection;
@@ -299,6 +299,8 @@ export class WebRTCService {
         } else {
           // Remove closed connection
           this.peerConnections.delete(participantId);
+          this.pendingIceCandidates.delete(participantId);
+          this.makingOffer.delete(participantId);
         }
       }
       
@@ -313,15 +315,25 @@ export class WebRTCService {
       if (peerConnection.signalingState === 'closed') {
         return;
       }
+
+      if (peerConnection.signalingState !== 'stable') {
+        console.warn('🟡 WEBRTC - Skipping offer; signaling state is', peerConnection.signalingState);
+        return;
+      }
       
-      // Create and send offer
-      const offer = await peerConnection.createOffer();
-      await peerConnection.setLocalDescription(offer);
-      
-      if (this.signalingService) {
-        await this.signalingService.sendOffer(participantId, offer);
+      this.makingOffer.set(participantId, true);
+      try {
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        
+        if (this.signalingService) {
+          await this.signalingService.sendOffer(participantId, offer);
+        }
+      } finally {
+        this.makingOffer.set(participantId, false);
       }
     } catch (error) {
+      this.makingOffer.set(participantId, false);
       console.error('🔴 WEBRTC - Error handling participant joined:', error);
     }
   }
@@ -333,6 +345,9 @@ export class WebRTCService {
       try {
         peerConnection.connection.close();
         this.peerConnections.delete(participantId);
+        this.pendingIceCandidates.delete(participantId);
+        this.makingOffer.delete(participantId);
+        this.stopConnectionQualityMonitoring(participantId);
         this.onParticipantLeft?.(participantId);
         console.log('🟢 WEBRTC - Closed peer connection for participant:', participantId);
       } catch (error) {
@@ -343,44 +358,108 @@ export class WebRTCService {
 
   // Handle incoming offer
   private async handleOffer(from: string, data: { offer: RTCSessionDescriptionInit }) {
-    const peerConnection = await this.createPeerConnection(from);
-    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
-    
-    // Create and send answer
-    const answer = await peerConnection.createAnswer();
-    await peerConnection.setLocalDescription(answer);
-    
-    if (this.signalingService) {
-      await this.signalingService.sendAnswer(from, answer);
+    try {
+      const peerConnection = await this.createPeerConnection(from);
+      const offerCollision =
+        this.makingOffer.get(from) === true ||
+        peerConnection.signalingState !== 'stable';
+
+      // Polite peer (higher ID) rolls back on glare; impolite peer ignores colliding offer
+      const polite = !this.shouldOfferTo(from);
+      if (offerCollision) {
+        if (!polite) {
+          console.warn('🟡 WEBRTC - Ignoring colliding offer from:', from);
+          return;
+        }
+        console.warn('🟡 WEBRTC - Rolling back local offer due to glare with:', from);
+        await peerConnection.setLocalDescription({ type: 'rollback' });
+      }
+
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+      await this.flushPendingIceCandidates(from);
+      
+      const answer = await peerConnection.createAnswer();
+      await peerConnection.setLocalDescription(answer);
+      
+      if (this.signalingService) {
+        await this.signalingService.sendAnswer(from, answer);
+      }
+    } catch (error) {
+      console.error('🔴 WEBRTC - Error handling offer from', from, error);
     }
   }
 
   // Handle incoming answer
   private async handleAnswer(from: string, data: { answer: RTCSessionDescriptionInit }) {
     const peerConnection = this.peerConnections.get(from);
-    if (peerConnection) {
+    if (!peerConnection) {
+      return;
+    }
+
+    try {
+      if (peerConnection.connection.signalingState !== 'have-local-offer') {
+        console.warn(
+          '🟡 WEBRTC - Ignoring answer in unexpected state:',
+          peerConnection.connection.signalingState
+        );
+        return;
+      }
+
       await peerConnection.connection.setRemoteDescription(new RTCSessionDescription(data.answer));
+      await this.flushPendingIceCandidates(from);
+    } catch (error) {
+      console.error('🔴 WEBRTC - Error handling answer from', from, error);
     }
   }
 
   // Handle incoming ICE candidate
   private async handleIceCandidate(from: string, data: { candidate: any }) {
     const peerConnection = this.peerConnections.get(from);
-    if (peerConnection) {
+    const candidateInit: RTCIceCandidateInit = {
+      candidate: data.candidate?.candidate || '',
+      sdpMLineIndex: data.candidate?.sdpMLineIndex ?? 0,
+      sdpMid: data.candidate?.sdpMid || null
+    };
+
+    if (!peerConnection) {
+      const pending = this.pendingIceCandidates.get(from) || [];
+      pending.push(candidateInit);
+      this.pendingIceCandidates.set(from, pending);
+      return;
+    }
+
+    try {
+      if (!peerConnection.connection.remoteDescription) {
+        const pending = this.pendingIceCandidates.get(from) || [];
+        pending.push(candidateInit);
+        this.pendingIceCandidates.set(from, pending);
+        console.log('🟢 WEBRTC - Queued ICE candidate for:', from);
+        return;
+      }
+
+      await peerConnection.connection.addIceCandidate(new RTCIceCandidate(candidateInit));
+      console.log('🟢 WEBRTC - Added ICE candidate for participant:', from);
+    } catch (error) {
+      console.error('🔴 WEBRTC - Error adding ICE candidate:', error);
+    }
+  }
+
+  private async flushPendingIceCandidates(peerId: string) {
+    const peerConnection = this.peerConnections.get(peerId);
+    const pending = this.pendingIceCandidates.get(peerId);
+    if (!peerConnection || !pending?.length) {
+      return;
+    }
+
+    for (const candidateInit of pending) {
       try {
-        // Convert the plain object back to RTCIceCandidateInit
-        const candidateInit: RTCIceCandidateInit = {
-          candidate: data.candidate.candidate || '',
-          sdpMLineIndex: data.candidate.sdpMLineIndex || 0,
-          sdpMid: data.candidate.sdpMid || ''
-        };
-        
         await peerConnection.connection.addIceCandidate(new RTCIceCandidate(candidateInit));
-        console.log('🟢 WEBRTC - Added ICE candidate for participant:', from);
       } catch (error) {
-        console.error('🔴 WEBRTC - Error adding ICE candidate:', error);
+        console.error('🔴 WEBRTC - Error flushing ICE candidate for:', peerId, error);
       }
     }
+    this.pendingIceCandidates.delete(peerId);
+    console.log('🟢 WEBRTC - Flushed', pending.length, 'queued ICE candidates for:', peerId);
   }
 
   // Initialize Firebase signaling service
@@ -393,10 +472,11 @@ export class WebRTCService {
     
     // Initialize Firebase signaling service
     this.signalingService = FirebaseSignalingService.getInstance();
-    await this.signalingService.initialize(this.sessionId, this.currentUserId);
-    
-    // Wait a moment to ensure initialization is complete
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await this.signalingService.initialize(
+      this.sessionId,
+      this.currentUserId,
+      this.baseSessionId || this.sessionId
+    );
     
     // Register message handlers
     this.signalingService.onMessage('join', (message) => this.handleSignalingMessage(message));
@@ -408,7 +488,17 @@ export class WebRTCService {
     console.log('🟢 WEBRTC - Firebase signaling initialized successfully');
   }
 
-  // Leave the session
+  private closeAllPeerConnections() {
+    this.clearAllQualityMonitoring();
+    this.peerConnections.forEach(({ connection }) => {
+      connection.close();
+    });
+    this.peerConnections.clear();
+    this.pendingIceCandidates.clear();
+    this.makingOffer.clear();
+  }
+
+  // Leave the session (keeps signalling channel unless disconnect() is called)
   async leaveSession() {
     // Send leave message via Firebase signaling
     if (this.signalingService) {
@@ -419,47 +509,30 @@ export class WebRTCService {
       }
     }
 
-    // Close all peer connections
-    this.peerConnections.forEach(({ connection }) => {
-      connection.close();
-    });
-    this.peerConnections.clear();
-
-    // Stop local stream
-    if (this.localStream) {
-      this.localStream.getTracks().forEach(track => track.stop());
-      this.localStream = null;
-    }
-
+    this.closeAllPeerConnections();
+    this.stopLocalTracks();
     this.onConnectionStateChange?.('disconnected');
   }
 
   // Disconnect the signaling service (call this when component unmounts)
   async disconnect() {
-    // Send leave message first
+    // Close peers/media and send leave once
     await this.leaveSession();
     
-    // Then disconnect the signaling service
+    // Tear down signalling without sending a second leave
     if (this.signalingService) {
-      await this.signalingService.disconnect();
+      await this.signalingService.disconnect({ skipLeave: true });
       this.signalingService = null;
     }
+
+    this.sessionId = null;
+    this.currentUserId = null;
   }
 
   // Cleanup without disconnecting signaling (for re-initialization)
   async cleanup() {
-    // Close all peer connections
-    this.peerConnections.forEach(({ connection }) => {
-      connection.close();
-    });
-    this.peerConnections.clear();
-
-    // Stop local stream
-    if (this.localStream) {
-      this.localStream.getTracks().forEach(track => track.stop());
-      this.localStream = null;
-    }
-
+    this.closeAllPeerConnections();
+    this.stopLocalTracks();
     this.onConnectionStateChange?.('disconnected');
   }
 
@@ -533,4 +606,9 @@ export class WebRTCService {
       this.qualityMonitoringIntervals.delete(peerId);
     }
   }
-} 
+
+  private clearAllQualityMonitoring() {
+    this.qualityMonitoringIntervals.forEach((interval) => clearInterval(interval));
+    this.qualityMonitoringIntervals.clear();
+  }
+}

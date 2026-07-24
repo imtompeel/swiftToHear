@@ -10,11 +10,15 @@ export interface SessionData {
   hostRole?: 'participant' | 'observer-permanent';
   createdAt: Timestamp | FieldValue;
   participants: Participant[];
+  /** Auth UIDs for security rules (kept in sync with participants[].id) */
+  participantIds?: string[];
   status: 'waiting' | 'active' | 'completed';
   minParticipants: number;
   maxParticipants: number;
   topicSuggestions: TopicSuggestion[];
   sessionType?: 'video' | 'in-person' | 'hybrid';
+  /** Present when the session was formed via public matchmaking */
+  matchMode?: 'curious' | 'full';
   currentPhase?: 'topic-selection' | 'hello-checkin' | 'listening' | 'transition' | 'reflection' | 'completion' | 'free-dialogue' | 'completed' | 'round' | undefined;
   phaseStartTime?: Timestamp | FieldValue;
   currentRound?: number;

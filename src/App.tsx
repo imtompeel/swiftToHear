@@ -29,6 +29,7 @@ import { CustomTimer } from './components/CustomTimer';
 
 // Import step-by-step session creation
 import StepByStepSessionCreationWrapper from './components/session-creation/StepByStepSessionCreationWrapper';
+import { MatchFlow } from './components/matchmaking/MatchFlow';
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
               <Route path="/auth" element={<Auth />} />
 
               <Route path="/practice" element={<DialecticSession />} />
+              <Route path="/practice/match" element={<MatchFlow />} />
               <Route path="/practice/create" element={
                 <ProtectedRoute>
                   <StepByStepSessionCreationWrapper />

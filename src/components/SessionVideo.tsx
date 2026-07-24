@@ -348,16 +348,8 @@ export const SessionVideo: React.FC<SessionVideoProps> = React.memo(({
               {videoCall.error && (
                 <button
                   onClick={() => {
-                    // Attempt to reconnect
-                    if (videoCall.leaveCall) {
-                      videoCall.leaveCall().then(() => {
-                        // Re-initialize after a short delay
-                        setTimeout(() => {
-                          if (videoCall.localVideoRef.current && videoCall.localStreamRef?.current) {
-                            videoCall.localVideoRef.current.srcObject = videoCall.localStreamRef.current;
-                          }
-                        }, 1000);
-                      });
+                    if (videoCall.reconnectCall) {
+                      videoCall.reconnectCall();
                     }
                   }}
                   className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition-colors"

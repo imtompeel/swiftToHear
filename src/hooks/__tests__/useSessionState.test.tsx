@@ -94,7 +94,7 @@ describe('useSessionState Hook', () => {
         result.current.handleRoleSelection('observer-permanent');
       });
 
-      expect(result.current.selectedRole).toBe('observer');
+      expect(result.current.selectedRole).toBe('observer-permanent');
       expect(result.current.isPassiveObserver).toBe(true);
     });
   });
@@ -111,8 +111,8 @@ describe('useSessionState Hook', () => {
       });
 
       expect(result.current.sessionStarted).toBe(true);
-      expect(result.current.sessionActive).toBe(true);
-      expect(result.current.currentPhase).toBe('practice');
+      expect(result.current.sessionActive).toBe(false);
+      expect(result.current.showHelloCheckIn).toBe(true);
     });
 
     it('should handle topic changes', () => {

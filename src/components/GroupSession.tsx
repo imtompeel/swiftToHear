@@ -62,25 +62,17 @@ export const GroupSession: React.FC<GroupSessionProps> = ({
     return session?.hostId === currentUserId;
   }, [session, currentUserId]);
 
-  // Video call setup - disabled for test environment to avoid Firebase permission issues
-  const videoCall = initialSession && initialCurrentGroup 
-    ? {
-        localVideoRef: { current: null },
-        peerStreams: {},
-        isConnected: false,
-        isConnecting: false,
-        connectionState: 'disconnected' as const,
-        peerCount: 0,
-        error: null,
-        localStreamRef: { current: null }
-      }
-    : useVideoCall({
-        sessionId: `${sessionId}-${groupId}`,
-        currentUserId,
-        currentUserName,
-        isActive: !!currentGroup && currentGroup.status === 'active',
-        participants: currentGroup?.participants || []
-      });
+  // Always call the hook (Rules of Hooks). Disable WebRTC in test harness.
+  const isTestHarness = !!(initialSession && initialCurrentGroup);
+  const videoCall = useVideoCall({
+    sessionId: `${sessionId}-${groupId}`,
+    baseSessionId: sessionId,
+    currentUserId,
+    currentUserName,
+    isActive: !isTestHarness && !!currentGroup && currentGroup.status === 'active',
+    enabled: !isTestHarness,
+    participants: currentGroup?.participants || []
+  });
 
   // Load session and group data
   useEffect(() => {

@@ -123,17 +123,26 @@ service cloud.firestore {
 
 ## 11. Environment Variables (Recommended)
 
-For better security, use environment variables:
+For better security, use environment variables. See `.env.example` for the full list.
 
-1. Create `.env.local` file in the root directory:
-   ```
-   VITE_FIREBASE_API_KEY=your-api-key
-   VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-   VITE_FIREBASE_PROJECT_ID=your-project-id
-   VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
-   VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
-   VITE_FIREBASE_APP_ID=your-app-id
-   ```
+1. Create `.env.local` in the project root with at least:
+
+```
+VITE_FIREBASE_API_KEY=your-api-key
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+VITE_FIREBASE_APP_ID=your-app-id
+```
+
+2. **Enable Anonymous Authentication** in Firebase Console → Authentication → Sign-in method.
+   Session joiners sign in anonymously so participant IDs match `auth.uid` (required for signalling ACLs).
+
+3. **TURN for reliable video** (mesh mode): set `VITE_METERED_TURN_API_KEY` or static `VITE_TURN_*` vars.
+
+4. **Optional Daily SFU**: set `VITE_VIDEO_PROVIDER=daily`, run `server/` with `DAILY_API_KEY`, and
+   `VITE_DAILY_TOKEN_URL=http://localhost:3001/api/daily/token`.
 
 2. Update `src/firebase/config.ts`:
    ```typescript

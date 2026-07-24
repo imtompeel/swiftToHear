@@ -1,5 +1,6 @@
 import React from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Timestamp } from 'firebase/firestore';
 import { useTranslation } from '../hooks/useTranslation';
 import { useSessionState } from '../hooks/useSessionState';
 import { useRoleRotation } from '../hooks/useRoleRotation';
@@ -14,7 +15,9 @@ import { ScribeFeedback } from './ScribeFeedback';
 import { createSessionContext } from '../types/sessionContext';
 import { SessionCompletion } from './SessionCompletion';
 import { FreeDialoguePhase } from './FreeDialoguePhase';
+import { PostMatchPrompt } from './matchmaking/PostMatchPrompt';
 import { HoverTimer } from './HoverTimer';
+import type { MatchMode } from '../types/matchmaking';
 import WordCloud from './WordCloud';
 import { SafetyTimeoutGuidance } from './SafetyTimeoutGuidance';
 import { SafetyTimeoutOtherParticipants } from './SafetyTimeoutOtherParticipants';
@@ -82,8 +85,10 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
   selectedTopic,
 }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('sessionId');
+  const [showPostMatchPrompt, setShowPostMatchPrompt] = React.useState(false);
   
   // Get session data from useSession hook
   const { 
@@ -97,6 +102,7 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
     continueRounds,
     startFreeDialogue,
     endSession,
+    leaveSession,
     completeHelloCheckIn,
     completeScribeFeedback,
     updateParticipantRole,
@@ -123,6 +129,17 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
       unsubscribe();
     };
   }, [sessionId, setupRealTimeListener]);
+
+  // Matchmaking sessions: skip completion screen and enter free dialogue automatically
+  React.useEffect(() => {
+    if (
+      session?.matchMode &&
+      session.currentPhase === 'completion' &&
+      isHost
+    ) {
+      void startFreeDialogue();
+    }
+  }, [session?.matchMode, session?.currentPhase, isHost, startFreeDialogue]);
 
 
 
@@ -552,7 +569,7 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
                 )
               )}
 
-              {!safetyTimeout.isTimeoutActive && session?.currentPhase === 'completion' && (
+              {!safetyTimeout.isTimeoutActive && session?.currentPhase === 'completion' && !session?.matchMode && (
                 <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-4 sm:p-6">
                   <SessionCompletion
                     currentRound={session?.currentRound || 1}
@@ -565,12 +582,49 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
                 </div>
               )}
 
-              {!safetyTimeout.isTimeoutActive && session?.currentPhase === 'free-dialogue' && (
+              {!safetyTimeout.isTimeoutActive && session?.currentPhase === 'completion' && session?.matchMode && (
+                <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-4 sm:p-6 text-center">
+                  <p className="text-secondary-600 dark:text-secondary-400">
+                    {t('matchmaking.freeDialogue.starting')}
+                  </p>
+                </div>
+              )}
+
+              {!safetyTimeout.isTimeoutActive && session?.currentPhase === 'free-dialogue' && showPostMatchPrompt && session?.matchMode && (
+                <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-4 sm:p-6">
+                  <PostMatchPrompt
+                    mode={session.matchMode as MatchMode}
+                    onFindAnother={async () => {
+                      const mode = session.matchMode as MatchMode;
+                      await leaveSession();
+                      navigate(`/practice/match?mode=${mode}`, { replace: true });
+                    }}
+                    onLeave={async () => {
+                      await leaveSession();
+                      navigate('/', { replace: true });
+                    }}
+                  />
+                </div>
+              )}
+
+              {!safetyTimeout.isTimeoutActive && session?.currentPhase === 'free-dialogue' && !(showPostMatchPrompt && session?.matchMode) && (
                 <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-4 sm:p-6">
                   <FreeDialoguePhase
                     onEndSession={endSession}
+                    onLeave={async () => {
+                      await leaveSession();
+                      navigate('/', { replace: true });
+                    }}
+                    onFreeDialogueEnded={() => setShowPostMatchPrompt(true)}
                     isHost={isHost}
                     participants={session?.participants || []}
+                    isMatchmaking={Boolean(session?.matchMode)}
+                    phaseStartTimeMs={
+                      session?.phaseStartTime &&
+                      typeof (session.phaseStartTime as Timestamp).toMillis === 'function'
+                        ? (session.phaseStartTime as Timestamp).toMillis()
+                        : null
+                    }
                   />
                 </div>
               )}

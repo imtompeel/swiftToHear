@@ -18,6 +18,13 @@ import { SessionData, TopicSuggestion, Participant, JoinData } from '../types/se
 export class FirestoreSessionService {
   private static COLLECTION_NAME = 'sessions';
 
+  private static withParticipantIds(participants: Participant[]) {
+    return {
+      participants,
+      participantIds: participants.map(p => p.id)
+    };
+  }
+
   // Create a new session
   static async createSession(sessionData: Omit<SessionData, 'sessionId' | 'createdAt' | 'participants' | 'status' | 'topicSuggestions'>): Promise<SessionData> {
     const sessionId = this.generateSessionId();
@@ -32,6 +39,7 @@ export class FirestoreSessionService {
         role: '', // Host will choose their role later
         status: 'ready'
       }],
+      participantIds: [sessionData.hostId],
       status: 'waiting',
       topicSuggestions: []
     };
@@ -116,12 +124,12 @@ export class FirestoreSessionService {
         const updatedParticipants = [...session.participants, participant];
         
         await updateDoc(doc(db, this.COLLECTION_NAME, joinData.sessionId), {
-          participants: updatedParticipants
+          ...this.withParticipantIds(updatedParticipants)
         });
 
         return {
           ...session,
-          participants: updatedParticipants
+          ...this.withParticipantIds(updatedParticipants)
         };
       }
 
@@ -137,12 +145,12 @@ export class FirestoreSessionService {
       const updatedParticipants = [...session.participants, participant];
       
       await updateDoc(doc(db, this.COLLECTION_NAME, joinData.sessionId), {
-        participants: updatedParticipants
+        ...this.withParticipantIds(updatedParticipants)
       });
 
       return {
         ...session,
-        participants: updatedParticipants
+        ...this.withParticipantIds(updatedParticipants)
       };
     } catch (error) {
       console.error('Error joining session:', error);
@@ -521,12 +529,12 @@ export class FirestoreSessionService {
       }
       
       await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
-        participants: updatedParticipants
+        ...this.withParticipantIds(updatedParticipants)
       });
 
       return {
         ...session,
-        participants: updatedParticipants
+        ...this.withParticipantIds(updatedParticipants)
       };
     } catch (error) {
       console.error('Error leaving session:', error);

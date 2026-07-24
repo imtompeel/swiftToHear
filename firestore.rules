@@ -1,111 +1,437 @@
 rules_version = '2';
 
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: sessions
+// Document ID: sessionId
+// Fields:
+//   - sessionId: string (required, immutable) - matches document ID
+//   - sessionName: string (required, immutable)
+//   - duration: number (required, immutable)
+//   - topic: string (required, immutable after create)
+//   - hostId: string (required, immutable) - Firebase Auth uid of host
+//   - hostName: string (required, immutable)
+//   - hostRole: string (optional, immutable)
+//   - createdAt: timestamp (required, immutable)
+//   - participants: list (required) - joiners may update (client-generated ids today)
+//   - status: 'waiting' | 'active' | 'completed' (required) - host-only on update
+//   - minParticipants / maxParticipants: number (required, immutable)
+//   - topicSuggestions: list (required) - joiners may update
+//   - sessionType: string (optional, immutable)
+//   - currentPhase / phaseStartTime / currentRound / fivePersonChoice - host-only
+//   - groupConfiguration: map (optional, immutable)
+//   - scribeNotes / safetyTimeout - joiners may update
+//   - accumulatedScribeNotes - host-only (rotation path)
+//
+// Collection: groupSessions
+// Document ID: sessionId
+// Similar shape plus groups / groupMode / groupConfiguration
+// Updates require authentication.
+//
+// Collection: matchRooms
+// Document ID: roomId
+// Fields:
+//   - roomId, mode ('curious'|'full'), status ('filling'|'matched'|'expired')
+//   - targetSize (3), participants[], participantIds[]
+//   - createdAt, lastHeartbeatAt, matchedSessionId?
+// Authenticated users may join/leave filling rooms; the joiner who fills
+// the room may create an active matched session (matchMode set).
+//
+// ===============================================================
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow anyone to create email signups (for the signup form)
-    match /emailSignups/{document} {
-      allow create: if 
-        request.resource.data.email is string &&
-        request.resource.data.email.size() > 0;
-      // Only allow superadmins to read email signups
-      allow read, update, delete: if 
-        request.auth != null && 
+
+    // ---------------------------------------------------------------
+    // Helpers
+    // ---------------------------------------------------------------
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isSuperadmin() {
+      return isAuthenticated() &&
         exists(/databases/$(database)/documents/superadmins/$(request.auth.uid));
     }
-    
-    // Superadmin collection - allow initial setup and then restrict to superadmins
-    match /superadmins/{document} {
-      // For the first superadmin setup, allow authenticated users to create their own document
-      // Once a superadmin exists, only superadmins can read/write
-      allow read, write: if 
-        request.auth != null && 
-        (document == request.auth.uid || 
-         exists(/databases/$(database)/documents/superadmins/$(request.auth.uid)));
+
+    function isSessionHost() {
+      return isAuthenticated() && request.auth.uid == resource.data.hostId;
     }
-    
-    // Test collection (for debugging)
-    match /test/{document} {
-      allow read, write: if request.auth != null;
+
+    function sessionIdentityUnchanged() {
+      return request.resource.data.hostId == resource.data.hostId &&
+        request.resource.data.sessionId == resource.data.sessionId &&
+        request.resource.data.createdAt == resource.data.createdAt &&
+        request.resource.data.hostName == resource.data.hostName &&
+        request.resource.data.sessionName == resource.data.sessionName &&
+        request.resource.data.duration == resource.data.duration &&
+        request.resource.data.topic == resource.data.topic &&
+        request.resource.data.minParticipants == resource.data.minParticipants &&
+        request.resource.data.maxParticipants == resource.data.maxParticipants;
     }
-    
-    // Session management rules
-    match /sessions/{sessionId} {
-      // Allow authenticated users to create sessions
-      allow create: if 
-        request.auth != null &&
-        request.auth.uid == request.resource.data.hostId &&
+
+    function sessionOptionalIdentityUnchanged() {
+      return (!('sessionType' in resource.data) ||
+          request.resource.data.sessionType == resource.data.sessionType) &&
+        (!('hostRole' in resource.data) ||
+          request.resource.data.hostRole == resource.data.hostRole) &&
+        (!('groupConfiguration' in resource.data) ||
+          request.resource.data.groupConfiguration == resource.data.groupConfiguration) &&
+        (!('matchMode' in resource.data) ||
+          request.resource.data.matchMode == resource.data.matchMode);
+    }
+
+    function isValidSessionStatus(status) {
+      return status in ['waiting', 'active', 'completed'];
+    }
+
+    function isValidHostedSessionCreate(sessionId) {
+      return request.resource.data.keys().hasAll([
+          'sessionId', 'sessionName', 'duration', 'topic', 'hostId',
+          'hostName', 'createdAt', 'participants', 'status',
+          'minParticipants', 'maxParticipants', 'topicSuggestions'
+        ]) &&
         request.resource.data.sessionId == sessionId &&
-        request.resource.data.status == 'waiting';
-      
-      // Allow anyone to read sessions (for anonymous joining)
-      allow read: if true;
-      
-      // Allow anyone to update sessions (for anonymous joining)
-      allow update: if true;
-      
-      // Allow host to delete their own session
-      allow delete: if 
-        request.auth != null &&
-        request.auth.uid == resource.data.hostId;
+        request.resource.data.hostId == request.auth.uid &&
+        request.resource.data.status == 'waiting' &&
+        !('matchMode' in request.resource.data) &&
+        request.resource.data.sessionName is string &&
+        request.resource.data.sessionName.size() > 0 &&
+        request.resource.data.sessionName.size() <= 200 &&
+        request.resource.data.topic is string &&
+        request.resource.data.topic.size() <= 500 &&
+        request.resource.data.duration is number &&
+        request.resource.data.duration > 0 &&
+        request.resource.data.participants is list &&
+        request.resource.data.topicSuggestions is list &&
+        request.resource.data.minParticipants is number &&
+        request.resource.data.maxParticipants is number;
     }
-    
-    // Group session management rules
-    match /groupSessions/{sessionId} {
-      // Allow authenticated users to create group sessions
-      allow create: if 
-        request.auth != null &&
-        request.auth.uid == request.resource.data.hostId &&
+
+    // Matchmaking: third joiner creates an already-active 3-person session.
+    // Creator must be a participant; host is the first participant (may differ).
+    function isValidMatchSessionCreate(sessionId) {
+      return request.resource.data.keys().hasAll([
+          'sessionId', 'sessionName', 'duration', 'topic', 'hostId',
+          'hostName', 'createdAt', 'participants', 'participantIds', 'status',
+          'minParticipants', 'maxParticipants', 'topicSuggestions', 'matchMode'
+        ]) &&
         request.resource.data.sessionId == sessionId &&
-        request.resource.data.status == 'waiting';
-      
-      // Allow authenticated users to read group sessions
-      allow read: if request.auth != null;
-      
-      // Allow authenticated users to update group sessions if they are a participant
-      allow update: if request.auth != null;
-      
-      // Allow host to delete their own group session
-      allow delete: if 
-        request.auth != null &&
-        request.auth.uid == resource.data.hostId;
+        request.resource.data.matchMode in ['curious', 'full'] &&
+        request.resource.data.status == 'active' &&
+        request.resource.data.currentPhase == 'hello-checkin' &&
+        request.resource.data.sessionType == 'video' &&
+        request.resource.data.participants is list &&
+        request.resource.data.participants.size() == 3 &&
+        request.resource.data.participantIds is list &&
+        request.resource.data.participantIds.size() == 3 &&
+        request.auth.uid in request.resource.data.participantIds &&
+        request.resource.data.hostId in request.resource.data.participantIds &&
+        request.resource.data.minParticipants == 3 &&
+        request.resource.data.maxParticipants == 3 &&
+        request.resource.data.duration is number &&
+        request.resource.data.duration > 0 &&
+        request.resource.data.topic is string &&
+        request.resource.data.topic.size() <= 500;
     }
-    
-    // WebRTC signaling rules
-    match /signaling/{messageId} {
-      // Allow authenticated users to create signaling messages
-      allow create: if 
-        request.auth != null &&
+
+    function isValidSessionCreate(sessionId) {
+      return isValidHostedSessionCreate(sessionId) || isValidMatchSessionCreate(sessionId);
+    }
+
+    // Joiner path: authenticated users may update collaboration fields only.
+    // participantIds is kept in sync with participants for signalling ACL.
+    function isSessionParticipantFieldUpdate() {
+      return isAuthenticated() &&
+        sessionIdentityUnchanged() &&
+        sessionOptionalIdentityUnchanged() &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['participants', 'participantIds', 'topicSuggestions', 'scribeNotes', 'safetyTimeout']) &&
+        request.resource.data.participants is list &&
+        request.resource.data.participants.size() <= 50 &&
+        request.resource.data.topicSuggestions is list &&
+        request.resource.data.topicSuggestions.size() <= 100 &&
+        request.resource.data.status == resource.data.status &&
+        (!('currentPhase' in resource.data) ||
+          request.resource.data.currentPhase == resource.data.currentPhase) &&
+        (!('currentRound' in resource.data) ||
+          request.resource.data.currentRound == resource.data.currentRound) &&
+        (!('phaseStartTime' in resource.data) ||
+          request.resource.data.phaseStartTime == resource.data.phaseStartTime) &&
+        (!('fivePersonChoice' in resource.data) ||
+          request.resource.data.fivePersonChoice == resource.data.fivePersonChoice) &&
+        (!('accumulatedScribeNotes' in resource.data) ||
+          request.resource.data.accumulatedScribeNotes == resource.data.accumulatedScribeNotes);
+    }
+
+    // Host path: may drive phase/status and participant rotations.
+    function isSessionHostFieldUpdate() {
+      return isSessionHost() &&
+        sessionIdentityUnchanged() &&
+        sessionOptionalIdentityUnchanged() &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly([
+            'participants', 'participantIds', 'topicSuggestions', 'scribeNotes', 'safetyTimeout',
+            'accumulatedScribeNotes', 'status', 'currentPhase', 'currentRound',
+            'phaseStartTime', 'fivePersonChoice'
+          ]) &&
+        isValidSessionStatus(request.resource.data.status) &&
+        request.resource.data.participants is list &&
+        request.resource.data.participants.size() <= 50;
+    }
+
+    function sessionDoc(sessionId) {
+      return get(/databases/$(database)/documents/sessions/$(sessionId));
+    }
+
+    function groupSessionDoc(sessionId) {
+      return get(/databases/$(database)/documents/groupSessions/$(sessionId));
+    }
+
+    function isMemberOfSession(sessionId) {
+      return exists(/databases/$(database)/documents/sessions/$(sessionId)) &&
+        (
+          sessionDoc(sessionId).data.hostId == request.auth.uid ||
+          (
+            'participantIds' in sessionDoc(sessionId).data &&
+            request.auth.uid in sessionDoc(sessionId).data.participantIds
+          )
+        );
+    }
+
+    function isMemberOfGroupSession(sessionId) {
+      return exists(/databases/$(database)/documents/groupSessions/$(sessionId)) &&
+        (
+          groupSessionDoc(sessionId).data.hostId == request.auth.uid ||
+          (
+            'participantIds' in groupSessionDoc(sessionId).data &&
+            request.auth.uid in groupSessionDoc(sessionId).data.participantIds
+          )
+        );
+    }
+
+    function isSignalingSessionMember(baseSessionId) {
+      return isMemberOfSession(baseSessionId) || isMemberOfGroupSession(baseSessionId);
+    }
+
+    function isValidSignalingType(type) {
+      return type in ['offer', 'answer', 'ice-candidate', 'join', 'leave'];
+    }
+
+    function isValidSignalingCreate() {
+      return isAuthenticated() &&
         request.auth.uid == request.resource.data.from &&
         request.resource.data.sessionId is string &&
-        request.resource.data.sessionId.size() > 0;
-      
-      // Allow authenticated users to read all signaling messages in their session
-      allow read: if 
-        request.auth != null &&
-        resource.data.sessionId is string;
-      
-      // Allow users to delete their own messages
-      allow delete: if 
-        request.auth != null &&
+        request.resource.data.sessionId.size() > 0 &&
+        request.resource.data.sessionId.size() <= 160 &&
+        request.resource.data.baseSessionId is string &&
+        request.resource.data.baseSessionId.size() > 0 &&
+        request.resource.data.baseSessionId.size() <= 100 &&
+        isValidSignalingType(request.resource.data.type) &&
+        isSignalingSessionMember(request.resource.data.baseSessionId) &&
+        (
+          request.resource.data.type in ['join', 'leave'] ||
+          (
+            request.resource.data.to is string &&
+            request.resource.data.to.size() > 0
+          )
+        );
+    }
+
+    function canReadSignalingMessage() {
+      return isAuthenticated() &&
+        resource.data.baseSessionId is string &&
+        isSignalingSessionMember(resource.data.baseSessionId) &&
+        (
+          resource.data.to == request.auth.uid ||
+          resource.data.type in ['join', 'leave'] ||
+          resource.data.from == request.auth.uid
+        );
+    }
+
+    function isValidGroupSessionCreate(sessionId) {
+      return request.resource.data.keys().hasAll([
+          'sessionId', 'sessionName', 'duration', 'topic', 'hostId',
+          'hostName', 'createdAt', 'participants', 'status',
+          'minParticipants', 'maxParticipants', 'topicSuggestions',
+          'groupMode', 'groups', 'groupConfiguration'
+        ]) &&
+        request.resource.data.sessionId == sessionId &&
+        request.resource.data.hostId == request.auth.uid &&
+        request.resource.data.status == 'waiting' &&
+        request.resource.data.participants is list &&
+        request.resource.data.groups is list;
+    }
+
+    function groupSessionIdentityUnchanged() {
+      return sessionIdentityUnchanged() &&
+        (!('groupMode' in resource.data) ||
+          request.resource.data.groupMode == resource.data.groupMode) &&
+        (!('groupConfiguration' in resource.data) ||
+          request.resource.data.groupConfiguration == resource.data.groupConfiguration) &&
+        (!('hostRole' in resource.data) ||
+          request.resource.data.hostRole == resource.data.hostRole);
+    }
+
+    function isGroupSessionParticipantFieldUpdate() {
+      return isAuthenticated() &&
+        groupSessionIdentityUnchanged() &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['participants', 'topicSuggestions', 'groups']) &&
+        request.resource.data.participants is list &&
+        request.resource.data.groups is list &&
+        request.resource.data.status == resource.data.status &&
+        (!('currentPhase' in resource.data) ||
+          request.resource.data.currentPhase == resource.data.currentPhase) &&
+        (!('currentRound' in resource.data) ||
+          request.resource.data.currentRound == resource.data.currentRound);
+    }
+
+    function isGroupSessionHostFieldUpdate() {
+      return isSessionHost() &&
+        groupSessionIdentityUnchanged() &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly([
+            'participants', 'topicSuggestions', 'groups',
+            'status', 'currentPhase', 'currentRound', 'phaseStartTime'
+          ]) &&
+        isValidSessionStatus(request.resource.data.status);
+    }
+
+    // ---------------------------------------------------------------
+    // Collections
+    // ---------------------------------------------------------------
+
+    // Allow anyone to create email signups (for the signup form)
+    match /emailSignups/{document} {
+      allow create: if
+        request.resource.data.email is string &&
+        request.resource.data.email.size() > 0 &&
+        request.resource.data.email.size() <= 320;
+
+      allow read, update, delete: if isSuperadmin();
+    }
+
+    // Superadmin collection - allow initial setup and then restrict to superadmins
+    match /superadmins/{document} {
+      allow read, write: if
+        isAuthenticated() &&
+        (document == request.auth.uid || isSuperadmin());
+    }
+
+    // Test collection (for debugging)
+    match /test/{document} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Session management rules
+    match /sessions/{sessionId} {
+      allow create: if isAuthenticated() && isValidSessionCreate(sessionId);
+
+      // Public read required for QR / anonymous join links
+      allow read: if true;
+
+      allow update: if isSessionHostFieldUpdate() || isSessionParticipantFieldUpdate();
+
+      // Host may delete; last participant leaving may also delete (leaveSession)
+      allow delete: if isSessionHost() ||
+        (resource.data.participants is list && resource.data.participants.size() <= 1);
+    }
+
+    // Group session management rules
+    match /groupSessions/{sessionId} {
+      allow create: if isAuthenticated() && isValidGroupSessionCreate(sessionId);
+
+      allow read: if isAuthenticated();
+
+      allow update: if isGroupSessionHostFieldUpdate() ||
+        isGroupSessionParticipantFieldUpdate();
+
+      allow delete: if isSessionHost() ||
+        (isAuthenticated() &&
+          resource.data.participants is list &&
+          resource.data.participants.size() <= 1);
+    }
+
+    // WebRTC signaling rules — session members only; targeted messages to recipient
+    match /signaling/{messageId} {
+      allow create: if isValidSignalingCreate();
+
+      allow read: if canReadSignalingMessage();
+
+      allow delete: if
+        isAuthenticated() &&
         request.auth.uid == resource.data.from;
     }
-    
+
+    // Public matchmaking queue rooms
+    match /matchRooms/{roomId} {
+      allow read: if isAuthenticated();
+
+      allow create: if isAuthenticated() &&
+        request.resource.data.roomId == roomId &&
+        request.resource.data.mode in ['curious', 'full'] &&
+        request.resource.data.status == 'filling' &&
+        request.resource.data.targetSize == 3 &&
+        request.resource.data.participants is list &&
+        request.resource.data.participants.size() == 1 &&
+        request.resource.data.participantIds is list &&
+        request.resource.data.participantIds.size() == 1 &&
+        request.auth.uid in request.resource.data.participantIds;
+
+      allow update: if isAuthenticated() &&
+        request.resource.data.roomId == resource.data.roomId &&
+        request.resource.data.mode == resource.data.mode &&
+        request.resource.data.targetSize == resource.data.targetSize &&
+        request.resource.data.createdAt == resource.data.createdAt &&
+        request.resource.data.participants is list &&
+        request.resource.data.participants.size() <= 3 &&
+        request.resource.data.participantIds is list &&
+        (
+          // Join / leave / heartbeat while filling
+          (
+            resource.data.status == 'filling' &&
+            request.resource.data.status == 'filling' &&
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['participants', 'participantIds', 'lastHeartbeatAt']) &&
+            (
+              request.auth.uid in resource.data.participantIds ||
+              request.auth.uid in request.resource.data.participantIds
+            )
+          ) ||
+          // Form match: fill to 3 and mark matched
+          (
+            resource.data.status == 'filling' &&
+            request.resource.data.status == 'matched' &&
+            request.resource.data.matchedSessionId is string &&
+            request.resource.data.participants.size() == 3 &&
+            request.auth.uid in request.resource.data.participantIds &&
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['participants', 'participantIds', 'lastHeartbeatAt', 'status', 'matchedSessionId'])
+          ) ||
+          // Opportunistic expire
+          (
+            resource.data.status == 'filling' &&
+            request.resource.data.status == 'expired' &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+          )
+        );
+
+      allow delete: if isAuthenticated() &&
+        resource.data.status == 'filling' &&
+        request.auth.uid in resource.data.participantIds;
+    }
+
     // Analytics collection for tracking downloads
     match /analytics/{document} {
-      // Allow anyone to create download events (for tracking)
       allow create: if true;
-      
-      // Only allow superadmins to read analytics data
-      allow read: if 
-        request.auth != null && 
-        exists(/databases/$(database)/documents/superadmins/$(request.auth.uid));
-      
-      // Allow superadmins to update analytics data
-      allow update: if 
-        request.auth != null && 
-        exists(/databases/$(database)/documents/superadmins/$(request.auth.uid));
+
+      allow read, update: if isSuperadmin();
     }
-    
+
     // Deny all other access by default
     match /{document=**} {
       allow read, write: if false;

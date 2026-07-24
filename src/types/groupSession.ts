@@ -11,6 +11,8 @@ export interface GroupSessionData {
   hostRole?: 'participant' | 'observer-permanent';
   createdAt: Timestamp;
   participants: Participant[];
+  /** Auth UIDs for security rules (kept in sync with participants[].id) */
+  participantIds?: string[];
   status: 'waiting' | 'active' | 'completed';
   minParticipants: number;
   maxParticipants: number;

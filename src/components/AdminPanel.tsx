@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { auth } from '../firebase/config';
-import { signInWithEmailAndPassword, onAuthStateChanged, User } from 'firebase/auth';
+import { onAuthStateChanged, User } from 'firebase/auth';
 import PlatformFeaturesGrid from './PlatformFeaturesGrid';
+import AdminLoginForm from './AdminLoginForm';
 import { useTranslation } from '../hooks/useTranslation';
 import { PeriodicCleanupService } from '../services/periodicCleanupService';
 
@@ -13,10 +14,6 @@ const AdminPanel: React.FC = () => {
   console.log('AdminPanel - test translation:', t('shared.common.adminDashboard'));
   
   const [user, setUser] = useState<User | null>(null);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [cleanupStats, setCleanupStats] = useState<any>(null);
   const [cleanupLoading, setCleanupLoading] = useState(false);
   const [cleanupResults, setCleanupResults] = useState<any>(null);
@@ -59,21 +56,6 @@ const AdminPanel: React.FC = () => {
     }
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (err) {
-      setError(t('shared.common.invalidCredentials'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
 
 
   // Show loading state while i18n is initializing
@@ -102,55 +84,9 @@ const AdminPanel: React.FC = () => {
             </p>
           </div>
           
-          <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-            {error && (
-              <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-md p-4">
-                <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
-              </div>
-            )}
-            
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-secondary-700 dark:text-secondary-300">
-                {t('admin.login.emailLabel')}
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-md shadow-sm bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 placeholder-secondary-500 dark:placeholder-secondary-400 focus:outline-none focus:ring-accent-500 focus:border-accent-500"
-                placeholder={t('shared.placeholders.adminEmail')}
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-secondary-700 dark:text-secondary-300">
-                {t('admin.login.passwordLabel')}
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-md shadow-sm bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 placeholder-secondary-500 dark:placeholder-secondary-400 focus:outline-none focus:ring-accent-500 focus:border-accent-500"
-                placeholder={t('shared.placeholders.passwordDots')}
-              />
-            </div>
-            
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-accent-600 dark:bg-accent-700 hover:bg-accent-700 dark:hover:bg-accent-600 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-secondary-900 focus:ring-accent-500 disabled:opacity-50 transition-colors duration-200"
-              >
-                {loading ? t('admin.login.signingIn') : t('admin.login.signInButton')}
-              </button>
-            </div>
-          </form>
+          <div className="mt-8">
+            <AdminLoginForm />
+          </div>
         </div>
       </div>
     );

@@ -2,7 +2,10 @@
   "navigation": {
     "home": "Inicio",
     "comingSoon": "Próximamente",
-    "siteName": "Pronto para Escuchar"
+    "siteName": "Pronto para Escuchar",
+    "findPracticeGroup": "Encontrar un grupo de práctica",
+    "adminPanel": "Admin",
+    "emailSignups": "Registros de email"
   },
   "landing": {
     "hero": {
@@ -118,6 +121,8 @@
       "title": "Una invitación",
       "description": "Estamos planeando un evento piloto para explorar esta práctica de escucha juntos—abierto a todos los que quieran intentar. Ya sea que estés confiado o curioso, cauteloso o escéptico, eres bienvenido.",
       "callToAction": "Si estás interesado en participar, o ayudarnos a probar y dar forma a esto para un uso más amplio, por favor únete a nuestra lista de espera.",
+      "findPracticeGroup": "Encontrar un grupo de práctica",
+      "findPracticeGroupHint": "Te emparejamos con otras dos personas que estén en línea y listas para practicar.",
       "form": {
         "emailPlaceholder": "Ingresa tu dirección de correo electrónico",
         "submitButton": "Unirse a Lista de Espera",
@@ -141,6 +146,11 @@
       "finalQuote": {
         "text": "Por esto, mis amados hermanos, todo hombre sea pronto para oír, tardo para hablar, tardo para airarse.",
         "reference": "Santiago 1:19"
+      },
+      "admin": {
+        "toggleShow": "Inicio de sesión de administrador",
+        "toggleHide": "Ocultar inicio de sesión de administrador",
+        "subtitle": "Inicia sesión para acceder al panel de administración"
       }
     }
   },
@@ -148,10 +158,13 @@
     "title": "Panel de Administración",
     "login": {
       "title": "Inicio de Sesión de Administrador",
+      "subtitle": "Inicia sesión para gestionar la plataforma",
       "emailLabel": "Correo Electrónico",
       "passwordLabel": "Contraseña",
       "loginButton": "Iniciar Sesión",
+      "signInButton": "Iniciar Sesión",
       "loggingIn": "Iniciando sesión...",
+      "signingIn": "Iniciando sesión...",
       "error": "Credenciales inválidas. Por favor intenta de nuevo."
     },
     "dashboard": {
@@ -178,6 +191,13 @@
         },
         "noSignups": "Aún no hay registros de correo electrónico.",
         "loadingError": "Error cargando registros de correo electrónico. Por favor intenta de nuevo."
+      },
+      "platformFeatures": {
+        "matchmaking": {
+          "title": "Encontrar un grupo de práctica",
+          "description": "Emparéjate con otras personas en línea: rondas cortas curiosas o una sesión completa.",
+          "action": "Abrir emparejamiento →"
+        }
       }
     }
   },
@@ -305,6 +325,54 @@
         "howItWorks": "Los primeros 3 participantes obtienen roles activos (orador, oyente, escriba). Los participantes adicionales se convierten en observadores y pueden rotar durante rondas adicionales.",
         "preview": "Máx. participantes: {{count}} (los primeros 3 obtienen roles activos, otros se convierten en observadores para la primera ronda)"
       }
+    }
+  },
+  "matchmaking": {
+    "loading": "Preparando…",
+    "modeChoice": {
+      "title": "Encontrar un grupo de práctica",
+      "subtitle": "Te emparejamos con otras dos personas que elijan la misma duración.",
+      "curious": {
+        "title": "Curioso",
+        "description": "Una prueba breve de la práctica con otros recién llegados.",
+        "detail": "Rondas de 2 minutos · 3 personas · unos 15 minutos en total"
+      },
+      "full": {
+        "title": "Sesión completa",
+        "description": "Una práctica de escucha completa con rondas cronometradas y rotación de roles.",
+        "detail": "Rondas de 5 minutos · 3 personas · unos 30 minutos en total"
+      }
+    },
+    "nameForm": {
+      "title": "¿Cómo te llamamos?",
+      "subtitle": "Este nombre se muestra a los demás en tu grupo.",
+      "label": "Tu nombre",
+      "placeholder": "Tu nombre",
+      "submit": "Encontrar mi grupo",
+      "joining": "Uniéndose…"
+    },
+    "waiting": {
+      "title": "Buscando tu grupo…",
+      "subtitle": "{{mode}} · {{count}} de {{total}} personas esperando",
+      "hint": "Comprueba tu cámara y micrófono mientras esperas. La práctica empieza cuando haya tres personas listas.",
+      "cancel": "Cancelar",
+      "waitingForOthers": "Esperando a los demás…"
+    },
+    "freeDialogue": {
+      "description": "Las rondas estructuradas han terminado. Podéis permanecer en la llamada hasta 10 minutos de conversación libre si queréis.",
+      "timeRemaining": "Tiempo restante para charlar: {{time}}",
+      "done": "Ya he terminado de charlar",
+      "starting": "Pasando a la conversación libre…"
+    },
+    "postMatch": {
+      "title": "Gracias por practicar",
+      "description": "¿Quieres otro grupo {{mode}}, o prefieres irte?",
+      "findAnother": "Encontrar otro grupo",
+      "leave": "Salir"
+    },
+    "errors": {
+      "authFailed": "No se pudo iniciar sesión. Actualiza e inténtalo de nuevo.",
+      "joinFailed": "No se pudo unir a la cola. Inténtalo de nuevo."
     }
   }
 }

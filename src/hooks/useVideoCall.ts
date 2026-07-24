@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { WebRTCService } from '../services/webrtcService';
+import { createVideoProvider } from '../services/video/createVideoProvider';
+import type { VideoProvider } from '../services/video/types';
 
 interface UseVideoCallProps {
   sessionId: string;
@@ -12,6 +13,10 @@ interface UseVideoCallProps {
     status: 'ready' | 'not-ready' | 'connecting';
   }>;
   isActive?: boolean;
+  /** When false, skip all WebRTC init (e.g. test harness without Firebase). */
+  enabled?: boolean;
+  /** Firestore session doc id for signalling ACL (defaults to sessionId). */
+  baseSessionId?: string;
 }
 
 interface VideoCallState {
@@ -28,7 +33,9 @@ export const useVideoCall = ({
   sessionId,
   currentUserId,
   participants,
-  isActive = true
+  isActive = true,
+  enabled = true,
+  baseSessionId
 }: UseVideoCallProps) => {
   const [state, setState] = useState<VideoCallState>({
     isConnected: false,
@@ -40,29 +47,61 @@ export const useVideoCall = ({
     connectionState: 'disconnected'
   });
 
-  const webrtcService = useRef<WebRTCService | null>(null);
+  const webrtcService = useRef<VideoProvider | null>(null);
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const isInitialized = useRef(false);
   const isJoining = useRef(false);
   const localStreamRef = useRef<MediaStream | null>(null);
-  const recoveryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const healthCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const recoveryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const healthCheckIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const retryCountRef = useRef(0);
   const maxRetries = 3;
+  const participantsRef = useRef(participants);
+  participantsRef.current = participants;
+
+  // Handle disconnection with auto-recovery
+  const handleDisconnection = useCallback(() => {
+    if (!enabled) return;
+
+    if (retryCountRef.current < maxRetries) {
+      retryCountRef.current++;
+      console.log(`Attempting to recover connection (attempt ${retryCountRef.current}/${maxRetries})`);
+      
+      if (recoveryTimeoutRef.current) {
+        clearTimeout(recoveryTimeoutRef.current);
+      }
+      
+      recoveryTimeoutRef.current = setTimeout(() => {
+        if (webrtcService.current && isActive) {
+          webrtcService.current.joinSession(participantsRef.current).catch(error => {
+            console.error('Recovery attempt failed:', error);
+          });
+        }
+      }, 2000 * retryCountRef.current);
+    } else {
+      console.error('Max retry attempts reached, connection recovery failed');
+      setState(prev => ({
+        ...prev,
+        error: 'Connection lost and recovery failed. Please try Reconnect or refresh the page.'
+      }));
+    }
+  }, [enabled, isActive]);
 
   // Initialize WebRTC service
   const initializeWebRTC = useCallback(async () => {
+    if (!enabled) {
+      return;
+    }
+
     try {
-      // Don't re-initialize if already initialized
       if (isInitialized.current) {
         console.log('WebRTC already initialized, skipping re-initialization');
         return;
       }
 
-      console.log('Initializing WebRTC service for session:', sessionId);
-      isInitialized.current = true;
+      console.log('Initializing video provider for session:', sessionId);
 
-      webrtcService.current = WebRTCService.getInstance();
+      webrtcService.current = createVideoProvider();
       
       await webrtcService.current.initialize(sessionId, currentUserId, {
         onParticipantJoined: (participantId: string) => {
@@ -86,12 +125,10 @@ export const useVideoCall = ({
             isConnecting: connectionState === 'connecting'
           }));
           
-          // Reset retry count on successful connection
           if (connectionState === 'connected') {
             retryCountRef.current = 0;
           }
           
-          // Handle disconnection with auto-recovery
           if (connectionState === 'disconnected' && isActive) {
             handleDisconnection();
           }
@@ -105,9 +142,11 @@ export const useVideoCall = ({
             return { ...prev, peerStreams: newPeerStreams };
           });
         }
-      });
+      }, { baseSessionId: baseSessionId || sessionId });
 
-      // Initialize local stream
+      // Mark initialized only after successful setup so failures can retry
+      isInitialized.current = true;
+
       if (isActive) {
         const localStream = await webrtcService.current.initializeLocalStream(
           state.isVideoEnabled,
@@ -116,86 +155,55 @@ export const useVideoCall = ({
         
         if (localVideoRef.current) {
           localVideoRef.current.srcObject = localStream;
-          localStreamRef.current = localStream;
         }
+        localStreamRef.current = localStream;
 
-        // Join session with current participants
-        await webrtcService.current.joinSession(participants);
+        await webrtcService.current.joinSession(participantsRef.current);
       }
     } catch (error) {
       console.error('Failed to initialize WebRTC:', error);
+      isInitialized.current = false;
       setState(prev => ({
         ...prev,
         error: error instanceof Error ? error.message : 'Failed to initialize video call'
       }));
     }
-  }, [sessionId, currentUserId, isActive, state.isVideoEnabled, state.isMuted]); // Removed participants dependency
-
-  // Handle disconnection with auto-recovery
-  const handleDisconnection = useCallback(() => {
-    if (retryCountRef.current < maxRetries) {
-      retryCountRef.current++;
-      console.log(`Attempting to recover connection (attempt ${retryCountRef.current}/${maxRetries})`);
-      
-      // Clear any existing recovery timeout
-      if (recoveryTimeoutRef.current) {
-        clearTimeout(recoveryTimeoutRef.current);
-      }
-      
-      // Retry after a delay
-      recoveryTimeoutRef.current = setTimeout(() => {
-        if (webrtcService.current && isActive) {
-          webrtcService.current.joinSession(participants).catch(error => {
-            console.error('Recovery attempt failed:', error);
-          });
-        }
-      }, 2000 * retryCountRef.current); // Exponential backoff
-    } else {
-      console.error('Max retry attempts reached, connection recovery failed');
-      setState(prev => ({
-        ...prev,
-        error: 'Connection lost and recovery failed. Please refresh the page.'
-      }));
-    }
-  }, [isActive, participants]);
+  }, [sessionId, currentUserId, isActive, enabled, baseSessionId, state.isVideoEnabled, state.isMuted, handleDisconnection]);
 
   // Initialize when component mounts or dependencies change
   useEffect(() => {
-    if (sessionId && currentUserId) {
+    if (enabled && sessionId && currentUserId) {
       initializeWebRTC();
     }
-  }, [sessionId, currentUserId]); // Removed isActive and initializeWebRTC from dependencies
+  }, [sessionId, currentUserId, enabled]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle participant updates without re-initializing WebRTC
   useEffect(() => {
+    if (!enabled) return;
+
     if (isInitialized.current && webrtcService.current && isActive && participants.length > 0) {
-      // Only update participants if we're already connected and have participants
-      // This prevents disrupting existing video connections when roles are updated
       console.log('Updating participants list without re-initializing WebRTC:', participants.length, 'participants');
       
-      // Use the new updateParticipants method that preserves existing connections
       webrtcService.current.updateParticipants(participants).catch(error => {
         console.error('Failed to update participants:', error);
       });
     }
-  }, [participants, isActive]); // Only depend on participants and isActive
+  }, [participants, isActive, enabled]);
 
   // Handle isActive state changes
   useEffect(() => {
+    if (!enabled) return;
+
     if (sessionId && currentUserId && isActive && webrtcService.current && !isJoining.current) {
-      // Check if we need to initialize local stream
       const hasLocalStream = localVideoRef.current && localVideoRef.current.srcObject;
       const hasStoredStream = localStreamRef.current;
       
       if (isInitialized.current) {
-        // If we don't have a local stream but have a stored stream, restore it
         if (!hasLocalStream && hasStoredStream) {
           if (localVideoRef.current) {
             localVideoRef.current.srcObject = hasStoredStream;
           }
-        }
-        // If we don't have any stream, initialize it
-        else if (!hasLocalStream && !hasStoredStream) {
+        } else if (!hasLocalStream && !hasStoredStream) {
           isJoining.current = true;
           
           webrtcService.current.initializeLocalStream(
@@ -204,8 +212,8 @@ export const useVideoCall = ({
           ).then(localStream => {
             if (localVideoRef.current) {
               localVideoRef.current.srcObject = localStream;
-              localStreamRef.current = localStream;
             }
+            localStreamRef.current = localStream;
             isJoining.current = false;
           }).catch(error => {
             console.error('Failed to initialize local stream:', error);
@@ -216,81 +224,77 @@ export const useVideoCall = ({
         initializeWebRTC();
       }
     }
-  }, [isActive, sessionId, currentUserId]); // Removed participants from dependencies
+  }, [isActive, sessionId, currentUserId, enabled]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Ensure local stream is always set to video element when ref changes
   useEffect(() => {
     if (localVideoRef.current && localStreamRef.current && !localVideoRef.current.srcObject) {
       localVideoRef.current.srcObject = localStreamRef.current;
     }
-  }, [localVideoRef.current]);
+  });
 
   // Health check for video stream
   useEffect(() => {
-    if (isActive && isInitialized.current) {
-      healthCheckIntervalRef.current = setInterval(() => {
-        const hasLocalStream = localVideoRef.current && localVideoRef.current.srcObject;
-        const hasStoredStream = localStreamRef.current;
-        
-        // If video element lost its stream but we have a stored one, restore it
-        if (!hasLocalStream && hasStoredStream && localVideoRef.current) {
-          console.log('Health check: Restoring lost video stream');
-          localVideoRef.current.srcObject = hasStoredStream;
-        }
-        
-        // If we have no stream at all and should be active, try to recover
-        if (!hasLocalStream && !hasStoredStream && !isJoining.current) {
-          console.log('Health check: No video stream found, attempting recovery');
-          if (webrtcService.current) {
-            webrtcService.current.initializeLocalStream(
-              state.isVideoEnabled,
-              !state.isMuted
-            ).then(localStream => {
-              if (localVideoRef.current) {
-                localVideoRef.current.srcObject = localStream;
-                localStreamRef.current = localStream;
-              }
-            }).catch(error => {
-              console.error('Health check recovery failed:', error);
-            });
-          }
-        }
-
-        // Check peer stream health
-        state.peerStreams.forEach((stream, participantId) => {
-          if (!stream.active || stream.getTracks().length === 0) {
-            console.warn('Health check: Invalid peer stream detected for:', participantId, 'active:', stream.active, 'tracks:', stream.getTracks().length);
-            // Remove invalid stream
-            setState(prev => {
-              const newPeerStreams = new Map(prev.peerStreams);
-              newPeerStreams.delete(participantId);
-              console.log('🟡 VIDEO - Health check removed invalid stream for:', participantId);
-              return { ...prev, peerStreams: newPeerStreams };
-            });
-          }
-        });
-      }, 5000); // Check every 5 seconds
-      
-      return () => {
-        if (healthCheckIntervalRef.current) {
-          clearInterval(healthCheckIntervalRef.current);
-          healthCheckIntervalRef.current = null;
-        }
-      };
+    if (!enabled || !isActive || !isInitialized.current) {
+      return;
     }
-  }, [isActive, state.isVideoEnabled, state.isMuted, state.peerStreams]);
 
-  // Separate cleanup effect that only runs on unmount
+    healthCheckIntervalRef.current = setInterval(() => {
+      const hasLocalStream = localVideoRef.current && localVideoRef.current.srcObject;
+      const hasStoredStream = localStreamRef.current;
+      
+      if (!hasLocalStream && hasStoredStream && localVideoRef.current) {
+        console.log('Health check: Restoring lost video stream');
+        localVideoRef.current.srcObject = hasStoredStream;
+      }
+      
+      if (!hasLocalStream && !hasStoredStream && !isJoining.current) {
+        console.log('Health check: No video stream found, attempting recovery');
+        if (webrtcService.current) {
+          webrtcService.current.initializeLocalStream(
+            state.isVideoEnabled,
+            !state.isMuted
+          ).then(localStream => {
+            if (localVideoRef.current) {
+              localVideoRef.current.srcObject = localStream;
+            }
+            localStreamRef.current = localStream;
+          }).catch(error => {
+            console.error('Health check recovery failed:', error);
+          });
+        }
+      }
+
+      state.peerStreams.forEach((stream, participantId) => {
+        if (!stream.active || stream.getTracks().length === 0) {
+          console.warn('Health check: Invalid peer stream detected for:', participantId);
+          setState(prev => {
+            const newPeerStreams = new Map(prev.peerStreams);
+            newPeerStreams.delete(participantId);
+            return { ...prev, peerStreams: newPeerStreams };
+          });
+        }
+      });
+    }, 5000);
+    
+    return () => {
+      if (healthCheckIntervalRef.current) {
+        clearInterval(healthCheckIntervalRef.current);
+        healthCheckIntervalRef.current = null;
+      }
+    };
+  }, [enabled, isActive, state.isVideoEnabled, state.isMuted, state.peerStreams]);
+
+  // Full teardown on unmount
   useEffect(() => {
     return () => {
-      // Cleanup on unmount - only disconnect if we're actually leaving the session
       if (webrtcService.current) {
-        console.log('Component unmounting, cleaning up WebRTC');
-        webrtcService.current.leaveSession();
+        console.log('Component unmounting, disconnecting WebRTC');
+        webrtcService.current.disconnect();
+        webrtcService.current = null;
         isInitialized.current = false;
       }
       
-      // Clear all timeouts and intervals
       if (recoveryTimeoutRef.current) {
         clearTimeout(recoveryTimeoutRef.current);
         recoveryTimeoutRef.current = null;
@@ -301,15 +305,10 @@ export const useVideoCall = ({
         healthCheckIntervalRef.current = null;
       }
       
-      // Stop local stream
-      if (localStreamRef.current) {
-        localStreamRef.current.getTracks().forEach(track => track.stop());
-        localStreamRef.current = null;
-      }
+      localStreamRef.current = null;
     };
-  }, []); // Empty dependency array means this only runs on mount/unmount
+  }, []);
 
-  // Toggle mute
   const toggleMute = useCallback(() => {
     if (webrtcService.current) {
       const newMutedState = !state.isMuted;
@@ -318,7 +317,6 @@ export const useVideoCall = ({
     }
   }, [state.isMuted]);
 
-  // Toggle video
   const toggleVideo = useCallback(() => {
     if (webrtcService.current) {
       const newVideoState = !state.isVideoEnabled;
@@ -327,10 +325,11 @@ export const useVideoCall = ({
     }
   }, [state.isVideoEnabled]);
 
-  // Leave call
   const leaveCall = useCallback(async () => {
     if (webrtcService.current) {
       await webrtcService.current.leaveSession();
+      localStreamRef.current = null;
+      isInitialized.current = false;
       setState(prev => ({
         ...prev,
         isConnected: false,
@@ -341,19 +340,57 @@ export const useVideoCall = ({
     }
   }, []);
 
-  // Get participant display name
+  // Full reconnect: tear down signalling + peers, then re-init
+  const reconnectCall = useCallback(async () => {
+    if (!enabled) return;
+
+    console.log('Reconnecting WebRTC call');
+    retryCountRef.current = 0;
+
+    if (recoveryTimeoutRef.current) {
+      clearTimeout(recoveryTimeoutRef.current);
+      recoveryTimeoutRef.current = null;
+    }
+
+    setState(prev => ({
+      ...prev,
+      error: null,
+      isConnected: false,
+      isConnecting: true,
+      connectionState: 'connecting',
+      peerStreams: new Map()
+    }));
+
+    try {
+      if (webrtcService.current) {
+        await webrtcService.current.disconnect();
+        webrtcService.current = null;
+      }
+      localStreamRef.current = null;
+      isInitialized.current = false;
+      await initializeWebRTC();
+    } catch (error) {
+      console.error('Reconnect failed:', error);
+      isInitialized.current = false;
+      setState(prev => ({
+        ...prev,
+        isConnecting: false,
+        connectionState: 'disconnected',
+        error: error instanceof Error ? error.message : 'Failed to reconnect'
+      }));
+    }
+  }, [enabled, initializeWebRTC]);
+
   const getParticipantDisplayName = useCallback((participantId: string) => {
     const participant = participants.find(p => p.id === participantId);
     return participant?.name || 'Unknown';
   }, [participants]);
 
-  // Get participant role
   const getParticipantRole = useCallback((participantId: string) => {
     const participant = participants.find(p => p.id === participantId);
     return participant?.role || 'unknown';
   }, [participants]);
 
-  // Update participants without disrupting connections
   const updateParticipants = useCallback((newParticipants: Array<{ id: string; name: string; role: string; status: 'ready' | 'not-ready' | 'connecting' }>) => {
     if (webrtcService.current && isInitialized.current) {
       webrtcService.current.updateParticipants(newParticipants).catch(error => {
@@ -372,6 +409,7 @@ export const useVideoCall = ({
     toggleMute,
     toggleVideo,
     leaveCall,
+    reconnectCall,
     updateParticipants,
     getParticipantDisplayName,
     getParticipantRole,
@@ -379,6 +417,6 @@ export const useVideoCall = ({
     // Computed values
     peerCount: state.peerStreams.size,
     hasError: !!state.error,
-    canConnect: isActive && !!sessionId && !!currentUserId
+    canConnect: enabled && isActive && !!sessionId && !!currentUserId
   };
-}; 
+};

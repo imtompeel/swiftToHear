@@ -18,6 +18,8 @@ export interface SignalingMessage {
   to?: string;
   data: any;
   sessionId: string;
+  /** Firestore sessions/groupSessions doc id used for ACL (may differ from lobby room id) */
+  baseSessionId: string;
   timestamp: Timestamp;
   expiresAt: Timestamp;
 }
@@ -25,6 +27,7 @@ export interface SignalingMessage {
 export class FirebaseSignalingService {
   private static instance: FirebaseSignalingService;
   private sessionId: string | null = null;
+  private baseSessionId: string | null = null;
   private currentUserId: string | null = null;
   private unsubscribe: (() => void) | null = null;
   private messageHandlers: Map<string, (message: SignalingMessage) => void> = new Map();
@@ -37,7 +40,11 @@ export class FirebaseSignalingService {
   }
 
   // Initialize the signaling service for a session
-  async initialize(sessionId: string, currentUserId: string): Promise<void> {
+  async initialize(
+    sessionId: string,
+    currentUserId: string,
+    baseSessionId: string = sessionId
+  ): Promise<void> {
     // If already initialized for the same session, don't reinitialize
     if (this.sessionId === sessionId && this.currentUserId === currentUserId) {
       console.log('🟢 FIREBASE SIGNALING - Already initialized for session:', sessionId);
@@ -48,40 +55,32 @@ export class FirebaseSignalingService {
     if (this.sessionId && this.sessionId !== sessionId) {
       console.log('🟢 FIREBASE SIGNALING - Disconnecting from previous session:', this.sessionId);
       await this.disconnect();
-      // Small delay to prevent rapid reconnections
       await new Promise(resolve => setTimeout(resolve, 200));
     }
     
     this.sessionId = sessionId;
+    this.baseSessionId = baseSessionId;
     this.currentUserId = currentUserId;
     
-    console.log('🟢 FIREBASE SIGNALING - Initializing for session:', sessionId, 'user:', currentUserId);
+    console.log('🟢 FIREBASE SIGNALING - Initializing for session:', sessionId, 'base:', baseSessionId, 'user:', currentUserId);
     
-    // Start listening for messages
     await this.startListening();
-    
-    // Clean up old messages (older than 1 hour)
     await this.cleanupOldMessages();
-    
-    // Wait a moment to ensure initialization is complete
-    await new Promise(resolve => setTimeout(resolve, 150));
   }
 
   // Send a signaling message
-  async sendMessage(message: Omit<SignalingMessage, 'timestamp' | 'expiresAt'>): Promise<void> {
-    if (!this.sessionId || !this.currentUserId) {
+  async sendMessage(message: Omit<SignalingMessage, 'timestamp' | 'expiresAt' | 'baseSessionId'>): Promise<void> {
+    if (!this.sessionId || !this.currentUserId || !this.baseSessionId) {
       console.warn('🟡 FIREBASE SIGNALING - Cannot send message, service not fully initialized');
       return;
     }
-
-    // Wait a moment to ensure the service is fully ready
-    await new Promise(resolve => setTimeout(resolve, 50));
 
     const now = Timestamp.now();
     const expiresAt = new Timestamp(now.seconds + 3600, now.nanoseconds); // 1 hour from now
 
     const signalingMessage: Omit<SignalingMessage, 'id'> = {
       ...message,
+      baseSessionId: this.baseSessionId,
       timestamp: now,
       expiresAt
     };
@@ -92,7 +91,8 @@ export class FirebaseSignalingService {
         type: message.type,
         from: message.from,
         to: message.to,
-        sessionId: message.sessionId
+        sessionId: message.sessionId,
+        baseSessionId: this.baseSessionId
       });
     } catch (error) {
       console.error('🔴 FIREBASE SIGNALING - Failed to send message:', error);
@@ -227,11 +227,11 @@ export class FirebaseSignalingService {
   }
 
   // Disconnect and cleanup
-  async disconnect(): Promise<void> {
+  async disconnect(options: { skipLeave?: boolean } = {}): Promise<void> {
     console.log('🟢 FIREBASE SIGNALING - Disconnecting from session:', this.sessionId);
     
-    // Send leave message
-    if (this.sessionId && this.currentUserId) {
+    // Send leave message unless caller already did (avoids duplicate leave on full teardown)
+    if (!options.skipLeave && this.sessionId && this.currentUserId) {
       try {
         await this.sendLeaveMessage();
       } catch (error) {
@@ -250,6 +250,7 @@ export class FirebaseSignalingService {
 
     // Reset state
     this.sessionId = null;
+    this.baseSessionId = null;
     this.currentUserId = null;
   }
 } 

@@ -32,6 +32,7 @@ export const VideoLobby: React.FC<VideoLobbyProps> = ({
   // Video call setup for lobby
   const videoCall = useVideoCall({
     sessionId: `${sessionId}-${groupId}-lobby`,
+    baseSessionId: sessionId,
     currentUserId,
     currentUserName,
     isActive: true, // Always active in lobby

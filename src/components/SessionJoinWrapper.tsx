@@ -6,68 +6,94 @@ import { useAuth } from '../contexts/AuthContext';
 
 const SessionJoinWrapper: React.FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, ensureSignedIn } = useAuth();
   const [joinLoading, setJoinLoading] = useState(false);
-  const [anonymousUserId, setAnonymousUserId] = useState<string>('');
+  const [authReady, setAuthReady] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
-  // Generate anonymous user ID for unauthenticated users
+  // Ensure Firebase Auth (anonymous if needed) so participant id === auth.uid
   useEffect(() => {
-    if (!user && !anonymousUserId) {
-      const anonymousId = `anonymous_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      setAnonymousUserId(anonymousId);
-    }
-  }, [user, anonymousUserId]);
+    if (authLoading) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        await ensureSignedIn();
+        if (!cancelled) {
+          setAuthReady(true);
+        }
+      } catch (err) {
+        console.error('Failed to establish auth for session join:', err);
+        if (!cancelled) {
+          setAuthError(err instanceof Error ? err.message : 'Failed to sign in');
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoading, ensureSignedIn]);
+
+  const currentUserId = user?.uid || '';
+  const currentUserName = user?.displayName || user?.email || 'Guest';
 
   const { 
     session, 
     loadSession, 
     joinSession, 
-    currentUserId, 
-    currentUserName, 
     error, 
     clearError,
     loading: sessionLoading 
-  } = useSession(user?.uid || anonymousUserId, user?.displayName || user?.email || 'Anonymous User');
+  } = useSession(currentUserId, currentUserName);
 
-  // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Load session data - allow both authenticated and anonymous users
   useEffect(() => {
-    if (sessionId && !authLoading) {
+    if (sessionId && authReady && currentUserId) {
       loadSession(sessionId);
     }
-  }, [sessionId, authLoading, loadSession]);
+  }, [sessionId, authReady, currentUserId, loadSession]);
 
   const handleJoinSession = async (joinData: any) => {
     setJoinLoading(true);
     try {
-      // Use authenticated user info if available, otherwise use anonymous info
+      const signedIn = await ensureSignedIn(joinData.userName);
       const finalJoinData = {
         ...joinData,
-        userId: user?.uid || anonymousUserId,
-        userName: user?.displayName || user?.email || joinData.userName || 'Anonymous User'
+        userId: signedIn.uid,
+        userName: joinData.userName || signedIn.displayName || signedIn.email || 'Guest'
       };
       
       await joinSession(finalJoinData);
     } catch (err) {
       console.error('Failed to join session:', err);
       setJoinLoading(false);
-      throw err; // Re-throw so the SessionJoin component can handle it
+      throw err;
     }
   };
 
-
-
-  // Show loading while auth is being determined
-  if (authLoading) {
+  if (authLoading || !authReady) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Preparing secure session…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (authError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center max-w-md px-4">
+          <p className="text-red-600 mb-4">{authError}</p>
+          <p className="text-sm text-gray-600">
+            Enable Anonymous Authentication in the Firebase console (Authentication → Sign-in method).
+          </p>
         </div>
       </div>
     );
@@ -100,8 +126,9 @@ const SessionJoinWrapper: React.FC = () => {
       <SessionJoin 
         session={session}
         onJoinSession={handleJoinSession}
-        currentUserId={user?.uid || anonymousUserId}
-        currentUserName={user?.displayName || user?.email || 'Anonymous User'}
+        onRoleSelect={() => { /* role chosen in lobby after join */ }}
+        currentUserId={currentUserId}
+        currentUserName={currentUserName}
         isFirstTime={true}
       />
       
@@ -116,4 +143,4 @@ const SessionJoinWrapper: React.FC = () => {
   );
 };
 
-export { SessionJoinWrapper }; 
+export { SessionJoinWrapper };

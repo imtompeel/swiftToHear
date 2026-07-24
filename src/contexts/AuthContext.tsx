@@ -1,11 +1,12 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { 
   User, 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   signOut, 
   onAuthStateChanged,
-  updateProfile
+  updateProfile,
+  signInAnonymously
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
 
@@ -15,6 +16,8 @@ interface AuthContextType {
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  /** Ensure there is an auth user (anonymous if needed) for session join / signalling */
+  ensureSignedIn: (displayName?: string) => Promise<User>;
   error: string | null;
   clearError: () => void;
 }
@@ -39,8 +42,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+    const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
+      setUser(nextUser);
       setLoading(false);
     });
 
@@ -52,7 +55,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setError(null);
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       
-      // Update the user's display name
       if (userCredential.user) {
         await updateProfile(userCredential.user, {
           displayName: displayName
@@ -76,6 +78,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const ensureSignedIn = useCallback(async (displayName?: string): Promise<User> => {
+    if (auth.currentUser) {
+      return auth.currentUser;
+    }
+
+    setError(null);
+    const credential = await signInAnonymously(auth);
+    if (displayName?.trim()) {
+      try {
+        await updateProfile(credential.user, { displayName: displayName.trim() });
+      } catch (profileError) {
+        console.warn('Could not set anonymous display name:', profileError);
+      }
+    }
+    return credential.user;
+  }, []);
+
   const signOutUser = async () => {
     try {
       setError(null);
@@ -97,6 +116,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signUp,
     signIn,
     signOut: signOutUser,
+    ensureSignedIn,
     error,
     clearError
   };
@@ -106,4 +126,4 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-}; 
+};

@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { addEmailSignup } from '../services/emailService';
 import { downloadTrackingService } from '../services/downloadTrackingService';
 import { useTranslation } from '../hooks/useTranslation';
+import AdminLoginForm from './AdminLoginForm';
 
 const LandingPage: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [email, setEmail] = useState('');
   const [involvementLevel, setInvolvementLevel] = useState<'keep-updated' | 'get-involved'>('keep-updated');
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -446,6 +449,19 @@ const LandingPage: React.FC = () => {
           <p className="text-lg text-accent-100 dark:text-accent-200 mb-8">
             {t('landing.invitation.callToAction')}
           </p>
+
+          <div className="mb-10">
+            <Link
+              to="/practice/match"
+              data-testid="landing-find-practice-group"
+              className="inline-flex items-center justify-center bg-white dark:bg-secondary-100 text-accent-800 dark:text-accent-900 hover:bg-secondary-50 dark:hover:bg-secondary-200 font-semibold py-3 px-8 rounded-md transition-colors duration-200 shadow-sm"
+            >
+              {t('landing.invitation.findPracticeGroup')}
+            </Link>
+            <p className="mt-3 text-sm text-accent-200 dark:text-accent-300">
+              {t('landing.invitation.findPracticeGroupHint')}
+            </p>
+          </div>
           
           {!isSubmitted ? (
             <form onSubmit={handleSubmit} className="mb-6">
@@ -538,6 +554,31 @@ const LandingPage: React.FC = () => {
           <p className="text-sm text-secondary-400 dark:text-secondary-500" style={{ marginTop: t('landing.footer.finalQuote.reference') ? '0' : '2rem' }}>
             {t('landing.footer.copyright')}
           </p>
+
+          <div className="mt-10 pt-8 border-t border-secondary-700">
+            <button
+              type="button"
+              onClick={() => setShowAdminLogin(!showAdminLogin)}
+              className="text-sm text-secondary-400 hover:text-white transition-colors duration-200"
+            >
+              {showAdminLogin ? t('landing.footer.admin.toggleHide') : t('landing.footer.admin.toggleShow')}
+            </button>
+
+            {showAdminLogin && (
+              <div className="mt-6 max-w-sm mx-auto text-left">
+                <h3 className="text-lg font-semibold text-white mb-1">
+                  {t('shared.common.adminLogin')}
+                </h3>
+                <p className="text-sm text-secondary-400 mb-4">
+                  {t('landing.footer.admin.subtitle')}
+                </p>
+                <AdminLoginForm
+                  variant="footer"
+                  onSuccess={() => navigate('/admin')}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </footer>
     </div>

@@ -28,6 +28,23 @@ const PlatformFeaturesGrid: React.FC = () => {
       actionText: t('admin.dashboard.platformFeatures.dialecticSession.action')
     },
     {
+      id: 'matchmaking',
+      title: t('admin.dashboard.platformFeatures.matchmaking.title'),
+      description: t('admin.dashboard.platformFeatures.matchmaking.description'),
+      link: '/practice/match',
+      icon: (
+        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+      ),
+      gradient: 'bg-gradient-to-r from-blue-50 to-sky-50 dark:from-blue-900 dark:to-sky-900',
+      border: 'border-blue-200 dark:border-blue-700',
+      iconBg: 'bg-blue-600 dark:bg-blue-500',
+      hoverColor: 'group-hover:text-blue-600 dark:group-hover:text-blue-400',
+      linkColor: 'text-blue-600 dark:text-blue-400 group-hover:text-blue-500',
+      actionText: t('admin.dashboard.platformFeatures.matchmaking.action')
+    },
+    {
       id: 'platform-guide',
       title: t('shared.common.platformGuide'),
       description: t('admin.dashboard.platformFeatures.platformGuide.description'),

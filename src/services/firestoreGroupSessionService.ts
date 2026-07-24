@@ -12,7 +12,7 @@ import {
   collection
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import { GroupSessionData, GroupData, GroupConfiguration } from '../types/groupSession';
+import { GroupSessionData, GroupData, GroupConfiguration, Participant } from '../types/groupSession';
 import { GroupAssignmentService } from './groupAssignmentService';
 
 export interface GroupSessionCreateData {
@@ -31,10 +31,24 @@ export interface GroupSessionCreateData {
 export class FirestoreGroupSessionService {
   private static COLLECTION_NAME = 'groupSessions';
 
+  private static withParticipantIds(participants: Participant[]) {
+    return {
+      participants,
+      participantIds: participants.map(p => p.id)
+    };
+  }
+
   // Create a new group session
   static async createGroupSession(sessionData: GroupSessionCreateData): Promise<GroupSessionData> {
     const sessionId = this.generateSessionId();
     
+    const participants = [{
+      id: sessionData.hostId,
+      name: sessionData.hostName,
+      role: '',
+      status: 'ready' as const
+    }];
+
     const session: GroupSessionData = {
       sessionId,
       sessionName: sessionData.sessionName,
@@ -44,12 +58,8 @@ export class FirestoreGroupSessionService {
       hostName: sessionData.hostName,
       hostRole: sessionData.hostRole,
       createdAt: serverTimestamp() as Timestamp,
-      participants: [{
-        id: sessionData.hostId,
-        name: sessionData.hostName,
-        role: '',
-        status: 'ready'
-      }],
+      participants,
+      participantIds: [sessionData.hostId],
       status: 'waiting',
       minParticipants: sessionData.minParticipants,
       maxParticipants: sessionData.maxParticipants,
@@ -107,10 +117,13 @@ export class FirestoreGroupSessionService {
       }
 
       await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
-        participants: session.participants
+        ...this.withParticipantIds(session.participants)
       });
 
-      return session;
+      return {
+        ...session,
+        ...this.withParticipantIds(session.participants)
+      };
     } catch (error) {
       console.error('Error joining group session:', error);
       throw error;

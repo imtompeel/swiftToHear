@@ -1,45 +1,54 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 
 interface TechCheckProps {
   onComplete?: (results: { camera: boolean; microphone: boolean }) => void;
+  /** When true, the primary action shows waiting copy instead of continue */
+  waitingForOthers?: boolean;
 }
 
-export const TechCheck: React.FC<TechCheckProps> = ({ onComplete }) => {
+export const TechCheck: React.FC<TechCheckProps> = ({
+  onComplete,
+  waitingForOthers = false,
+}) => {
   const { t } = useTranslation();
   const [cameraStatus, setCameraStatus] = useState<'checking' | 'working' | 'failed'>('working');
   const [microphoneStatus, setMicrophoneStatus] = useState<'checking' | 'working' | 'failed'>('working');
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     checkDevices();
     return () => {
-      // Cleanup stream on unmount
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
       }
     };
   }, []);
 
   const checkDevices = async () => {
     try {
-      // Check camera and microphone access
+      // Stop any previous preview stream before reacquiring
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
+
       const mediaStream = await navigator.mediaDevices.getUserMedia({ 
         video: true, 
         audio: true 
       });
       
+      streamRef.current = mediaStream;
       setStream(mediaStream);
       
-      // Check if we got video track
       const videoTracks = mediaStream.getVideoTracks();
       setCameraStatus(videoTracks.length > 0 ? 'working' : 'failed');
       
-      // Check if we got audio track
       const audioTracks = mediaStream.getAudioTracks();
       setMicrophoneStatus(audioTracks.length > 0 ? 'working' : 'failed');
 
-      // Call completion callback
       if (onComplete) {
         onComplete({
           camera: videoTracks.length > 0,
@@ -173,13 +182,21 @@ export const TechCheck: React.FC<TechCheckProps> = ({ onComplete }) => {
           {t('dialectic.preparation.techCheck.checkAgain')}
         </button>
         <button
+          type="button"
+          disabled={waitingForOthers}
           className={`px-6 py-2 rounded-lg font-medium ${
-            allReady 
-              ? 'bg-green-600 text-white hover:bg-green-700' 
-              : 'bg-accent-600 text-white hover:bg-accent-700'
+            waitingForOthers
+              ? 'bg-secondary-300 dark:bg-secondary-600 text-secondary-700 dark:text-secondary-200 cursor-wait'
+              : allReady
+                ? 'bg-green-600 text-white hover:bg-green-700'
+                : 'bg-accent-600 text-white hover:bg-accent-700'
           }`}
         >
-          {allReady ? t('shared.actions.continueToSession') : t('dialectic.preparation.techCheck.continueAnyway')}
+          {waitingForOthers
+            ? t('matchmaking.waiting.waitingForOthers')
+            : allReady
+              ? t('shared.actions.continueToSession')
+              : t('dialectic.preparation.techCheck.continueAnyway')}
         </button>
       </div>
     </div>

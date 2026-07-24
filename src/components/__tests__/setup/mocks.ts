@@ -25,23 +25,156 @@ vi.mock('@daily-co/daily-js', () => ({
 
 // ===== FIREBASE MOCKS =====
 
+const mockAuthUser = {
+  uid: 'test-user',
+  email: 'test@example.com',
+  displayName: 'Test User',
+};
+
+export const mockFirestoreDb = { _type: 'firestore' };
+
+vi.mock('firebase/app', () => ({
+  initializeApp: vi.fn(() => ({ name: 'test-app' })),
+}));
+
+vi.mock('firebase/auth', () => ({
+  getAuth: vi.fn(() => ({ currentUser: mockAuthUser })),
+  onAuthStateChanged: vi.fn((_auth: unknown, callback: (user: typeof mockAuthUser) => void) => {
+    callback(mockAuthUser);
+    return vi.fn();
+  }),
+  signInWithEmailAndPassword: vi.fn(() => Promise.resolve({ user: mockAuthUser })),
+  signOut: vi.fn(() => Promise.resolve()),
+  createUserWithEmailAndPassword: vi.fn(() => Promise.resolve({ user: mockAuthUser })),
+  updateProfile: vi.fn(() => Promise.resolve()),
+}));
+
+vi.mock('firebase/firestore', () => ({
+  getFirestore: vi.fn(() => mockFirestoreDb),
+  collection: vi.fn((_db: unknown, path: string) => ({ path })),
+  doc: vi.fn(() => ({ path: 'mock-doc' })),
+  addDoc: vi.fn(() => Promise.resolve({ id: 'mock-id' })),
+  setDoc: vi.fn(() => Promise.resolve()),
+  updateDoc: vi.fn(() => Promise.resolve()),
+  deleteDoc: vi.fn(() => Promise.resolve()),
+  getDoc: vi.fn(() => Promise.resolve({ exists: () => false, data: () => undefined })),
+  getDocs: vi.fn(() => Promise.resolve({ docs: [], empty: true, forEach: vi.fn() })),
+  onSnapshot: vi.fn(() => vi.fn()),
+  query: vi.fn(),
+  where: vi.fn(),
+  orderBy: vi.fn(),
+  limit: vi.fn(),
+  increment: vi.fn(),
+  serverTimestamp: vi.fn(() => ({ seconds: 0, nanoseconds: 0 })),
+  Timestamp: { now: vi.fn(() => ({ seconds: 0, nanoseconds: 0, toMillis: () => 0 })) },
+  runTransaction: vi.fn(async (_db: unknown, fn: (tx: unknown) => Promise<unknown>) => {
+    const tx = {
+      get: vi.fn(async () => ({ exists: () => false, data: () => undefined })),
+      set: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+    };
+    return fn(tx);
+  }),
+}));
+
+vi.mock('firebase/analytics', () => ({
+  getAnalytics: vi.fn(),
+}));
+
 export const mockFirebaseConfig = {
-  db: {},
-  auth: { 
-    currentUser: { uid: 'test-user' },
-    signInAnonymously: vi.fn(),
-    onAuthStateChanged: vi.fn()
+  db: mockFirestoreDb,
+  auth: {
+    currentUser: mockAuthUser,
+    onAuthStateChanged: vi.fn((callback: (user: typeof mockAuthUser) => void) => {
+      callback(mockAuthUser);
+      return vi.fn();
+    }),
   },
-  firestore: {
-    collection: vi.fn(),
-    doc: vi.fn(),
-    addDoc: vi.fn(),
-    updateDoc: vi.fn(),
-    deleteDoc: vi.fn()
-  }
+  analytics: {},
+  default: { name: 'test-app' },
 };
 
 vi.mock('../../../firebase/config', () => mockFirebaseConfig);
+
+vi.mock('../../../components/ProtectedRoute', () => ({
+  ProtectedRoute: ({ children }: { children: React.ReactNode }) => children,
+}));
+
+vi.mock('../../../contexts/AuthContext', () => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) => children,
+  useAuth: () => ({
+    user: mockAuthUser,
+    loading: false,
+    signUp: vi.fn(),
+    signIn: vi.fn(),
+    signOut: vi.fn(),
+    ensureSignedIn: vi.fn(async () => mockAuthUser),
+    error: null,
+    clearError: vi.fn(),
+  }),
+}));
+
+vi.mock('../../../components/VideoLobby', () => ({
+  VideoLobby: () => null,
+}));
+
+const mockTestUsers = [
+  { id: 'user-1', name: 'Alice', email: 'alice@test.com', role: 'host' },
+  { id: 'user-2', name: 'Bob', email: 'bob@test.com', role: 'participant' },
+  { id: 'user-3', name: 'Charlie', email: 'charlie@test.com', role: 'participant' },
+  { id: 'user-4', name: 'Diana', email: 'diana@test.com', role: 'participant' },
+];
+
+const createTestAuthServiceMock = () => ({
+  getTestUsers: vi.fn(() => mockTestUsers),
+  getCurrentTestUser: vi.fn(() => mockTestUsers[0]),
+  getCurrentUserId: vi.fn(() => 'user-1'),
+  getCurrentUserName: vi.fn(() => 'Alice'),
+  isAuthenticated: vi.fn(() => true),
+  signInAsTestUser: vi.fn(() => Promise.resolve({ uid: 'user-1' })),
+  authenticateTestUser: vi.fn(),
+  onAuthStateChange: vi.fn(() => vi.fn()),
+});
+
+vi.mock('../../../services/testAuthService', () => {
+  const testAuthService = createTestAuthServiceMock();
+  return { testAuthService, default: testAuthService };
+});
+
+vi.mock('../../../hooks/useVideoCall', () => ({
+  useVideoCall: () => ({
+    isConnected: false,
+    isConnecting: false,
+    isMuted: false,
+    isVideoEnabled: true,
+    error: null,
+    peerStreams: new Map(),
+    connectionState: 'disconnected',
+    localVideoRef: { current: null },
+    localStreamRef: { current: null },
+    toggleMute: vi.fn(),
+    toggleVideo: vi.fn(),
+    leaveCall: vi.fn(),
+    reconnectCall: vi.fn(),
+    updateParticipants: vi.fn(),
+    getParticipantDisplayName: vi.fn(() => 'Unknown'),
+    getParticipantRole: vi.fn(() => 'unknown'),
+    peerCount: 0,
+    hasError: false,
+    canConnect: false,
+  }),
+}));
+
+vi.mock('../../../services/firestoreSessionService', () => ({
+  FirestoreSessionService: {
+    getSession: vi.fn(() => Promise.resolve(null)),
+    createSession: vi.fn(),
+    updateSession: vi.fn(),
+    joinSession: vi.fn(),
+    deleteSession: vi.fn(),
+  },
+}));
 
 // ===== WEBRTC MOCKS =====
 

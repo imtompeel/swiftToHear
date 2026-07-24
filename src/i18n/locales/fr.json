@@ -2,7 +2,10 @@
   "navigation": {
     "home": "Accueil",
     "comingSoon": "Bientôt disponible",
-    "siteName": "Prompt à Écouter"
+    "siteName": "Prompt à Écouter",
+    "findPracticeGroup": "Trouver un groupe de pratique",
+    "adminPanel": "Admin",
+    "emailSignups": "Inscriptions email"
   },
   "landing": {
     "hero": {
@@ -118,6 +121,8 @@
       "title": "Une invitation",
       "description": "Nous planifions un événement pilote pour explorer cette pratique d'écoute ensemble—ouvert à tous ceux qui veulent essayer. Que vous soyez confiant ou curieux, prudent ou sceptique, vous êtes les bienvenus.",
       "callToAction": "Si vous êtes intéressé à participer, ou à nous aider à tester et façonner cela pour un usage plus large, veuillez rejoindre notre liste d'attente.",
+      "findPracticeGroup": "Trouver un groupe de pratique",
+      "findPracticeGroupHint": "Nous vous mettons en relation avec deux autres personnes en ligne et prêtes à pratiquer.",
       "form": {
         "emailPlaceholder": "Entrez votre adresse e-mail",
         "submitButton": "Rejoindre la Liste d'Attente",
@@ -141,6 +146,11 @@
       "finalQuote": {
         "text": "Ainsi donc, mes frères bien-aimés, que tout homme soit prompt à écouter, lent à parler, lent à se mettre en colère.",
         "reference": "Jacques 1:19"
+      },
+      "admin": {
+        "toggleShow": "Connexion administrateur",
+        "toggleHide": "Masquer la connexion administrateur",
+        "subtitle": "Connectez-vous pour accéder au tableau de bord administrateur"
       }
     }
   },
@@ -148,10 +158,13 @@
     "title": "Panneau d'Administration",
     "login": {
       "title": "Connexion Administrateur",
+      "subtitle": "Connectez-vous pour gérer la plateforme",
       "emailLabel": "E-mail",
       "passwordLabel": "Mot de passe",
       "loginButton": "Se connecter",
+      "signInButton": "Se connecter",
       "loggingIn": "Connexion...",
+      "signingIn": "Connexion...",
       "error": "Identifiants invalides. Veuillez réessayer."
     },
     "dashboard": {
@@ -178,6 +191,13 @@
         },
         "noSignups": "Aucune inscription e-mail pour le moment.",
         "loadingError": "Erreur lors du chargement des inscriptions e-mail. Veuillez réessayer."
+      },
+      "platformFeatures": {
+        "matchmaking": {
+          "title": "Trouver un groupe de pratique",
+          "description": "Rejoignez d’autres personnes en ligne : tours courts curieux ou session complète.",
+          "action": "Ouvrir le matching →"
+        }
       }
     }
   },
@@ -295,6 +315,54 @@
         "howItWorks": "Les 3 premiers participants obtiennent des rôles actifs (orateur, auditeur, scribe). Les participants supplémentaires deviennent observateurs et peuvent tourner pendant des tours supplémentaires.",
         "preview": "Max participants : {{count}} (les 3 premiers obtiennent des rôles actifs, les autres deviennent observateurs pour le premier tour)"
       }
+    }
+  },
+  "matchmaking": {
+    "loading": "Préparation…",
+    "modeChoice": {
+      "title": "Trouver un groupe de pratique",
+      "subtitle": "Nous vous mettons en relation avec deux autres personnes qui choisissent la même durée.",
+      "curious": {
+        "title": "Curieux",
+        "description": "Un court aperçu de la pratique avec d'autres nouveaux venus.",
+        "detail": "Tours de 2 minutes · 3 personnes · environ 15 minutes au total"
+      },
+      "full": {
+        "title": "Session complète",
+        "description": "Une pratique d'écoute complète avec tours chronométrés et rotation des rôles.",
+        "detail": "Tours de 5 minutes · 3 personnes · environ 30 minutes au total"
+      }
+    },
+    "nameForm": {
+      "title": "Comment devons-nous vous appeler ?",
+      "subtitle": "Ce nom est affiché aux autres membres de votre groupe.",
+      "label": "Votre nom",
+      "placeholder": "Votre prénom",
+      "submit": "Trouver mon groupe",
+      "joining": "Connexion…"
+    },
+    "waiting": {
+      "title": "Recherche de votre groupe…",
+      "subtitle": "{{mode}} · {{count}} sur {{total}} personnes en attente",
+      "hint": "Vérifiez votre caméra et votre micro pendant l'attente. La pratique commence dès que trois personnes sont prêtes.",
+      "cancel": "Annuler",
+      "waitingForOthers": "En attente des autres…"
+    },
+    "freeDialogue": {
+      "description": "Les tours structurés sont terminés. Vous pouvez rester en appel jusqu'à 10 minutes de conversation libre si vous le souhaitez.",
+      "timeRemaining": "Temps restant pour discuter : {{time}}",
+      "done": "J'ai fini de discuter",
+      "starting": "Passage à la conversation libre…"
+    },
+    "postMatch": {
+      "title": "Merci d'avoir pratiqué",
+      "description": "Souhaitez-vous un autre groupe {{mode}}, ou préférez-vous partir ?",
+      "findAnother": "Trouver un autre groupe",
+      "leave": "Quitter"
+    },
+    "errors": {
+      "authFailed": "Impossible de vous connecter. Actualisez et réessayez.",
+      "joinFailed": "Impossible de rejoindre la file. Réessayez."
     }
   }
 }
