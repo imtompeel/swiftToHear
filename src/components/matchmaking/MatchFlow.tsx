@@ -1,7 +1,13 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useAudiencePreference } from '../../hooks/useAudiencePreference';
 import { useTranslation } from '../../hooks/useTranslation';
+import {
+  broadenAudience,
+  type AudiencePreference,
+} from '../../services/audiencePreference';
+import { isChristadelphianUnlocked } from '../../services/christadelphianGate';
 import { MatchmakingService } from '../../services/matchmakingService';
 import {
   MATCH_HEARTBEAT_INTERVAL_MS,
@@ -19,6 +25,7 @@ export const MatchFlow: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { ensureSignedIn, user } = useAuth();
+  const { preference, setPreference } = useAudiencePreference();
 
   const initialMode = searchParams.get('mode');
   const presetMode: MatchMode | null =
@@ -26,13 +33,21 @@ export const MatchFlow: React.FC = () => {
 
   const [step, setStep] = useState<MatchStep>(presetMode ? 'name' : 'mode');
   const [mode, setMode] = useState<MatchMode | null>(presetMode);
+  const [audience, setAudience] = useState<AudiencePreference | null>(preference);
   const [roomId, setRoomId] = useState<string | null>(null);
   const [room, setRoom] = useState<MatchRoom | null>(null);
   const [loading, setLoading] = useState(false);
+  const [broadening, setBroadening] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [authReady, setAuthReady] = useState(false);
+  const [suggestBroaden, setSuggestBroaden] = useState(false);
 
   const navigatingRef = useRef(false);
+  const displayNameRef = useRef('');
+
+  useEffect(() => {
+    setAudience(preference);
+  }, [preference]);
 
   useEffect(() => {
     let cancelled = false;
@@ -72,6 +87,50 @@ export const MatchFlow: React.FC = () => {
     };
   }, [roomId, user, navigate]);
 
+  // Suggest broadening when alone in a narrower funnel pool
+  useEffect(() => {
+    if (step !== 'waiting' || !mode || !audience || !user) {
+      setSuggestBroaden(false);
+      return;
+    }
+
+    const nextAudience = broadenAudience(audience);
+    if (!nextAudience) {
+      setSuggestBroaden(false);
+      return;
+    }
+
+    const aloneInRoom = !room || room.participants.length <= 1;
+    if (!aloneInRoom) {
+      setSuggestBroaden(false);
+      return;
+    }
+
+    let cancelled = false;
+    const check = async () => {
+      try {
+        const others = await MatchmakingService.hasOthersWaiting({
+          mode,
+          audience,
+          excludeUserId: user.uid,
+        });
+        if (!cancelled) setSuggestBroaden(!others);
+      } catch {
+        if (!cancelled) setSuggestBroaden(false);
+      }
+    };
+
+    void check();
+    const interval = window.setInterval(() => {
+      void check();
+    }, 15_000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [step, mode, audience, user, room]);
+
   // Leave queue on unmount if still waiting
   useEffect(() => {
     return () => {
@@ -90,12 +149,20 @@ export const MatchFlow: React.FC = () => {
   const handleNameSubmit = useCallback(
     async (name: string) => {
       if (!mode) return;
+      const pool = audience ?? preference ?? 'open';
+      if (!audience) {
+        setAudience(pool);
+        setPreference(pool);
+      }
+
+      displayNameRef.current = name;
       setLoading(true);
       setError(null);
       try {
         const signedIn = await ensureSignedIn(name);
         const result = await MatchmakingService.joinQueue({
           mode,
+          audience: pool,
           userId: signedIn.uid,
           userName: name,
         });
@@ -108,8 +175,40 @@ export const MatchFlow: React.FC = () => {
         setLoading(false);
       }
     },
-    [mode, ensureSignedIn, t]
+    [mode, audience, preference, setPreference, ensureSignedIn, t]
   );
+
+  const handleBroaden = useCallback(async () => {
+    if (!mode || !audience || !user) return;
+    const next = broadenAudience(audience);
+    if (!next) return;
+
+    setBroadening(true);
+    setError(null);
+    try {
+      if (roomId) {
+        await MatchmakingService.leaveQueue(roomId, user.uid);
+      }
+      setPreference(next);
+      setAudience(next);
+      setSuggestBroaden(false);
+
+      const name = displayNameRef.current || user.displayName || 'Guest';
+      const result = await MatchmakingService.joinQueue({
+        mode,
+        audience: next,
+        userId: user.uid,
+        userName: name,
+      });
+      setRoomId(result.roomId);
+      setRoom(null);
+    } catch (err) {
+      console.error(err);
+      setError(t('matchmaking.errors.joinFailed'));
+    } finally {
+      setBroadening(false);
+    }
+  }, [mode, audience, user, roomId, setPreference, t]);
 
   const handleCancel = useCallback(async () => {
     if (roomId && user) {
@@ -117,6 +216,7 @@ export const MatchFlow: React.FC = () => {
     }
     setRoomId(null);
     setRoom(null);
+    setSuggestBroaden(false);
     setStep('mode');
     setMode(null);
   }, [roomId, user]);
@@ -132,6 +232,29 @@ export const MatchFlow: React.FC = () => {
     );
   }
 
+  if (!preference && !audience) {
+    return (
+      <div className="max-w-md mx-auto p-8 text-center space-y-4" data-testid="match-flow-need-audience">
+        <h1 className="font-display text-2xl font-semibold text-secondary-900 dark:text-secondary-50">
+          {t('matchmaking.needAudience.title')}
+        </h1>
+        <p className="text-secondary-600 dark:text-secondary-400">
+          {t('matchmaking.needAudience.body')}
+        </p>
+        <Link to="/?choose=1" className="btn-primary inline-flex">
+          {t('matchmaking.needAudience.action')}
+        </Link>
+      </div>
+    );
+  }
+
+  const activeAudience = audience ?? preference ?? 'open';
+  if (activeAudience === 'christadelphian' && !isChristadelphianUnlocked()) {
+    return <Navigate to="/christadelphian" replace />;
+  }
+
+  const broadenTo = broadenAudience(activeAudience);
+
   return (
     <div className="min-h-[70vh] py-8" data-testid="match-flow">
       {error && (
@@ -140,7 +263,9 @@ export const MatchFlow: React.FC = () => {
         </div>
       )}
 
-      {step === 'mode' && <MatchModeChoice onSelect={handleModeSelect} />}
+      {step === 'mode' && (
+        <MatchModeChoice audience={activeAudience} onSelect={handleModeSelect} />
+      )}
 
       {step === 'name' && mode && (
         <MatchNameForm
@@ -155,7 +280,15 @@ export const MatchFlow: React.FC = () => {
       )}
 
       {step === 'waiting' && mode && (
-        <MatchWaitingRoom mode={mode} room={room} onCancel={handleCancel} />
+        <MatchWaitingRoom
+          mode={mode}
+          audience={activeAudience}
+          room={room}
+          onCancel={handleCancel}
+          broadenTo={suggestBroaden ? broadenTo : null}
+          onBroaden={handleBroaden}
+          broadening={broadening}
+        />
       )}
     </div>
   );

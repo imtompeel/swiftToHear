@@ -21,14 +21,24 @@ import App from '../../App';
 describe('App Routing for Session Management', () => {
   setupTests();
 
-  it('should render the landing page at /', () => {
+  it('should render the audience gateway at /', () => {
     render(
-      <MemoryRouter initialEntries={['/']}>
+      <MemoryRouter initialEntries={['/?choose=1']}>
         <App />
       </MemoryRouter>
     );
 
-    expect(screen.getByRole('navigation')).toBeInTheDocument();
+    expect(screen.getByTestId('audience-gateway')).toBeInTheDocument();
+  });
+
+  it('should render the open landing at /welcome', () => {
+    render(
+      <MemoryRouter initialEntries={['/welcome']}>
+        <App />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByTestId('landing-open')).toBeInTheDocument();
   });
 
   it('should render DialecticSession at /practice', () => {
@@ -42,6 +52,8 @@ describe('App Routing for Session Management', () => {
   });
 
   it('should render matchmaking flow at /practice/match', () => {
+    localStorage.setItem('swiftToHear.audience', 'open');
+
     render(
       <MemoryRouter initialEntries={['/practice/match']}>
         <App />

@@ -1,6 +1,5 @@
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import LandingPage from './components/LandingPage';
 
 import AdminPanel from './components/AdminPanel';
 import SuperadminPanel from './components/SuperadminPanel';
@@ -30,16 +29,27 @@ import { CustomTimer } from './components/CustomTimer';
 // Import step-by-step session creation
 import StepByStepSessionCreationWrapper from './components/session-creation/StepByStepSessionCreationWrapper';
 import { MatchFlow } from './components/matchmaking/MatchFlow';
+import { AudienceGateway } from './components/AudienceGateway';
+import { AudiencePathLanding } from './components/AudiencePathLanding';
+import { ChristadelphianPathLanding } from './components/ChristadelphianPathLanding';
 
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Router>
-          <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-primary-900 dark:to-secondary-900 transition-colors duration-200">
+        <Router
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
+          <div className="app-shell">
             <Navigation />
             <Routes>
-              <Route path="/" element={<LandingPage />} />
+              <Route path="/" element={<AudienceGateway />} />
+              <Route path="/for-churches" element={<AudiencePathLanding audience="church" />} />
+              <Route path="/welcome" element={<AudiencePathLanding audience="open" />} />
+              <Route path="/christadelphian" element={<ChristadelphianPathLanding />} />
               <Route path="/auth" element={<Auth />} />
 
               <Route path="/practice" element={<DialecticSession />} />

@@ -123,35 +123,35 @@ export const TechCheck: React.FC<TechCheckProps> = ({
       </div>
 
       {/* Device Status */}
-      <div className="space-y-4 mb-6">
-        <div className="flex items-center justify-between p-4 bg-secondary-50 dark:bg-secondary-700 rounded-lg">
-          <div className="flex items-center space-x-3">
-            <span className="text-2xl">{getStatusIcon(cameraStatus)}</span>
-            <span className="text-secondary-900 dark:text-secondary-100">
+      <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="flex items-center justify-between gap-2 p-4 bg-secondary-50 dark:bg-secondary-700 rounded-lg">
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="text-2xl shrink-0">{getStatusIcon(cameraStatus)}</span>
+            <span className="text-secondary-900 dark:text-secondary-100 text-sm sm:text-base">
               {getStatusText(cameraStatus, 'Camera')}
             </span>
           </div>
           {cameraStatus === 'failed' && (
             <button
               onClick={checkDevices}
-              className="text-sm text-accent-600 hover:text-accent-700"
+              className="text-sm text-accent-600 hover:text-accent-700 shrink-0"
             >
               {t('dialectic.preparation.techCheck.retry')}
             </button>
           )}
         </div>
 
-        <div className="flex items-center justify-between p-4 bg-secondary-50 dark:bg-secondary-700 rounded-lg">
-          <div className="flex items-center space-x-3">
-            <span className="text-2xl">{getStatusIcon(microphoneStatus)}</span>
-            <span className="text-secondary-900 dark:text-secondary-100">
+        <div className="flex items-center justify-between gap-2 p-4 bg-secondary-50 dark:bg-secondary-700 rounded-lg">
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="text-2xl shrink-0">{getStatusIcon(microphoneStatus)}</span>
+            <span className="text-secondary-900 dark:text-secondary-100 text-sm sm:text-base">
               {getStatusText(microphoneStatus, 'Microphone')}
             </span>
           </div>
           {microphoneStatus === 'failed' && (
             <button
               onClick={checkDevices}
-              className="text-sm text-accent-600 hover:text-accent-700"
+              className="text-sm text-accent-600 hover:text-accent-700 shrink-0"
             >
               {t('dialectic.preparation.techCheck.retry')}
             </button>

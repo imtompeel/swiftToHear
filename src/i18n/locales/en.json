@@ -127,9 +127,10 @@
   },
   "navigation": {
     "home": "Home",
-    "findPracticeGroup": "Find a practice group",
+    "findPracticeGroup": "Find a group",
     "adminPanel": "Admin",
-    "emailSignups": "Email signups"
+    "emailSignups": "Email signups",
+    "invitedGroup": "Invited group"
   },
   "auth": {
     "signUp": {
@@ -220,7 +221,11 @@
       },
       "rotation": "Crucially, these roles rotate. Everyone becomes a speaker, a listener, and a scribe after an allotted time. No one controls the outcome. Instead, we place faith in what can emerge when we listen together in love. As Proverbs 20:5 says, \"The purpose in a man's heart is like deep water,but a man of understanding will draw it out.\" This practice is a way of drawing out—not just others' words, but the meaning beneath them, even those meanings hidden from ourselves.",
       "discovery": "As the conversation unfolds, it often leads us to discoveries none of us could have reached alone. As Paul reminds us in 1 Corinthians 13:12, \"For now we see through a glass, darkly; but then face to face: now I know in part; but then shall I know even as also I am known.\" Our understanding is always partial. But through mutual listening, we begin to uncover not only what we don't know, but what we don't know we don't know—the blind spots and assumptions that only another's voice can help illuminate.",
-      "faith": "This practice is not about asserting control over words or ideas, but about cultivating faith in the conversation itself—faith that when we \"submit to one another out of reverence for Christ\" (Ephesians 5:21), something deeper than individual insight can emerge. We begin, as 2 Timothy 2:24–25 teaches, to \"patiently endure,\" \"correct with gentleness,\" and leave room for \"God [to] grant them [or us!] repentance leading to a knowledge of the truth.\""
+      "faith": "This practice is not about asserting control over words or ideas, but about cultivating faith in the conversation itself—faith that when we \"submit to one another out of reverence for Christ\" (Ephesians 5:21), something deeper than individual insight can emerge. We begin, as 2 Timothy 2:24–25 teaches, to \"patiently endure,\" \"correct with gentleness,\" and leave room for \"God [to] grant them [or us!] repentance leading to a knowledge of the truth.\"",
+      "guideCta": {
+        "title": "Want to learn more about these roles?",
+        "description": "Download our detailed guide to understand each role deeply and prepare for meaningful conversations."
+      }
     },
     "format": {
       "showMore": "Read more about this format",
@@ -281,15 +286,20 @@
     "pdfResource": {
       "title": "Download Your Listening Guide",
       "subtitle": "A comprehensive resource to deepen your listening practice",
+      "guideTitle": "Listener, Speaker, Scribe",
       "description": "Get our detailed guide on the three roles of listening practice: Speaker, Listener, and Scribe. This resource will help you understand each role deeply and prepare for meaningful conversations.",
       "downloadButton": "Download PDF Guide",
       "fileSize": "PDF • Free Download",
       "features": {
         "title": "What's included:",
+        "speakerTitle": "Speaker",
+        "listenerTitle": "Listener",
+        "scribeTitle": "Scribe",
         "speaker": "Speaker role guidance and preparation",
         "listener": "Listener techniques and reflection methods",
         "scribe": "Scribe responsibilities and insight capture",
-        "practice": "Practice exercises and conversation starters"
+        "practice": "Practice exercises and conversation starters",
+        "practiceTitle": "Practice Resources"
       }
     },
     "invitation": {
@@ -327,7 +337,13 @@
         "toggleShow": "Admin login",
         "toggleHide": "Hide admin login",
         "subtitle": "Sign in to access the admin dashboard"
-      }
+      },
+      "switchToSecular": "Prefer a version without Christian framing?"
+    },
+    "platformGuide": {
+      "title": "Want to learn more about the platform?",
+      "description": "Explore our comprehensive platform guide to understand how to use Swift to Hear effectively for both video and in-person sessions.",
+      "action": "View Platform Guide →"
     }
   },
   "admin": {
@@ -1440,11 +1456,42 @@
       }
     }
   },
+  "christadelphianGate": {
+    "title": "Christadelphian introduction",
+    "subtitle": "Enter the word indicated by this week’s clue.",
+    "clueLabel": "This week's clue",
+    "answerLabel": "The word",
+    "answerPlaceholder": "Type the word",
+    "submit": "Continue",
+    "incorrect": "That doesn't match this week's clue. Check the hymn book and try again.",
+    "notConfigured": "This week's answer isn't set yet. Please try again later.",
+    "back": "Choose a different path"
+  },
   "matchmaking": {
     "loading": "Getting ready…",
+    "needAudience": {
+      "title": "Choose how you’d like to join",
+      "body": "We match people who chose the same path—for churches, open practice, or Christadelphian communities. Pick one first so we can place you with the right group.",
+      "action": "Choose a path"
+    },
+    "audience": {
+      "church": "church groups",
+      "open": "open practice",
+      "christadelphian": "Christadelphian communities"
+    },
+    "moderationWarning": {
+      "title": "These calls are not moderated",
+      "body": "You may be matched with people you do not know. We cannot supervise or intervene in live conversations. Leave at any time if you feel unsafe or uncomfortable, and take care with what you share.",
+      "safetyLink": "Read our safety guidelines"
+    },
     "modeChoice": {
       "title": "Find a practice group",
       "subtitle": "We'll match you with two others who choose the same length of practice.",
+      "poolByAudience": {
+        "church": "You’ll be matched with others exploring this for churches.",
+        "open": "You’ll be matched with others in open practice.",
+        "christadelphian": "You’ll be matched with others from Christadelphian communities."
+      },
       "curious": {
         "title": "Curious",
         "description": "A short taste of the practice with other newcomers.",
@@ -1467,9 +1514,20 @@
     "waiting": {
       "title": "Finding your group…",
       "subtitle": "{{mode}} · {{count}} of {{total}} people waiting",
+      "poolByAudience": {
+        "church": "Looking among people from churches",
+        "open": "Looking among people in open practice",
+        "christadelphian": "Looking among Christadelphian communities"
+      },
       "hint": "Check your camera and microphone while you wait. The practice starts when three people are ready.",
       "cancel": "Cancel",
       "waitingForOthers": "Waiting for others…"
+    },
+    "broaden": {
+      "title": "No one else waiting here yet",
+      "body": "Nobody else from {{current}} is online right now. You can look among {{next}} instead.",
+      "action": "Look among {{audience}} instead",
+      "switching": "Switching…"
     },
     "freeDialogue": {
       "description": "The structured rounds are finished. Stay on the call for up to 10 minutes of free conversation if you like.",
@@ -1486,6 +1544,396 @@
     "errors": {
       "authFailed": "Could not sign you in. Please refresh and try again.",
       "joinFailed": "Could not join the queue. Please try again."
+    }
+  },
+  "landingSecular": {
+    "hero": {
+      "subtitle": "Good conversations need more than good intentions. They need people who know how to listen.",
+      "description": "A practice for slowing down, hearing one another clearly, and discovering what emerges when we listen with care."
+    },
+    "principles": {
+      "title": "What this practice values",
+      "items": {
+        "presence": {
+          "title": "Be present",
+          "text": "Give someone your full attention before you decide what to say next."
+        },
+        "patience": {
+          "title": "Slow down",
+          "text": "Quick replies often miss the point. Space to hear creates clearer thinking."
+        },
+        "curiosity": {
+          "title": "Stay curious",
+          "text": "Ask what someone means, not how to win the exchange."
+        },
+        "clarity": {
+          "title": "Reflect accurately",
+          "text": "Check you understood before you challenge, advise, or move on."
+        },
+        "humility": {
+          "title": "Hold your view lightly",
+          "text": "Your perspective matters—and so does the possibility that you do not see everything yet."
+        }
+      }
+    },
+    "introduction": {
+      "content": "Most of us were taught to speak with confidence. Fewer of us were taught to listen with skill. In workplaces, friendships, families, and communities, conversation often rewards the quickest answer, the sharpest point, or the loudest voice. This practice offers a different pace: one that makes room for understanding before reaction."
+    },
+    "listeningDeficit": {
+      "title": "A listening deficit",
+      "content1": "We live with a quiet pressure to know, to teach, and to respond immediately. That pressure shows up as interruption, defensiveness, and conversations that leave everyone feeling unseen. Answering before listening is common—and costly.",
+      "content2": "The result is familiar: people talk past each other about important things. Relationships fray. Good ideas go unheard. Conflict hardens because nobody felt properly received."
+    },
+    "practising": {
+      "title": "Practising the art of listening",
+      "intro1": "Listening well is not passive silence. It is active, compassionate attention—the kind that slows us down, draws people out, and creates space for insight none of us could reach alone.",
+      "intro2": "The practice centres on three rotating roles:",
+      "roles": {
+        "speaker": {
+          "description": "Shares what's on their mind, taking time to explore their thoughts and feelings."
+        },
+        "listener": {
+          "description": "Offers full attention and reflects back what they heard, without adding advice or their own agenda."
+        },
+        "scribe": {
+          "description": "Captures key insights and themes, helping the group remember what was shared."
+        }
+      },
+      "guideCta": {
+        "title": "Want to learn more about these roles?",
+        "description": "Download our guide to understand each role and prepare for meaningful conversations."
+      },
+      "rotation": "These roles rotate. Everyone becomes a speaker, a listener, and a scribe. No one stays in charge of the outcome. Instead, we trust what can emerge when people listen carefully together—drawing out not only words, but the meaning beneath them.",
+      "discovery": "As the conversation unfolds, it often leads to discoveries none of us could have reached alone. Our understanding is always partial. Through mutual listening, we begin to notice blind spots and assumptions that only another person's attention can help illuminate.",
+      "trust": "This practice is not about controlling the conversation. It is about trusting the process: patience, accurate reflection, and room for people to revise their own thinking when they feel heard."
+    },
+    "format": {
+      "sectionTitle": "Why use this format?",
+      "showMore": "Read more about this format",
+      "showLess": "Show less",
+      "intro1": "The Speaker–Listener–Scribe structure is a practical tool. It helps people live out values that make hard conversations safer and more useful.",
+      "intro2": "This listening format helps enact values such as:",
+      "values": {
+        "humility": {
+          "title": "Humility",
+          "text": "Treat other people's experience as worth careful attention, not as an obstacle to your point."
+        },
+        "mutualCare": {
+          "title": "Mutual care",
+          "text": "Share the work of speaking and listening so no one carries the whole conversation alone."
+        },
+        "attentiveListening": {
+          "title": "Attentive listening",
+          "text": "Be quick to hear and slower to speak—especially when you feel sure you already know."
+        },
+        "drawingOut": {
+          "title": "Drawing things out",
+          "text": "Help people find the meaning under their first words, rather than debating the surface."
+        }
+      },
+      "pitfalls": {
+        "title": "It also helps guard against common pitfalls:",
+        "items": {
+          "reactiveness": "Reactiveness and debate: the Listener does not reply with their own view, but reflects what they heard.",
+          "dominance": "Dominance and status: the roles rotate—no one stays in charge.",
+          "losingInsight": "Losing insight: the Scribe helps capture what might otherwise be forgotten."
+        }
+      },
+      "grounding": "This structure is a modern method, but its spirit is simple: create conditions where people can hear one another, test ideas carefully, and stay in relationship while they do.",
+      "protections": {
+        "title": "Why this structure helps:",
+        "items": {
+          "trust": "Having been heard, people are more likely to receive challenge later. Trust comes before correction.",
+          "selfCorrection": "Ideas are drawn out more fully, so flaws often become visible to the speaker themselves.",
+          "smallGroups": "Small groups let people explore without performing for a crowd.",
+          "scribing": "Reflection and notes keep clarity, so useful insights—and weak claims—are harder to lose.",
+          "pace": "A slower pace and rotating roles encourage discernment instead of reactive misunderstanding.",
+          "timeLimits": "Time limits keep balance, so no single voice overwhelms the group."
+        }
+      }
+    },
+    "whyItMatters": {
+      "title": "Why it matters",
+      "content": "Listening is not only a communication skill. It is a practice of respect. It creates the conditions for disagreement without contempt, for learning without humiliation, and for conversations sturdy enough to hold complexity."
+    },
+    "platformGuide": {
+      "title": "Want to learn more about the platform?",
+      "description": "Explore the platform guide to see how Swift to Hear works for video and in-person sessions.",
+      "action": "View platform guide →"
+    },
+    "pdfResource": {
+      "title": "Download your listening guide",
+      "subtitle": "A practical resource to deepen your listening practice",
+      "guideTitle": "Proposer, Midwife, Scribe",
+      "description": "Get a clear guide to the three roles—Proposer, Midwife, and Scribe—and how to use them in conversation.",
+      "downloadButton": "Download PDF guide",
+      "fileSize": "PDF • Free download",
+      "features": {
+        "title": "What's included:",
+        "speakerTitle": "Proposer",
+        "listenerTitle": "Midwife",
+        "scribeTitle": "Scribe",
+        "speaker": "Proposer role guidance and preparation",
+        "listener": "Midwife techniques and reflection methods",
+        "scribe": "Scribe responsibilities and insight capture",
+        "practice": "Practice exercises and conversation starters",
+        "practiceTitle": "Practice resources"
+      }
+    },
+    "invitation": {
+      "title": "An invitation",
+      "description": "We are exploring this listening practice with anyone who wants to try—whether you feel confident, curious, cautious, or sceptical.",
+      "callToAction": "If you'd like to take part, or help us test and shape it, get in touch.",
+      "findPracticeGroup": "Find a practice group",
+      "findPracticeGroupHint": "Get matched with two others who are online and ready to practise.",
+      "errors": {
+        "joinFailed": "Failed to join waiting list. Please try again."
+      },
+      "form": {
+        "emailPlaceholder": "Enter your email address",
+        "submitButton": "Join waiting list",
+        "involvementLevel": {
+          "keepUpdated": {
+            "title": "Keep me updated",
+            "description": "Notify me about events and developments"
+          },
+          "getInvolved": {
+            "title": "Get involved",
+            "description": "I want to help test and shape this practice"
+          }
+        },
+        "success": "Thank you for joining our waiting list. We'll be in touch soon.",
+        "privacy": "We'll only use your email to update you about this listening practice. You can unsubscribe at any time."
+      }
+    },
+    "footer": {
+      "copyright": "© 2025 Swift to Hear. All rights reserved.",
+      "finalQuote": {
+        "text": "Let us listen well—to each other, and to what careful conversation can reveal."
+      },
+      "switchToFaith": "Looking for the faith-based version?",
+      "admin": {
+        "toggleShow": "Admin login",
+        "toggleHide": "Hide admin login",
+        "subtitle": "Sign in to access the admin dashboard"
+      }
+    }
+  },
+  "landingChurch": {
+    "hero": {
+      "subtitle": "Churches are called to speak the truth in love. But how can we speak the truth in love if we have not first learned to listen?",
+      "description": "A listening practice for churches and faith communities—recovering attentive, compassionate conversation through Speaker, Listener, and Scribe."
+    },
+    "scripture": {
+      "title": "Called to Listen",
+      "verses": {
+        "james1": {
+          "text": "Let every person be quick to hear, slow to speak, slow to anger.",
+          "reference": "James 1:19"
+        },
+        "proverbs18": {
+          "text": "If one gives an answer before he hears, it is his folly and shame.",
+          "reference": "Proverbs 18:13"
+        },
+        "corinthians": {
+          "text": "I could not address you as spiritual people, but as people of the flesh… For while there is jealousy and strife among you, are you not of the flesh?",
+          "reference": "1 Corinthians 3:1–3"
+        },
+        "timothy": {
+          "text": "The Lord's servant must not be quarrelsome but kind to everyone, able to teach, patiently enduring evil, correcting his opponents with gentleness.",
+          "reference": "2 Timothy 2:24–25"
+        },
+        "ecclesiastes": {
+          "text": "Guard your steps when you go to the house of God. To draw near to listen is better than to offer the sacrifice of fools, for they do not know that they are doing evil.",
+          "reference": "Ecclesiastes 5:1"
+        }
+      }
+    },
+    "introduction": {
+      "content": "It is easy to forget how deeply Scripture values listening. In our culture—and often in church conversations—there is a quiet pressure to be the one who knows, who teaches, who speaks with confidence. Scripture pushes us toward a different wisdom: not the quick retort, but the attentive ear."
+    },
+    "listeningDeficit": {
+      "title": "A listening deficit",
+      "content1": "The Proverbs warn of the folly of answering before listening. James reminds us that hearing must come before speaking, and that anger—often the fruit of defensive or unchecked speech—does not produce the righteousness of God. Paul, writing to Corinth, describes a church fractured by immaturity—strife, factions, jealousy—and marks these as symptoms of people still driven by the flesh rather than the Spirit.",
+      "content2": "It is not difficult to see parallels in our own communities. We share faith and a love of Scripture, yet we also know the pain of fractured conversations—over doctrine, relationships, or church practice—where we speak past one another."
+    },
+    "practising": {
+      "title": "Practising the art of listening",
+      "intro1": "If we are to become mature in Christ, we must recover the art of listening—not passive silence, but active, compassionate attention. The kind of listening that Jesus often invited through his poetic and enigmatic statements. His parables, questions, and open-ended encounters called others to listen more deeply—to themselves, to him, and to the movement of God in their lives. This kind of listening slows us down, draws us out, and opens a space where Wisdom might speak.",
+      "intro2": "To that end, this practice helps congregations and small groups listen better and trust the conversation. It centres around three roles:",
+      "roles": {
+        "speaker": {
+          "description": "Shares what's on their heart, taking time to explore their thoughts and feelings."
+        },
+        "listener": {
+          "description": "Offers full attention and reflects back what they heard, without adding their own thoughts or advice."
+        },
+        "scribe": {
+          "description": "Captures key insights and themes that emerge, helping the group remember what was shared."
+        }
+      },
+      "rotation": "Crucially, these roles rotate. Everyone becomes a speaker, a listener, and a scribe after an allotted time. No one controls the outcome. Instead, we place faith in what can emerge when we listen together in love. As Proverbs 20:5 says, \"The purpose in a man's heart is like deep water,but a man of understanding will draw it out.\" This practice is a way of drawing out—not just others' words, but the meaning beneath them, even those meanings hidden from ourselves.",
+      "discovery": "As the conversation unfolds, it often leads us to discoveries none of us could have reached alone. As Paul reminds us in 1 Corinthians 13:12, \"For now we see through a glass, darkly; but then face to face: now I know in part; but then shall I know even as also I am known.\" Our understanding is always partial. But through mutual listening, we begin to uncover not only what we don't know, but what we don't know we don't know—the blind spots and assumptions that only another's voice can help illuminate.",
+      "faith": "This practice is not about asserting control over words or ideas, but about cultivating faith in the conversation itself—faith that when we \"submit to one another out of reverence for Christ\" (Ephesians 5:21), something deeper than individual insight can emerge. We begin, as 2 Timothy 2:24–25 teaches, to \"patiently endure,\" \"correct with gentleness,\" and leave room for \"God [to] grant them [or us!] repentance leading to a knowledge of the truth.\"",
+      "guideCta": {
+        "title": "Want to learn more about these roles?",
+        "description": "Download our detailed guide to understand each role deeply and prepare for meaningful conversations."
+      }
+    },
+    "format": {
+      "showMore": "Read more about this format",
+      "showLess": "Show less",
+      "intro1": "The specific structure—Speaker, Listener, Scribe—has no direct precedent in Scripture, it is a newer technology. But many of our current practices are. The early church had no hymn books, Sunday schools, or digital tools. We use these because they help us live out the principles of Scripture.",
+      "intro2": "This listening format is just that—a tool to enact timeless values:",
+      "values": {
+        "humility": {
+          "title": "Humility",
+          "verse": "Do nothing from selfish ambition or conceit, but in humility count others more significant than yourselves.",
+          "reference": "Philippians 2:3"
+        },
+        "mutualSubmission": {
+          "title": "Mutual Submission",
+          "verse": "Submitting to one another out of reverence for Christ.",
+          "reference": "Ephesians 5:21"
+        },
+        "attentiveListening": {
+          "title": "Attentive Listening"
+        },
+        "drawingWisdom": {
+          "title": "Drawing Out Wisdom",
+          "verse": "The purposes of a person's heart are deep waters, but one who has insight draws them out.",
+          "reference": "Proverbs 20:5"
+        }
+      },
+      "pitfalls": {
+        "title": "It also helps us guard against common pitfalls:",
+        "labels": {
+          "reactiveness": "Reactiveness and debate:",
+          "dominance": "Dominance and status:",
+          "losingInsight": "Losing insight:"
+        },
+        "items": {
+          "reactiveness": "Reactiveness and debate: The Listener doesn't reply, but reflects back what they heard.",
+          "dominance": "Dominance and status: The roles rotate—no one stays in charge.",
+          "losingInsight": "Losing insight: The Scribe helps capture what might otherwise be forgotten or overlooked."
+        }
+      },
+      "grounding": "This structure is a modern method, but by testing its spirit—discerning whether it aligns with godly wisdom—we find it grounded in Scripture. We are not seeking novelty for its own sake, but new ways to become what we are called to be: a people shaped by love, wisdom, and deep mutual care.",
+      "discernment": "Some may worry that careful listening opens us to harmful or misleading ideas. But to listen is not to agree. In Genesis 3:17 Adam is critiqued for listening to his wife and disobeying God—not for hearing her words, but for giving them authority over God's command. In other cases, like Rehoboam (1 Kings 12), the failure was choosing the wrong advisers. Scripture calls us to test what we hear, not to fear hearing it. Structured listening creates space to slow down, reflect, and weigh words against Scripture so that weak reasoning is realised and self-correction becomes possible. Even in more homogeneous groups, reflecting ideas back accurately and inviting gentle challenge can surface Scripture-shaped discernment and reduce reactive misunderstanding, helping the body grow in truth and love.",
+      "protections": {
+        "title": "Why this structure protects against error:",
+        "items": {
+          "trust": "Unlike debate, the space given to an idea builds trust; having been heard, proponents are more likely to receive correction during others' speaking time. The practice creates better conditions for correction by building trust first.",
+          "selfCorrection": "Ideas are drawn out and explored more completely, making flaws more apparent to the speaker or to others who can respond in their turn. The practice helps people self-correct, which is often more effective than external correction.",
+          "smallGroups": "Discussion occurs in smaller groups, allowing exploration and testing of ideas without involving everyone.",
+          "scribing": "Reflection and scribing create accountability and preserve clarity, preventing misleading claims, as well as good insights from going unnoticed.",
+          "pace": "The slowed pace and rotation of roles encourage discernment, humility, trust, and careful evaluation, helping participants move beyond initial emotional reactions to more thoughtful consideration.",
+          "timeLimits": "Time limits bring balance, preventing any one idea from overwhelming the group."
+        }
+      }
+    },
+    "rootedInWord": {
+      "title": "Rooted in the Word",
+      "content": "We are grounding this approach in Scripture. We believe listening is not just a communication skill; it's a spiritual practice. It aligns with the gentleness and patience Paul urged in 2 Timothy. It creates the conditions where we may correct without quarrelling, and teach without pride. It is the soil in which love, patience, and mutual forbearance can grow."
+    },
+    "pdfResource": {
+      "title": "Download Your Listening Guide",
+      "subtitle": "A comprehensive resource to deepen your listening practice",
+      "guideTitle": "Listener, Speaker, Scribe",
+      "description": "Get our detailed guide on the three roles of listening practice: Speaker, Listener, and Scribe. This resource will help you understand each role deeply and prepare for meaningful conversations.",
+      "downloadButton": "Download PDF Guide",
+      "fileSize": "PDF • Free Download",
+      "features": {
+        "title": "What's included:",
+        "speakerTitle": "Speaker",
+        "listenerTitle": "Listener",
+        "scribeTitle": "Scribe",
+        "speaker": "Speaker role guidance and preparation",
+        "listener": "Listener techniques and reflection methods",
+        "scribe": "Scribe responsibilities and insight capture",
+        "practice": "Practice exercises and conversation starters",
+        "practiceTitle": "Practice Resources"
+      }
+    },
+    "invitation": {
+      "title": "An invitation",
+      "description": "Whether you are exploring this for a church small group, leadership team, or wider congregation—confident or curious—you are welcome.",
+      "callToAction": "If you're interested in taking part, or helping us test and shape this for broader use, please get in touch.",
+      "findPracticeGroup": "Find a practice group",
+      "findPracticeGroupHint": "Get matched with two others who are online and ready to practise.",
+      "errors": {
+        "joinFailed": "Failed to join waiting list. Please try again."
+      },
+      "form": {
+        "emailPlaceholder": "Enter your email address",
+        "submitButton": "Join Waiting List",
+        "involvementLevel": {
+          "keepUpdated": {
+            "title": "Keep me updated",
+            "description": "Notify me about events and developments"
+          },
+          "getInvolved": {
+            "title": "Get involved",
+            "description": "I want to help test and shape this practice"
+          }
+        },
+        "success": "Thank you for joining our waiting list! We'll be in touch soon.",
+        "privacy": "We'll only use your email to update you about this listening practice. You can unsubscribe at any time."
+      }
+    },
+    "footer": {
+      "copyright": "© 2025 Swift to Hear. All rights reserved.",
+      "finalQuote": {
+        "text": "Let us listen well—to each other, to the Word, and through our shared searching."
+      },
+      "admin": {
+        "toggleShow": "Admin login",
+        "toggleHide": "Hide admin login",
+        "subtitle": "Sign in to access the admin dashboard"
+      },
+      "switchToSecular": "Prefer a version without Christian framing?"
+    },
+    "platformGuide": {
+      "title": "Want to learn more about the platform?",
+      "description": "Explore our comprehensive platform guide to understand how to use Swift to Hear effectively for both video and in-person sessions.",
+      "action": "View Platform Guide →"
+    }
+  },
+  "audience": {
+    "switchFraming": "Switch framing",
+    "gateway": {
+      "title": "How would you like to begin?",
+      "subtitle": "Same listening practice. Choose the framing that fits you—we will remember your choice on this device.",
+      "continue": "Continue",
+      "rememberHint": "You can change this anytime from the menu.",
+      "skipOpen": "Skip and use the open framing",
+      "delphPrompt": "Christadelphian?",
+      "delphLink": "This site was originally created for Christadelphian communities — read the ecclesial introduction",
+      "delphShort": "Christadelphian",
+      "church": {
+        "title": "In a church or faith community",
+        "description": "Scripture-aware framing for congregations, small groups, and church leaders."
+      },
+      "open": {
+        "title": "Open to everyone",
+        "description": "The same practice in practical language—no religious framing required."
+      }
+    },
+    "ctas": {
+      "roulette": {
+        "title": "Find a practice group",
+        "description": "Get matched with others who are online and ready—like a listening roulette.",
+        "action": "Start matching"
+      },
+      "invited": {
+        "title": "Invited group",
+        "description": "Start a session for people you invite, or join with a session link or ID.",
+        "start": "Start an invited group",
+        "join": "I have an invite",
+        "sessionIdLabel": "Session ID",
+        "sessionIdPlaceholder": "Paste session ID from your invite",
+        "joinSubmit": "Join group"
+      }
     }
   }
 }

@@ -10,7 +10,7 @@ interface SignInProps {
 const SignIn: React.FC<SignInProps> = ({ onSuccess, onSwitchToSignUp }) => {
   const { t } = useTranslation();
   const { signIn, error, clearError } = useAuth();
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -28,7 +28,7 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess, onSwitchToSignUp }) => {
     try {
       await signIn(email, password);
       onSuccess?.();
-    } catch (err) {
+    } catch {
       // Error is handled by the auth context
     } finally {
       setIsLoading(false);
@@ -36,27 +36,27 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess, onSwitchToSignUp }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 surface-panel p-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-bold text-gray-900 dark:text-white">
+          <h2 className="font-display text-center text-3xl font-semibold text-secondary-900 dark:text-secondary-50">
             {t('auth.signIn.title')}
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-center text-sm text-secondary-600 dark:text-secondary-400">
             {t('auth.signIn.subtitle')}
           </p>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
-            <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-md p-4">
+            <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-xl p-4">
               <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
             </div>
           )}
 
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="email" className="block text-sm font-medium text-secondary-700 dark:text-secondary-300">
                 {t('shared.common.email')}
               </label>
               <input
@@ -66,13 +66,13 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess, onSwitchToSignUp }) => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="input-field mt-1"
                 placeholder={t('shared.placeholders.enterEmail')}
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="password" className="block text-sm font-medium text-secondary-700 dark:text-secondary-300">
                 {t('shared.common.password')}
               </label>
               <input
@@ -82,29 +82,23 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess, onSwitchToSignUp }) => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="input-field mt-1"
                 placeholder={t('shared.placeholders.enterPassword')}
               />
             </div>
           </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? t('shared.actions.signingIn') : t('shared.actions.signIn')}
-            </button>
-          </div>
+          <button type="submit" disabled={isLoading} className="btn-primary w-full disabled:opacity-50">
+            {isLoading ? t('shared.actions.signingIn') : t('shared.actions.signIn')}
+          </button>
 
           <div className="text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Don't have an account?{' '}
+            <p className="text-sm text-secondary-600 dark:text-secondary-400">
+              Don&apos;t have an account?{' '}
               <button
                 type="button"
                 onClick={onSwitchToSignUp}
-                className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
+                className="font-semibold text-accent-700 hover:text-accent-600 dark:text-accent-300 dark:hover:text-accent-200"
               >
                 Sign up
               </button>
@@ -116,4 +110,4 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess, onSwitchToSignUp }) => {
   );
 };
 
-export { SignIn }; 
+export { SignIn };

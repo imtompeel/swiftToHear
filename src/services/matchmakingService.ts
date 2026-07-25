@@ -19,6 +19,7 @@ import { db } from '../firebase/config';
 import { SessionData, Participant } from '../types/sessionTypes';
 import {
   MatchMode,
+  MatchAudience,
   MatchRoom,
   MatchRoomParticipant,
   MATCH_TARGET_SIZE,
@@ -97,15 +98,16 @@ export class MatchmakingService {
 
   static async joinQueue(params: {
     mode: MatchMode;
+    audience: MatchAudience;
     userId: string;
     userName: string;
   }): Promise<{ roomId: string }> {
-    const { mode, userId, userName } = params;
+    const { mode, audience, userId, userName } = params;
 
     // Leave any existing filling rooms for this user first
     await this.leaveAllQueuesForUser(userId);
 
-    const candidate = await this.findJoinableRoom(mode);
+    const candidate = await this.findJoinableRoom(mode, audience);
 
     if (candidate) {
       try {
@@ -117,14 +119,53 @@ export class MatchmakingService {
       }
     }
 
-    const roomId = await this.createRoom(mode, userId, userName);
+    const roomId = await this.createRoom(mode, audience, userId, userName);
     return { roomId };
   }
 
-  private static async findJoinableRoom(mode: MatchMode): Promise<MatchRoom | null> {
+  /**
+   * True if someone else is already waiting in the same mode + audience pool.
+   */
+  static async hasOthersWaiting(params: {
+    mode: MatchMode;
+    audience: MatchAudience;
+    excludeUserId: string;
+  }): Promise<boolean> {
+    const { mode, audience, excludeUserId } = params;
     const q = query(
       collection(db, this.COLLECTION),
       where('mode', '==', mode),
+      where('audience', '==', audience),
+      where('status', '==', 'filling'),
+      orderBy('createdAt', 'asc'),
+      limit(20)
+    );
+
+    const snap = await getDocs(q);
+    const now = Date.now();
+
+    for (const d of snap.docs) {
+      const room = d.data() as MatchRoom;
+      if (isRoomStale(room, now)) {
+        void this.expireRoom(room.roomId);
+        continue;
+      }
+      if (room.participantIds.some((id) => id !== excludeUserId)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private static async findJoinableRoom(
+    mode: MatchMode,
+    audience: MatchAudience
+  ): Promise<MatchRoom | null> {
+    const q = query(
+      collection(db, this.COLLECTION),
+      where('mode', '==', mode),
+      where('audience', '==', audience),
       where('status', '==', 'filling'),
       orderBy('createdAt', 'asc'),
       limit(10)
@@ -151,6 +192,7 @@ export class MatchmakingService {
 
   private static async createRoom(
     mode: MatchMode,
+    audience: MatchAudience,
     userId: string,
     userName: string
   ): Promise<string> {
@@ -164,6 +206,7 @@ export class MatchmakingService {
     const room: MatchRoom = {
       roomId,
       mode,
+      audience,
       status: 'filling',
       targetSize: MATCH_TARGET_SIZE,
       participants: [participant],
@@ -342,6 +385,7 @@ export class MatchmakingService {
     const room: MatchRoom = {
       roomId: 'test-room',
       mode,
+      audience: 'open',
       status: 'filling',
       targetSize: MATCH_TARGET_SIZE,
       participants: people.map((p) => ({

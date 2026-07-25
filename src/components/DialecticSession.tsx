@@ -106,6 +106,7 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
     completeHelloCheckIn,
     completeScribeFeedback,
     updateParticipantRole,
+    selectTopic,
     isHost
   } = useSession();
   
@@ -502,9 +503,14 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
                     <div className="bg-white dark:bg-secondary-800 rounded-lg border border-secondary-200 dark:border-secondary-600 p-3 sm:p-4 lg:p-6">
                       <WordCloud
                         suggestions={session.topicSuggestions}
-                        onTopicSelect={(topic) => {
-                          console.log('Selected topic:', topic);
-                          setShowWordCloud(false);
+                        onTopicSelect={async (topic) => {
+                          try {
+                            await selectTopic(topic);
+                          } catch (error) {
+                            console.error('Failed to select topic:', error);
+                          } finally {
+                            setShowWordCloud(false);
+                          }
                         }}
                         maxWords={10}
                       />

@@ -95,7 +95,7 @@ export const FreeDialoguePhase: React.FC<FreeDialoguePhaseProps> = ({
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 rounded-lg p-6 border-2 border-blue-200 dark:border-blue-700">
+          <div className="bg-gradient-to-br from-accent-50 to-primary-100 dark:from-accent-950 dark:to-primary-900 rounded-2xl p-6 border border-accent-200/70 dark:border-accent-700/40">
             <h3 className="text-xl font-semibold text-blue-900 dark:text-blue-100 mb-4">
               {t('dialectic.session.freeDialogue.participants.title')}
             </h3>

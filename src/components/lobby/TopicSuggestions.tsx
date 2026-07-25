@@ -23,8 +23,9 @@ const TopicSuggestions: React.FC<TopicSuggestionsProps> = ({
     'What is alive in you right now?',
   ];
 
-  const handleAddTopicSuggestion = async () => {
-    if (!newTopicSuggestion.trim()) return;
+  const handleAddTopicSuggestion = async (topicOverride?: string) => {
+    const topicToAdd = (topicOverride ?? newTopicSuggestion).trim();
+    if (!topicToAdd) return;
 
     const currentParticipant = session.participants.find((p: any) => p.id === currentUserId);
     if (!currentParticipant) return;
@@ -32,7 +33,7 @@ const TopicSuggestions: React.FC<TopicSuggestionsProps> = ({
     setIsAddingTopic(true);
     try {
       if (onAddTopicSuggestion) {
-        await onAddTopicSuggestion(newTopicSuggestion.trim());
+        await onAddTopicSuggestion(topicToAdd);
       }
       
       setNewTopicSuggestion('');
@@ -63,9 +64,7 @@ const TopicSuggestions: React.FC<TopicSuggestionsProps> = ({
       // If it exists, just vote for it
       await handleVoteForTopic(existingSuggestion.id);
     } else {
-      // If it doesn't exist, add it
-      setNewTopicSuggestion(sampleTopic);
-      await handleAddTopicSuggestion();
+      await handleAddTopicSuggestion(sampleTopic);
     }
   };
 
@@ -89,7 +88,7 @@ const TopicSuggestions: React.FC<TopicSuggestionsProps> = ({
               disabled={isAddingTopic}
             />
             <button
-              onClick={handleAddTopicSuggestion}
+              onClick={() => handleAddTopicSuggestion()}
               disabled={!newTopicSuggestion.trim() || isAddingTopic}
               className="px-4 py-2 bg-accent-600 text-white rounded-md hover:bg-accent-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >

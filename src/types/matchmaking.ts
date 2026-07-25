@@ -1,6 +1,9 @@
 import { Timestamp, FieldValue } from 'firebase/firestore';
+import type { AudiencePreference } from '../services/audiencePreference';
 
 export type MatchMode = 'curious' | 'full';
+
+export type MatchAudience = AudiencePreference;
 
 export type MatchRoomStatus = 'filling' | 'matched' | 'expired';
 
@@ -13,6 +16,8 @@ export interface MatchRoomParticipant {
 export interface MatchRoom {
   roomId: string;
   mode: MatchMode;
+  /** Funnel pool — users only match within the same audience. */
+  audience: MatchAudience;
   status: MatchRoomStatus;
   targetSize: number;
   participants: MatchRoomParticipant[];

@@ -25,8 +25,9 @@ export const MatchNameForm: React.FC<MatchNameFormProps> = ({
   };
 
   return (
-    <div className="max-w-md mx-auto p-6" data-testid="match-name-form">
-      <h1 className="text-2xl font-bold text-secondary-900 dark:text-secondary-100 mb-2 text-center">
+    <div className="max-w-md mx-auto p-6 sm:p-10" data-testid="match-name-form">
+      <div className="surface-panel p-6 sm:p-8">
+      <h1 className="font-display text-2xl sm:text-3xl font-semibold text-secondary-900 dark:text-secondary-50 mb-2 text-center">
         {t('matchmaking.nameForm.title')}
       </h1>
       <p className="text-secondary-600 dark:text-secondary-400 mb-6 text-center">
@@ -46,7 +47,7 @@ export const MatchNameForm: React.FC<MatchNameFormProps> = ({
             disabled={loading}
             autoFocus
             data-testid="match-name-input"
-            className="w-full px-4 py-3 rounded-lg border border-secondary-300 dark:border-secondary-600 bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100"
+            className="w-full px-4 py-3 rounded-xl border border-secondary-200 dark:border-white/15 bg-white/90 dark:bg-secondary-900/60 text-secondary-900 dark:text-secondary-100"
           />
         </label>
 
@@ -55,7 +56,7 @@ export const MatchNameForm: React.FC<MatchNameFormProps> = ({
             type="button"
             onClick={onBack}
             disabled={loading}
-            className="flex-1 px-4 py-3 rounded-lg border border-secondary-300 dark:border-secondary-600 text-secondary-700 dark:text-secondary-200"
+            className="btn-secondary flex-1"
           >
             {t('shared.actions.back')}
           </button>
@@ -63,12 +64,13 @@ export const MatchNameForm: React.FC<MatchNameFormProps> = ({
             type="submit"
             disabled={loading || !name.trim()}
             data-testid="match-name-submit"
-            className="flex-1 px-4 py-3 rounded-lg bg-accent-600 text-white hover:bg-accent-700 disabled:opacity-50"
+            className="btn-primary flex-1 disabled:opacity-50"
           >
             {loading ? t('matchmaking.nameForm.joining') : t('matchmaking.nameForm.submit')}
           </button>
         </div>
       </form>
+      </div>
     </div>
   );
 };

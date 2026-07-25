@@ -76,7 +76,11 @@ export class SessionCrudService extends CrudService<SessionData> {
   }
 
   // Session-specific create method with proper typing
-  async createSession(sessionData: Omit<SessionData, 'sessionId' | 'createdAt' | 'participants' | 'status' | 'topicSuggestions'>): Promise<SessionData> {
+  async createSession(
+    sessionData: Omit<SessionData, 'sessionId' | 'createdAt' | 'participants' | 'status'> & {
+      topicSuggestions?: SessionData['topicSuggestions'];
+    }
+  ): Promise<SessionData> {
     const session = {
       ...sessionData,
       participants: [{
@@ -86,7 +90,7 @@ export class SessionCrudService extends CrudService<SessionData> {
         status: 'ready'
       }],
       status: 'waiting',
-      topicSuggestions: []
+      topicSuggestions: sessionData.topicSuggestions || []
     };
 
     return this.create(session as any);

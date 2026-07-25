@@ -7,7 +7,11 @@ export class SessionLifecycleService {
   private static crudService = new SessionCrudService();
 
   // Create a new session
-  static async createSession(sessionData: Omit<SessionData, 'sessionId' | 'createdAt' | 'participants' | 'status' | 'topicSuggestions'>): Promise<SessionData> {
+  static async createSession(
+    sessionData: Omit<SessionData, 'sessionId' | 'createdAt' | 'participants' | 'status'> & {
+      topicSuggestions?: SessionData['topicSuggestions'];
+    }
+  ): Promise<SessionData> {
     return this.crudService.createSession(sessionData);
   }
 

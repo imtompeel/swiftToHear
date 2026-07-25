@@ -3,23 +3,18 @@ import { useTheme } from '../contexts/ThemeContext';
 
 const ThemeToggle: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
+  const next = theme === 'light' ? 'dark' : 'light';
 
   return (
     <button
+      type="button"
       onClick={toggleTheme}
-      className="relative inline-flex h-10 w-10 items-center justify-center rounded-md border border-secondary-300 dark:border-secondary-600 bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 hover:bg-secondary-50 dark:hover:bg-secondary-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 dark:focus:ring-offset-secondary-800"
-      aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-      title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+      className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-secondary-200/80 dark:border-white/15 bg-white/80 dark:bg-secondary-800/80 text-secondary-700 dark:text-secondary-200 shadow-soft hover:border-accent-400/60 hover:text-accent-700 dark:hover:text-accent-300 transition-all duration-200"
+      aria-label={`Switch to ${next} mode`}
+      title={`Switch to ${next} mode`}
     >
       {theme === 'light' ? (
-        // Moon icon for dark mode
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -28,14 +23,7 @@ const ThemeToggle: React.FC = () => {
           />
         </svg>
       ) : (
-        // Sun icon for light mode
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
           <path
             strokeLinecap="round"
             strokeLinejoin="round"

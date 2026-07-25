@@ -35,50 +35,52 @@ const Navigation: React.FC = () => {
   const navLinkClass = (active: boolean) =>
     `text-sm font-medium transition-colors ${
       active
-        ? 'text-accent-700 dark:text-accent-400'
-        : 'text-secondary-600 dark:text-secondary-400 hover:text-secondary-900 dark:hover:text-secondary-200'
+        ? 'text-accent-700 dark:text-accent-300'
+        : 'text-secondary-600 dark:text-secondary-400 hover:text-secondary-900 dark:hover:text-secondary-100'
     }`;
 
   const mobileNavLinkClass = (active: boolean) =>
-    `block px-3 py-2 text-base font-medium rounded-md transition-colors ${
+    `block px-3 py-2.5 text-base font-medium rounded-xl transition-colors ${
       active
-        ? 'text-accent-700 dark:text-accent-400 bg-accent-50 dark:bg-accent-900/20'
-        : 'text-secondary-600 dark:text-secondary-400 hover:text-secondary-900 dark:hover:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-700'
+        ? 'text-accent-700 dark:text-accent-300 bg-accent-50 dark:bg-accent-900/30'
+        : 'text-secondary-600 dark:text-secondary-400 hover:text-secondary-900 dark:hover:text-secondary-100 hover:bg-secondary-100/80 dark:hover:bg-white/5'
     }`;
 
   return (
-    <nav className="bg-white dark:bg-secondary-800 shadow-sm border-b border-secondary-200 dark:border-secondary-700 transition-colors duration-200">
+    <nav className="nav-shell">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-accent-700 dark:bg-accent-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">S</span>
+            <Link to="/" className="flex items-center gap-2.5 group">
+              <div className="w-8 h-8 bg-accent-600 dark:bg-accent-500 rounded-xl flex items-center justify-center shadow-soft group-hover:shadow-glow transition-shadow">
+                <span className="text-white font-bold text-sm font-display">S</span>
               </div>
-              <span className="text-xl font-semibold text-secondary-900 dark:text-secondary-100">
+              <span className="text-xl font-display font-semibold tracking-tight text-secondary-900 dark:text-secondary-50">
                 {t('shared.common.siteName')}
               </span>
             </Link>
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
-            <Link to="/" className={navLinkClass(location.pathname === '/')}>
+            <Link to="/" className={navLinkClass(location.pathname === '/' || location.search.includes('choose=1'))}>
               {t('navigation.home')}
             </Link>
 
-            {user ? (
-              <Link
-                to="/practice/match"
-                data-testid="nav-matchmaking"
-                className={navLinkClass(location.pathname.startsWith('/practice/match'))}
-              >
-                {t('navigation.findPracticeGroup')}
-              </Link>
-            ) : (
-              <span className="text-sm font-medium text-secondary-400 dark:text-secondary-500">
-                {t('shared.common.comingSoon')}
-              </span>
-            )}
+            <Link
+              to="/practice/match"
+              data-testid="nav-matchmaking"
+              className={navLinkClass(location.pathname.startsWith('/practice/match'))}
+            >
+              {t('navigation.findPracticeGroup')}
+            </Link>
+
+            <Link
+              to="/practice/create"
+              data-testid="nav-invited-group"
+              className={navLinkClass(location.pathname.startsWith('/practice/create'))}
+            >
+              {t('navigation.invitedGroup')}
+            </Link>
 
             {isAdmin && (
               <Link
@@ -138,11 +140,11 @@ const Navigation: React.FC = () => {
             <ThemeToggle />
           </div>
 
-          <div className="md:hidden flex items-center space-x-2">
+          <div className="md:hidden flex items-center gap-2">
             <ThemeToggle />
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-md text-secondary-600 dark:text-secondary-400 hover:text-secondary-900 dark:hover:text-secondary-200 hover:bg-secondary-100 dark:hover:bg-secondary-700 transition-colors"
+              className="p-2 rounded-xl text-secondary-600 dark:text-secondary-400 hover:text-secondary-900 dark:hover:text-secondary-100 hover:bg-secondary-100/80 dark:hover:bg-white/5 transition-colors"
               aria-label="Toggle menu"
             >
               <svg
@@ -162,8 +164,8 @@ const Navigation: React.FC = () => {
         </div>
 
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-secondary-200 dark:border-secondary-700 py-3">
-            <div className="space-y-3">
+          <div className="md:hidden border-t border-secondary-200/70 dark:border-white/10 py-3">
+            <div className="space-y-1">
               <Link
                 to="/"
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -172,20 +174,23 @@ const Navigation: React.FC = () => {
                 {t('navigation.home')}
               </Link>
 
-              {user ? (
-                <Link
-                  to="/practice/match"
-                  data-testid="nav-matchmaking-mobile"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={mobileNavLinkClass(location.pathname.startsWith('/practice/match'))}
-                >
-                  {t('navigation.findPracticeGroup')}
-                </Link>
-              ) : (
-                <div className="px-3 py-2 text-base font-medium text-secondary-400 dark:text-secondary-500">
-                  {t('shared.common.comingSoon')}
-                </div>
-              )}
+              <Link
+                to="/practice/match"
+                data-testid="nav-matchmaking-mobile"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={mobileNavLinkClass(location.pathname.startsWith('/practice/match'))}
+              >
+                {t('navigation.findPracticeGroup')}
+              </Link>
+
+              <Link
+                to="/practice/create"
+                data-testid="nav-invited-group-mobile"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={mobileNavLinkClass(location.pathname.startsWith('/practice/create'))}
+              >
+                {t('navigation.invitedGroup')}
+              </Link>
 
               {isAdmin && (
                 <Link

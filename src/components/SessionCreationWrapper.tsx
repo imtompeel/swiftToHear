@@ -19,15 +19,30 @@ const SessionCreationWrapper: React.FC = () => {
       // Start with a regular session that can be upgraded to group mode if needed
       const skipNavigation = sessionData.sessionType === 'in-person';
       
+      const hostId = user?.uid || '';
+      const hostName = user?.displayName || user?.email || 'Anonymous';
+      const seededSuggestions = (sessionData.topicSuggestions || []).map(
+        (suggestion: { id?: string; topic: string; suggestedBy?: string; votes?: number }, index: number) => ({
+          id: suggestion.id || `host-suggestion-${index}`,
+          topic: suggestion.topic,
+          suggestedBy: suggestion.suggestedBy || hostName,
+          suggestedByUserId: hostId,
+          suggestedAt: new Date(),
+          votes: suggestion.votes ?? 1,
+          voters: [hostId]
+        })
+      );
+
       const createdSession = await createSession({
         sessionName: sessionData.sessionName,
         duration: sessionData.duration,
-        topic: sessionData.topic,
-        hostId: user?.uid || '',
-        hostName: user?.displayName || user?.email || 'Anonymous',
+        topic: sessionData.topic || seededSuggestions[0]?.topic || '',
+        hostId,
+        hostName,
         minParticipants: sessionData.minParticipants,
         maxParticipants: sessionData.maxParticipants,
         sessionType: sessionData.sessionType || 'video',
+        topicSuggestions: seededSuggestions,
         groupConfiguration: {
           autoAssignRoles: false // Allow manual role selection for all sessions (simplified approach)
         }

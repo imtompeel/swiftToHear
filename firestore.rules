@@ -10,7 +10,7 @@ rules_version = '2';
 //   - sessionId: string (required, immutable) - matches document ID
 //   - sessionName: string (required, immutable)
 //   - duration: number (required, immutable)
-//   - topic: string (required, immutable after create)
+//   - topic: string (required; may be updated when selecting from suggestions)
 //   - hostId: string (required, immutable) - Firebase Auth uid of host
 //   - hostName: string (required, immutable)
 //   - hostRole: string (optional, immutable)
@@ -33,11 +33,13 @@ rules_version = '2';
 // Collection: matchRooms
 // Document ID: roomId
 // Fields:
-//   - roomId, mode ('curious'|'full'), status ('filling'|'matched'|'expired')
+//   - roomId, mode ('curious'|'full'), audience ('church'|'open'|'christadelphian')
+//   - status ('filling'|'matched'|'expired')
 //   - targetSize (3), participants[], participantIds[]
 //   - createdAt, lastHeartbeatAt, matchedSessionId?
 // Authenticated users may join/leave filling rooms; the joiner who fills
 // the room may create an active matched session (matchMode set).
+// Matching is scoped by mode + audience (funnel pool).
 //
 // ===============================================================
 
@@ -68,9 +70,15 @@ service cloud.firestore {
         request.resource.data.hostName == resource.data.hostName &&
         request.resource.data.sessionName == resource.data.sessionName &&
         request.resource.data.duration == resource.data.duration &&
-        request.resource.data.topic == resource.data.topic &&
         request.resource.data.minParticipants == resource.data.minParticipants &&
         request.resource.data.maxParticipants == resource.data.maxParticipants;
+    }
+
+    function isValidTopicUpdate() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['topic']) ||
+        (request.resource.data.topic is string &&
+          request.resource.data.topic.size() > 0 &&
+          request.resource.data.topic.size() <= 500);
     }
 
     function sessionOptionalIdentityUnchanged() {
@@ -144,12 +152,14 @@ service cloud.firestore {
 
     // Joiner path: authenticated users may update collaboration fields only.
     // participantIds is kept in sync with participants for signalling ACL.
+    // topic may be set when selecting from lobby suggestions / word cloud.
     function isSessionParticipantFieldUpdate() {
       return isAuthenticated() &&
         sessionIdentityUnchanged() &&
         sessionOptionalIdentityUnchanged() &&
+        isValidTopicUpdate() &&
         request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['participants', 'participantIds', 'topicSuggestions', 'scribeNotes', 'safetyTimeout']) &&
+          .hasOnly(['participants', 'participantIds', 'topicSuggestions', 'scribeNotes', 'safetyTimeout', 'topic']) &&
         request.resource.data.participants is list &&
         request.resource.data.participants.size() <= 50 &&
         request.resource.data.topicSuggestions is list &&
@@ -172,11 +182,12 @@ service cloud.firestore {
       return isSessionHost() &&
         sessionIdentityUnchanged() &&
         sessionOptionalIdentityUnchanged() &&
+        isValidTopicUpdate() &&
         request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly([
             'participants', 'participantIds', 'topicSuggestions', 'scribeNotes', 'safetyTimeout',
             'accumulatedScribeNotes', 'status', 'currentPhase', 'currentRound',
-            'phaseStartTime', 'fivePersonChoice'
+            'phaseStartTime', 'fivePersonChoice', 'topic'
           ]) &&
         isValidSessionStatus(request.resource.data.status) &&
         request.resource.data.participants is list &&
@@ -374,6 +385,7 @@ service cloud.firestore {
       allow create: if isAuthenticated() &&
         request.resource.data.roomId == roomId &&
         request.resource.data.mode in ['curious', 'full'] &&
+        request.resource.data.audience in ['church', 'open', 'christadelphian'] &&
         request.resource.data.status == 'filling' &&
         request.resource.data.targetSize == 3 &&
         request.resource.data.participants is list &&
@@ -385,6 +397,7 @@ service cloud.firestore {
       allow update: if isAuthenticated() &&
         request.resource.data.roomId == resource.data.roomId &&
         request.resource.data.mode == resource.data.mode &&
+        request.resource.data.audience == resource.data.audience &&
         request.resource.data.targetSize == resource.data.targetSize &&
         request.resource.data.createdAt == resource.data.createdAt &&
         request.resource.data.participants is list &&

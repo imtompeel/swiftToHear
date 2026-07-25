@@ -117,7 +117,12 @@ export const useSession = (externalUserId?: string, externalUserName?: string) =
   }, [currentUserId]);
 
   // Create session
-  const createSession = useCallback(async (sessionData: Omit<SessionData, 'sessionId' | 'createdAt' | 'participants' | 'status' | 'topicSuggestions'>, options?: { skipNavigation?: boolean }) => {
+  const createSession = useCallback(async (
+    sessionData: Omit<SessionData, 'sessionId' | 'createdAt' | 'participants' | 'status'> & {
+      topicSuggestions?: SessionData['topicSuggestions'];
+    },
+    options?: { skipNavigation?: boolean }
+  ) => {
     try {
       setLoading(true);
       setError(null);
@@ -233,11 +238,11 @@ export const useSession = (externalUserId?: string, externalUserName?: string) =
   // Vote for topic suggestion
   const voteForTopic = useCallback(async (suggestionId: string) => {
     if (!session) return;
-    
+
     try {
       const updatedSession = await FirestoreSessionService.voteForTopic(
-        session.sessionId, 
-        suggestionId, 
+        session.sessionId,
+        suggestionId,
         currentUserId
       );
       if (updatedSession) {
@@ -247,6 +252,23 @@ export const useSession = (externalUserId?: string, externalUserName?: string) =
       setError(err instanceof Error ? err.message : 'Failed to vote for topic');
     }
   }, [session, currentUserId]);
+
+  // Select active discussion topic (e.g. from WordCloud)
+  const selectTopic = useCallback(async (topic: string) => {
+    if (!session) return;
+
+    try {
+      const updatedSession = await FirestoreSessionService.updateSessionTopic(
+        session.sessionId,
+        topic
+      );
+      if (updatedSession) {
+        setSession(updatedSession);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to select topic');
+    }
+  }, [session]);
 
   // Start session
   const startSession = useCallback(async (fivePersonChoice?: 'split' | 'together') => {
@@ -452,6 +474,7 @@ export const useSession = (externalUserId?: string, externalUserName?: string) =
     updateParticipantRole,
     addTopicSuggestion,
     voteForTopic,
+    selectTopic,
     startSession,
     completeHelloCheckIn,
     completeScribeFeedback,

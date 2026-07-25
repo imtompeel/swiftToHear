@@ -222,14 +222,15 @@ const StepByStepSessionCreation: React.FC<SessionCreationProps> = ({ onSessionCr
 
     try {
       // Convert host topic suggestions to TopicSuggestion format
+      // voter/user IDs are remapped to the authenticated host in the create wrapper
       const hostSuggestions: TopicSuggestion[] = state.hostTopicSuggestions.map((suggestion, index) => ({
         id: `host-suggestion-${index}`,
         topic: suggestion,
         suggestedBy: 'Host',
-        suggestedByUserId: 'host',
+        suggestedByUserId: '',
         suggestedAt: new Date(),
         votes: 1,
-        voters: ['host']
+        voters: []
       }));
 
       const sessionName = `Dialectic Session ${new Date().toLocaleDateString()}`;

@@ -26,11 +26,16 @@ export class FirestoreSessionService {
   }
 
   // Create a new session
-  static async createSession(sessionData: Omit<SessionData, 'sessionId' | 'createdAt' | 'participants' | 'status' | 'topicSuggestions'>): Promise<SessionData> {
+  static async createSession(
+    sessionData: Omit<SessionData, 'sessionId' | 'createdAt' | 'participants' | 'status'> & {
+      topicSuggestions?: TopicSuggestion[];
+    }
+  ): Promise<SessionData> {
     const sessionId = this.generateSessionId();
-    
+    const { topicSuggestions: seedSuggestions = [], ...rest } = sessionData;
+
     const session: SessionData = {
-      ...sessionData,
+      ...rest,
       sessionId,
       createdAt: serverTimestamp() as Timestamp,
       participants: [{
@@ -41,7 +46,16 @@ export class FirestoreSessionService {
       }],
       participantIds: [sessionData.hostId],
       status: 'waiting',
-      topicSuggestions: []
+      topicSuggestions: seedSuggestions.map((suggestion, index) => ({
+        ...suggestion,
+        id: suggestion.id || `host-suggestion-${index}`,
+        suggestedByUserId: suggestion.suggestedByUserId || sessionData.hostId,
+        votes: suggestion.votes ?? 1,
+        voters: suggestion.voters?.length ? suggestion.voters : [sessionData.hostId],
+        suggestedAt: suggestion.suggestedAt instanceof Date
+          ? Timestamp.fromDate(suggestion.suggestedAt)
+          : suggestion.suggestedAt
+      }))
     };
 
     await setDoc(doc(db, this.COLLECTION_NAME, sessionId), session);
@@ -716,6 +730,23 @@ export class FirestoreSessionService {
       return await this.getSession(sessionId);
     } catch (error) {
       console.error('Error voting for topic:', error);
+      throw error;
+    }
+  }
+
+  // Set the active discussion topic (e.g. from WordCloud selection)
+  static async updateSessionTopic(sessionId: string, topic: string): Promise<SessionData | null> {
+    try {
+      const trimmed = topic.trim();
+      if (!trimmed) return null;
+
+      await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
+        topic: trimmed
+      });
+
+      return await this.getSession(sessionId);
+    } catch (error) {
+      console.error('Error updating session topic:', error);
       throw error;
     }
   }

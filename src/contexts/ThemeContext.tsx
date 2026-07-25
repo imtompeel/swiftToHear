@@ -40,15 +40,18 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const root = window.document.documentElement;
-    
-    // Remove previous theme classes
+
     root.classList.remove('light', 'dark');
-    
-    // Add current theme class
     root.classList.add(theme);
-    
-    // Save to localStorage
+    root.style.colorScheme = theme;
+
     localStorage.setItem('theme', theme);
+
+    const meta = document.querySelector('meta[name="theme-color"]:not([media])')
+      || document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      meta.setAttribute('content', theme === 'dark' ? '#070d16' : '#f4f7fb');
+    }
   }, [theme]);
 
   // Listen for system theme changes

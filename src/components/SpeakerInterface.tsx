@@ -50,7 +50,7 @@ export const SpeakerInterface: React.FC<SpeakerInterfaceProps> = ({
   return (
     <div 
       data-testid="speaker-interface"
-      className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4 sm:p-6 rounded-xl"
+      className="bg-gradient-to-br from-accent-50 to-primary-100 dark:from-secondary-900 dark:to-primary-950 p-4 sm:p-6 rounded-2xl border border-secondary-200/60 dark:border-white/10"
     >
       <div className="max-w-4xl mx-auto">
         {/* Header Section */}

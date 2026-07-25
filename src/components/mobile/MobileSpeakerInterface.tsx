@@ -50,7 +50,7 @@ export const MobileSpeakerInterface: React.FC<MobileSpeakerInterfaceProps> = ({
   const showPauseComfort = timeRemaining < pauseComfortThreshold;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-accent-50 to-primary-100 dark:from-secondary-900 dark:to-primary-950 p-4">
       <div className="max-w-md mx-auto">
         {/* Header Section */}
         <div className="text-center mb-6">

@@ -3,25 +3,105 @@
 @tailwind utilities;
 
 @layer base {
-  html {
-    font-family: 'Inter', system-ui, sans-serif;
+  :root {
+    color-scheme: light;
+    --surface: 255 255 255;
+    --surface-muted: 238 241 245;
+    --ink: 17 24 39;
+    --ink-muted: 79 92 110;
+    --ring: 13 148 136;
   }
-  
+
+  .dark {
+    color-scheme: dark;
+    --surface: 26 35 50;
+    --surface-muted: 17 24 39;
+    --ink: 232 238 247;
+    --ink-muted: 154 168 186;
+    --ring: 45 212 191;
+  }
+
+  html {
+    @apply antialiased;
+    font-family: 'Figtree', system-ui, sans-serif;
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-secondary-50 dark:bg-secondary-900 text-secondary-900 dark:text-secondary-100 transition-colors duration-200;
+    @apply bg-primary-50 text-secondary-900 dark:bg-primary-950 dark:text-secondary-100;
+    @apply transition-colors duration-300;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: 'Fraunces', Georgia, serif;
+    font-optical-sizing: auto;
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    @apply bg-accent-200 text-accent-900 dark:bg-accent-800 dark:text-accent-50;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent-500 ring-offset-2 ring-offset-primary-50 dark:ring-offset-primary-950;
   }
 }
 
 @layer components {
+  .app-shell {
+    @apply min-h-screen bg-mesh-light dark:bg-mesh-dark transition-[background] duration-300;
+  }
+
   .btn-primary {
-    @apply bg-accent-700 hover:bg-accent-800 dark:bg-accent-600 dark:hover:bg-accent-700 text-white font-medium py-3 px-6 rounded-md transition-colors duration-200 shadow-sm;
+    @apply inline-flex items-center justify-center gap-2;
+    @apply bg-accent-600 hover:bg-accent-500 dark:bg-accent-500 dark:hover:bg-accent-400;
+    @apply text-white font-semibold py-3 px-6 rounded-xl;
+    @apply transition-all duration-200 shadow-soft hover:shadow-glow dark:hover:shadow-glow-dark;
+    @apply active:scale-[0.98];
   }
-  
+
   .btn-secondary {
-    @apply bg-secondary-200 hover:bg-secondary-300 dark:bg-secondary-700 dark:hover:bg-secondary-600 text-secondary-800 dark:text-secondary-200 font-medium py-3 px-6 rounded-md transition-colors duration-200 shadow-sm;
+    @apply inline-flex items-center justify-center gap-2;
+    @apply bg-white/80 hover:bg-white dark:bg-secondary-800/80 dark:hover:bg-secondary-800;
+    @apply text-secondary-800 dark:text-secondary-100 font-semibold py-3 px-6 rounded-xl;
+    @apply border border-secondary-200/80 dark:border-secondary-700;
+    @apply transition-all duration-200 shadow-soft;
+    @apply active:scale-[0.98];
   }
-  
+
   .card {
-    @apply bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-700 p-6;
+    @apply bg-white/80 dark:bg-secondary-800/80 backdrop-blur-sm;
+    @apply rounded-2xl border border-secondary-200/70 dark:border-white/10;
+    @apply p-6 shadow-soft;
   }
-} 
+
+  .surface-panel {
+    @apply bg-white/70 dark:bg-secondary-800/60 backdrop-blur-md;
+    @apply border border-secondary-200/60 dark:border-white/10;
+    @apply rounded-2xl shadow-soft;
+  }
+
+  .nav-shell {
+    @apply sticky top-0 z-40;
+    @apply bg-white/70 dark:bg-primary-950/70 backdrop-blur-xl;
+    @apply border-b border-secondary-200/70 dark:border-white/10;
+  }
+
+  .choice-tile {
+    @apply p-6 rounded-2xl text-left transition-all duration-200;
+    @apply bg-white/80 dark:bg-secondary-800/70 backdrop-blur-sm;
+    @apply border border-secondary-200/80 dark:border-white/10;
+    @apply hover:border-accent-500/70 dark:hover:border-accent-400/60;
+    @apply hover:shadow-glow dark:hover:shadow-glow-dark;
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500;
+  }
+
+  .input-field {
+    @apply block w-full px-3 py-2.5 rounded-xl shadow-sm;
+    @apply border border-secondary-200 dark:border-white/15;
+    @apply bg-white/90 dark:bg-secondary-900/60;
+    @apply text-secondary-900 dark:text-secondary-100;
+    @apply placeholder-secondary-400 dark:placeholder-secondary-500;
+    @apply focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500;
+  }
+}

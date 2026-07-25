@@ -6,6 +6,7 @@ import {
   isRoomStale,
   MatchmakingService,
 } from '../matchmakingService';
+import { broadenAudience } from '../audiencePreference';
 import {
   MATCH_MODE_DURATION_MS,
   MATCH_STALE_MS,
@@ -102,6 +103,14 @@ describe('MatchmakingService.buildSessionForTest', () => {
     expect(full.matchMode).toBe('full');
     expect(curious.duration).not.toBe(full.duration);
     expect(full.duration).toBe(5 * 60 * 1000);
+  });
+});
+
+describe('audience broadening', () => {
+  it('broadens Christadelphian to church, church to open, and stops at open', () => {
+    expect(broadenAudience('christadelphian')).toBe('church');
+    expect(broadenAudience('church')).toBe('open');
+    expect(broadenAudience('open')).toBeNull();
   });
 });
 
