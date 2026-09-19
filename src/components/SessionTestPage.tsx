@@ -699,7 +699,7 @@ export const SessionTestPage: React.FC = () => {
                             autoPlay
                             muted
                             playsInline
-                            className="w-full h-48 object-cover"
+                            className="w-full h-48 object-cover -scale-x-100"
                           />
                           <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
                             {currentUser?.name} - {currentUser?.role}
@@ -768,7 +768,7 @@ export const SessionTestPage: React.FC = () => {
                             autoPlay
                             muted
                             playsInline
-                            className="w-full h-32 object-cover rounded"
+                            className="w-full h-32 object-cover rounded -scale-x-100"
                           />
                           <div className="mt-2 flex gap-2">
                             <button

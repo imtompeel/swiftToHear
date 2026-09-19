@@ -101,20 +101,21 @@ export const TechCheck: React.FC<TechCheckProps> = ({
 
       {/* Camera Preview */}
       <div className="mb-6">
-        <div className="bg-secondary-900 rounded-lg h-48 flex items-center justify-center mb-4">
+        <div className="bg-secondary-900 rounded-lg aspect-[3/4] sm:aspect-video max-h-[70vh] flex items-center justify-center overflow-hidden mb-4">
           {stream && cameraStatus === 'working' ? (
             <video
               autoPlay
               muted
+              playsInline
               ref={(video) => {
                 if (video && stream) {
                   video.srcObject = stream;
                 }
               }}
-              className="w-full h-full object-cover rounded-lg"
+              className="w-full h-full object-contain rounded-lg -scale-x-100"
             />
           ) : (
-            <div className="text-white text-center">
+            <div className="text-white text-center p-6">
               <div className="text-4xl mb-2">📹</div>
               <div>{t('dialectic.preparation.techCheck.cameraPreview')}</div>
             </div>

@@ -102,14 +102,20 @@ export class FirebaseSignalingService {
 
   // Start listening for incoming messages
   private async startListening(): Promise<void> {
-    if (!this.sessionId || !this.currentUserId) {
+    if (!this.sessionId || !this.currentUserId || !this.baseSessionId) {
       throw new Error('Signaling service not initialized');
     }
 
-    // Create query for messages to this user or to all users in this session
+    if (this.unsubscribe) {
+      this.unsubscribe();
+      this.unsubscribe = null;
+    }
+
+    // Query must constrain baseSessionId so Firestore can evaluate session membership.
     const messagesQuery = query(
       collection(db, 'signaling'),
       where('sessionId', '==', this.sessionId),
+      where('baseSessionId', '==', this.baseSessionId),
       where('expiresAt', '>', Timestamp.now()),
       orderBy('expiresAt', 'desc'),
       orderBy('timestamp', 'asc'),

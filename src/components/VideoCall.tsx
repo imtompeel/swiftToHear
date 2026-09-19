@@ -105,7 +105,7 @@ export const VideoCall: React.FC<VideoCallProps> = ({
             autoPlay
             muted
             playsInline
-            className="w-full h-48 sm:h-56 md:h-64 lg:h-72 object-cover"
+            className="w-full h-48 sm:h-56 md:h-64 lg:h-72 object-cover -scale-x-100"
           />
           <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
             {currentUserName} (You) - {getParticipantRole(currentUserId)}

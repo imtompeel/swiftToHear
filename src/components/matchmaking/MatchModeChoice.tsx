@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../hooks/useTranslation';
+import { PracticeDemoVideo } from '../PracticeDemoVideo';
 import type { AudiencePreference } from '../../services/audiencePreference';
 import type { MatchMode } from '../../types/matchmaking';
 
@@ -60,6 +61,10 @@ export const MatchModeChoice: React.FC<MatchModeChoiceProps> = ({ audience, onSe
             {t('matchmaking.modeChoice.full.detail')}
           </p>
         </button>
+      </div>
+
+      <div className="mt-6">
+        <PracticeDemoVideo variant="collapsible" density="compact" />
       </div>
 
       <aside

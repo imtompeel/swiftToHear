@@ -5,6 +5,7 @@ import { SessionData } from '../types/sessionTypes';
 import { FivePersonGroupingChoice } from './FivePersonGroupingChoice';
 import { TopicSuggestions } from './lobby';
 import { VideoLobby } from './VideoLobby';
+import { PracticeDemoVideo } from './PracticeDemoVideo';
 
 interface SessionLobbyProps {
   session: SessionData;
@@ -411,6 +412,8 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
           </p>
         </div>
       </div>
+
+      <PracticeDemoVideo density="compact" className="mt-2" />
 
       {/* Duration Breakdown */}
       <div className="text-center text-sm text-secondary-600 dark:text-secondary-400" data-testid="duration-breakdown">

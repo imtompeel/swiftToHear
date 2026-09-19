@@ -9,6 +9,28 @@
           "order": "ASCENDING"
         },
         {
+          "fieldPath": "baseSessionId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "expiresAt",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "timestamp",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "signaling",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "sessionId",
+          "order": "ASCENDING"
+        },
+        {
           "fieldPath": "expiresAt",
           "order": "DESCENDING"
         },

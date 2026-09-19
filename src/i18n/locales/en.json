@@ -125,6 +125,21 @@
       "james119Ref": "James 1:19"
     }
   },
+  "practiceDemo": {
+    "title": "See the practice",
+    "description": "Four short clips: an introduction, the first turn of round 1, the rest of round 1, then all three turns of round 2.",
+    "watchLink": "Watch how rounds work",
+    "loading": "Loading demonstration…",
+    "unsupported": "Your browser cannot play this video.",
+    "playlistLabel": "Demonstration videos",
+    "stepLabel": "{{current}} of {{total}} · {{title}}",
+    "parts": {
+      "intro": "Introduction",
+      "round1Turn1": "Round 1 · first turn",
+      "round1Complete": "Round 1 · remaining turns",
+      "round2": "Round 2 · all three turns"
+    }
+  },
   "navigation": {
     "home": "Home",
     "findPracticeGroup": "Find a group",
@@ -578,7 +593,7 @@
         "completed": "Session completed"
       },
       "rounds": {
-        "current": "Round {{current}} of 3",
+                "current": "Round {{current}} of 3",
         "switching": "Switching roles..."
       },
       "timing": {
@@ -710,7 +725,7 @@
         },
         "controls": {
           "title": "Session Controls",
-          "startSession": "Start Session",
+                    "startSession": "Start Session",
           "nextPhase": "Next Phase",
           "launchNewSession": "Launch New Session"
         },
@@ -932,7 +947,7 @@
         "format": "Format: Role-based practice with rotation",
         "hostRole": "Host role: {{role}}",
         "sessionInfo": "Session will adapt automatically as participants join",
-        "groupConfig": "Groups: {{size}} people, {{strategy}} observers"
+        "groupConfig": "Groups: mixed sizes (3-4 people), observers distributed across groups"
       },
       "participantLimits": {
         "label": "Maximum Participants",
@@ -1147,8 +1162,8 @@
         "title": "Session Summary",
         "activeGroups": "Active Groups",
         "pausedGroups": "Paused Groups",
-        "completedGroups": "Completed Groups"
-      }
+                "completedGroups": "Completed Groups"
+        }
     },
     "preparation": {
       "title": "Session Preparation",
@@ -1457,7 +1472,7 @@
     }
   },
   "christadelphianGate": {
-    "title": "Christadelphian introduction",
+    "title": "Find a practice group",
     "subtitle": "Enter the word indicated by this week’s clue.",
     "clueLabel": "This week's clue",
     "answerLabel": "The word",
@@ -1465,7 +1480,7 @@
     "submit": "Continue",
     "incorrect": "That doesn't match this week's clue. Check the hymn book and try again.",
     "notConfigured": "This week's answer isn't set yet. Please try again later.",
-    "back": "Choose a different path"
+    "back": "Back to the introduction"
   },
   "matchmaking": {
     "loading": "Getting ready…",

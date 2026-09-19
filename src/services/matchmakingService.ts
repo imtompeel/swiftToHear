@@ -107,17 +107,29 @@ export class MatchmakingService {
     // Leave any existing filling rooms for this user first
     await this.leaveAllQueuesForUser(userId);
 
-    const candidate = await this.findJoinableRoom(mode, audience);
+    const tryJoinCandidate = async (): Promise<string | null> => {
+      const candidate = await this.findJoinableRoom(mode, audience, userId);
+      if (!candidate) return null;
 
-    if (candidate) {
       try {
         await this.joinExistingRoom(candidate.roomId, userId, userName);
-        return { roomId: candidate.roomId };
+        return candidate.roomId;
       } catch (err) {
-        // Room filled or expired under us — create a new one
+        // Room filled, expired, or still holding our seat — do not resume
         console.warn('Failed to join existing match room, creating new:', err);
+        if (candidate.participantIds.includes(userId)) {
+          try {
+            await this.leaveQueue(candidate.roomId, userId);
+          } catch {
+            // ignore — create path below still runs
+          }
+        }
+        return null;
       }
-    }
+    };
+
+    const joinedId = (await tryJoinCandidate()) ?? (await tryJoinCandidate());
+    if (joinedId) return { roomId: joinedId };
 
     const roomId = await this.createRoom(mode, audience, userId, userName);
     return { roomId };
@@ -160,7 +172,8 @@ export class MatchmakingService {
 
   private static async findJoinableRoom(
     mode: MatchMode,
-    audience: MatchAudience
+    audience: MatchAudience,
+    excludeUserId?: string
   ): Promise<MatchRoom | null> {
     const q = query(
       collection(db, this.COLLECTION),
@@ -179,6 +192,11 @@ export class MatchmakingService {
       if (isRoomStale(room, now)) {
         // Opportunistic cleanup — best effort
         void this.expireRoom(room.roomId);
+        continue;
+      }
+      if (excludeUserId && room.participantIds.includes(excludeUserId)) {
+        // Abandoned seat still present — drop it and keep looking
+        await this.leaveQueue(room.roomId, excludeUserId);
         continue;
       }
       if (room.participants.length >= MATCH_TARGET_SIZE) {
@@ -238,7 +256,8 @@ export class MatchmakingService {
         throw new Error('Match room is not open');
       }
       if (room.participantIds.includes(userId)) {
-        return; // already in room
+        // Already seated — leave and rejoin cleanly so abandoned seats are not resumed
+        throw new Error('Already in match room');
       }
       if (room.participants.length >= MATCH_TARGET_SIZE) {
         throw new Error('Match room is full');

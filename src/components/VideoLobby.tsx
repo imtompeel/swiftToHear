@@ -98,7 +98,7 @@ export const VideoLobby: React.FC<VideoLobbyProps> = ({
                 autoPlay
                 muted
                 playsInline
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover -scale-x-100"
               />
               <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
                 {currentUserName} (You)

@@ -1,14 +1,18 @@
+import { vi } from 'vitest';
 import {
   render,
   screen,
   describe,
   it,
   expect,
-  vi,
   setupTests,
   renderWithProviders,
 } from './setup';
 import { SessionLobby } from '../SessionLobby';
+
+vi.mock('../PracticeDemoVideo', () => ({
+  PracticeDemoVideo: () => null,
+}));
 
 describe('SessionLobby Component', () => {
   setupTests();

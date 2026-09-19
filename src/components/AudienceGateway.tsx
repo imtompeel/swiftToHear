@@ -45,10 +45,7 @@ export const AudienceGateway: React.FC = () => {
   }, [forceChooser, preference, clearPreference]);
 
   const choose = (next: AudiencePreference) => {
-    // Christadelphian path is hymn-book gated; only set preference after unlock.
-    if (next !== 'christadelphian') {
-      setPreference(next);
-    }
+    setPreference(next);
     navigate(pathForAudience(next));
   };
 

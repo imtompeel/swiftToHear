@@ -127,6 +127,10 @@ export const useVideoCall = ({
           
           if (connectionState === 'connected') {
             retryCountRef.current = 0;
+            if (recoveryTimeoutRef.current) {
+              clearTimeout(recoveryTimeoutRef.current);
+              recoveryTimeoutRef.current = null;
+            }
           }
           
           if (connectionState === 'disconnected' && isActive) {

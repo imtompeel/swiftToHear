@@ -89,7 +89,10 @@ export const ChristadelphianGateForm: React.FC<ChristadelphianGateFormProps> = (
         </form>
 
         <p className="mt-6 text-center text-sm text-secondary-500 dark:text-secondary-400">
-          <Link to="/?choose=1" className="underline-offset-2 hover:underline hover:text-accent-600 dark:hover:text-accent-300">
+          <Link
+            to="/christadelphian"
+            className="underline-offset-2 hover:underline hover:text-accent-600 dark:hover:text-accent-300"
+          >
             {t('christadelphianGate.back')}
           </Link>
         </p>

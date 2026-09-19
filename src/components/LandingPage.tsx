@@ -5,6 +5,7 @@ import { downloadTrackingService } from '../services/downloadTrackingService';
 import { useTranslation } from '../hooks/useTranslation';
 import AdminLoginForm from './AdminLoginForm';
 import { PracticeEntryCTAs } from './PracticeEntryCTAs';
+import { PracticeDemoVideo } from './PracticeDemoVideo';
 
 export type LandingVariant = 'church' | 'open' | 'christadelphian' | 'faith' | 'secular';
 
@@ -236,6 +237,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ variant = 'open' }) => {
                 </p>
               </div>
             </div>
+
+            <PracticeDemoVideo className="mb-8" />
 
             <div className="bg-accent-50 dark:bg-accent-900/20 rounded-lg p-6 mb-8 border border-accent-200 dark:border-accent-700">
               <div className="flex flex-col md:flex-row items-center justify-between gap-4">

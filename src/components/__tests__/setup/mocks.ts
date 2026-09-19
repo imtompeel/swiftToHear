@@ -82,6 +82,13 @@ vi.mock('firebase/analytics', () => ({
   getAnalytics: vi.fn(),
 }));
 
+vi.mock('firebase/storage', () => ({
+  getStorage: vi.fn(() => ({ _type: 'storage' })),
+  ref: vi.fn((_storage: unknown, path: string) => ({ fullPath: path, name: path.split('/').pop() })),
+  listAll: vi.fn(async () => ({ items: [], prefixes: [] })),
+  getDownloadURL: vi.fn(async () => 'https://example.com/demo.mp4'),
+}));
+
 export const mockFirebaseConfig = {
   db: mockFirestoreDb,
   auth: {
@@ -92,6 +99,7 @@ export const mockFirebaseConfig = {
     }),
   },
   analytics: {},
+  storage: { _type: 'storage' },
   default: { name: 'test-app' },
 };
 

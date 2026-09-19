@@ -30,6 +30,18 @@ rules_version = '2';
 // Similar shape plus groups / groupMode / groupConfiguration
 // Updates require authentication.
 //
+// Collection: signaling
+// Document ID: auto-id
+// Fields:
+//   - type: 'offer' | 'answer' | 'ice-candidate' | 'join' | 'leave'
+//   - from: string (auth uid of sender)
+//   - to: string (optional; required for offer/answer/ice-candidate)
+//   - sessionId: string (WebRTC room id; may differ from the Firestore session id)
+//   - baseSessionId: string (sessions/groupSessions document id used for ACL)
+//   - data: map, timestamp, expiresAt
+// Authenticated session members (hostId or participantIds) may create messages
+// and listen to the session's signalling stream. Recipient filtering is client-side.
+//
 // Collection: matchRooms
 // Document ID: roomId
 // Fields:
@@ -252,15 +264,12 @@ service cloud.firestore {
         );
     }
 
+    // List queries cannot filter by recipient. Session members may read all
+    // signalling for their session; the client ignores messages not meant for it.
     function canReadSignalingMessage() {
       return isAuthenticated() &&
         resource.data.baseSessionId is string &&
-        isSignalingSessionMember(resource.data.baseSessionId) &&
-        (
-          resource.data.to == request.auth.uid ||
-          resource.data.type in ['join', 'leave'] ||
-          resource.data.from == request.auth.uid
-        );
+        isSignalingSessionMember(resource.data.baseSessionId);
     }
 
     function isValidGroupSessionCreate(sessionId) {
@@ -367,7 +376,7 @@ service cloud.firestore {
           resource.data.participants.size() <= 1);
     }
 
-    // WebRTC signaling rules — session members only; targeted messages to recipient
+    // WebRTC signaling — session members only
     match /signaling/{messageId} {
       allow create: if isValidSignalingCreate();
 

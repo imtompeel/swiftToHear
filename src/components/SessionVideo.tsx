@@ -123,7 +123,7 @@ export const SessionVideo: React.FC<SessionVideoProps> = React.memo(({
                 autoPlay
                 playsInline
                 muted
-                className={`w-full h-full object-cover rounded-lg bg-gray-200 dark:bg-gray-700 max-w-full ${showSelfVideo && videoCall.isVideoEnabled ? 'block' : 'hidden'}`}
+                className={`w-full h-full object-cover rounded-lg bg-gray-200 dark:bg-gray-700 max-w-full -scale-x-100 ${showSelfVideo && videoCall.isVideoEnabled ? 'block' : 'hidden'}`}
               />
               
               {/* Overlay when video is hidden from self */}

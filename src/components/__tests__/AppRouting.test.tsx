@@ -41,17 +41,17 @@ describe('App Routing for Session Management', () => {
     expect(screen.getByTestId('landing-open')).toBeInTheDocument();
   });
 
-  it('should render DialecticSession at /practice', () => {
+  it('should render DialecticSession at /practice', async () => {
     render(
       <MemoryRouter initialEntries={['/practice']}>
         <App />
       </MemoryRouter>
     );
 
-    expect(screen.getByTestId('dialectic-session')).toBeInTheDocument();
+    expect(await screen.findByTestId('dialectic-session')).toBeInTheDocument();
   });
 
-  it('should render matchmaking flow at /practice/match', () => {
+  it('should render matchmaking flow at /practice/match', async () => {
     localStorage.setItem('swiftToHear.audience', 'open');
 
     render(
@@ -60,16 +60,16 @@ describe('App Routing for Session Management', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByTestId('match-flow')).toBeInTheDocument();
+    expect(await screen.findByTestId('match-flow')).toBeInTheDocument();
   });
 
-  it('should render session creation at /practice/create', () => {
+  it('should render session creation at /practice/create', async () => {
     render(
       <MemoryRouter initialEntries={['/practice/create']}>
         <App />
       </MemoryRouter>
     );
 
-    expect(screen.getByTestId('step-by-step-session-creation')).toBeInTheDocument();
+    expect(await screen.findByTestId('step-by-step-session-creation')).toBeInTheDocument();
   });
 });

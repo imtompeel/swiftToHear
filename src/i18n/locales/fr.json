@@ -334,7 +334,7 @@
     }
   },
   "christadelphianGate": {
-    "title": "Introduction christadelphienne",
+    "title": "Trouver un groupe de pratique",
     "subtitle": "Entrez le mot indiqué par l’indice de cette semaine.",
     "clueLabel": "Indice de cette semaine",
     "answerLabel": "Le mot",
@@ -342,7 +342,22 @@
     "submit": "Continuer",
     "incorrect": "Cela ne correspond pas à l'indice de cette semaine. Vérifiez le livre de cantiques et réessayez.",
     "notConfigured": "La réponse de cette semaine n'est pas encore configurée. Réessayez plus tard.",
-    "back": "Choisir un autre chemin"
+    "back": "Retour à l’introduction"
+  },
+  "practiceDemo": {
+    "title": "Voir la pratique",
+    "description": "Quatre courts clips : une introduction, le premier tour du round 1, la suite du round 1, puis les trois tours du round 2.",
+    "watchLink": "Voir comment fonctionnent les tours",
+    "loading": "Chargement de la démonstration…",
+    "unsupported": "Votre navigateur ne peut pas lire cette vidéo.",
+    "playlistLabel": "Vidéos de démonstration",
+    "stepLabel": "{{current}} sur {{total}} · {{title}}",
+    "parts": {
+      "intro": "Introduction",
+      "round1Turn1": "Round 1 · premier tour",
+      "round1Complete": "Round 1 · tours restants",
+      "round2": "Round 2 · les trois tours"
+    }
   },
   "matchmaking": {
     "loading": "Préparation…",

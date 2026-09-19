@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from '../../hooks/useTranslation';
 import { TechCheck } from '../TechCheck';
+import { PracticeDemoVideo } from '../PracticeDemoVideo';
 import type { AudiencePreference } from '../../services/audiencePreference';
 import type { MatchMode, MatchRoom } from '../../types/matchmaking';
 import { MATCH_TARGET_SIZE } from '../../types/matchmaking';
@@ -99,6 +100,10 @@ export const MatchWaitingRoom: React.FC<MatchWaitingRoomProps> = ({
 
       <div className="mb-8 surface-panel p-4">
         <TechCheck waitingForOthers={count < MATCH_TARGET_SIZE} />
+      </div>
+
+      <div className="mb-8">
+        <PracticeDemoVideo density="compact" />
       </div>
 
       <div className="text-center">

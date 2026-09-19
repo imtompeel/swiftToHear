@@ -2,6 +2,35 @@ import { FirebaseSignalingService, SignalingMessage } from './firebaseSignalingS
 import { getIceServers } from './iceServers';
 import type { VideoProvider, VideoProviderCallbacks, VideoParticipant } from './video/types';
 
+export const ICE_DISCONNECT_GRACE_MS = 4000;
+const MAX_ICE_RESTARTS = 3;
+const VIDEO_MAX_BITRATE_BPS = 800_000;
+const PACKET_LOSS_WARN_RATE = 0.1;
+const PACKET_LOSS_MIN_PACKETS = 20;
+
+export interface RtpPacketCounters {
+  packetsLost: number;
+  packetsReceived: number;
+}
+
+/** Interval packet loss from cumulative WebRTC getStats() counters. */
+export function computeIntervalPacketLoss(
+  previous: RtpPacketCounters | undefined,
+  current: RtpPacketCounters
+): { lossRate: number; sampleSize: number } {
+  if (!previous) {
+    return { lossRate: 0, sampleSize: 0 };
+  }
+
+  const deltaLost = Math.max(0, current.packetsLost - previous.packetsLost);
+  const deltaReceived = Math.max(0, current.packetsReceived - previous.packetsReceived);
+  const sampleSize = deltaLost + deltaReceived;
+  return {
+    lossRate: sampleSize > 0 ? deltaLost / sampleSize : 0,
+    sampleSize
+  };
+}
+
 export interface PeerConnection {
   peerId: string;
   connection: RTCPeerConnection;
@@ -19,6 +48,10 @@ export class WebRTCService implements VideoProvider {
   private qualityMonitoringIntervals: Map<string, ReturnType<typeof setInterval>> = new Map();
   private pendingIceCandidates: Map<string, RTCIceCandidateInit[]> = new Map();
   private makingOffer: Map<string, boolean> = new Map();
+  private iceRestartTimers: Map<string, ReturnType<typeof setTimeout>> = new Map();
+  private iceRestartAttempts: Map<string, number> = new Map();
+  private iceRestartInFlight: Set<string> = new Set();
+  private lastInboundVideoStats: Map<string, RtpPacketCounters> = new Map();
 
   // WebRTC configuration — iceServers filled at initialize() via getIceServers()
   private rtcConfig: RTCConfiguration = {
@@ -174,11 +207,17 @@ export class WebRTCService implements VideoProvider {
         this.peerConnections.delete(peerId);
         this.pendingIceCandidates.delete(peerId);
         this.makingOffer.delete(peerId);
+        this.clearIceRestartTimer(peerId);
+        this.iceRestartAttempts.delete(peerId);
       }
     }
 
     console.log('🟢 WEBRTC - Creating new peer connection for:', peerId);
     const peerConnection = new RTCPeerConnection(this.rtcConfig);
+    this.peerConnections.set(peerId, {
+      peerId,
+      connection: peerConnection
+    });
     
     // Add local stream tracks
     if (this.localStream) {
@@ -195,6 +234,10 @@ export class WebRTCService implements VideoProvider {
         // Validate stream before using it
         if (stream.active && stream.getTracks().length > 0) {
           console.log('🟢 WEBRTC - Valid stream received from:', peerId, 'tracks:', stream.getTracks().length);
+          const stored = this.peerConnections.get(peerId);
+          if (stored) {
+            stored.stream = stream;
+          }
           this.onStreamReceived?.(peerId, stream);
         } else {
           console.warn('🟡 WEBRTC - Invalid stream received from:', peerId);
@@ -217,16 +260,26 @@ export class WebRTCService implements VideoProvider {
       
       switch (peerConnection.connectionState) {
         case 'connected':
+          this.clearIceRestartTimer(peerId);
+          this.iceRestartAttempts.delete(peerId);
           this.onConnectionStateChange?.('connected');
           this.onParticipantJoined?.(peerId);
+          this.reemitRemoteStream(peerId);
           this.startConnectionQualityMonitoring(peerConnection, peerId);
           break;
         case 'connecting':
           this.onConnectionStateChange?.('connecting');
           break;
         case 'disconnected':
+          // Transient — browsers recover from this without a leave
+          this.onConnectionStateChange?.('connecting');
+          this.scheduleIceRestart(peerConnection, peerId);
+          break;
         case 'failed':
+          this.handleIceFailure(peerId);
+          break;
         case 'closed':
+          this.clearIceRestartTimer(peerId);
           this.onParticipantLeft?.(peerId);
           this.stopConnectionQualityMonitoring(peerId);
           break;
@@ -236,23 +289,20 @@ export class WebRTCService implements VideoProvider {
     // Monitor ICE connection state
     peerConnection.oniceconnectionstatechange = () => {
       console.log('🟢 WEBRTC - ICE connection state for', peerId, ':', peerConnection.iceConnectionState);
-      
-      if (peerConnection.iceConnectionState === 'failed') {
-        console.warn('🟡 WEBRTC - ICE connection failed for:', peerId);
-        // Attempt to restart ICE
-        try {
-          peerConnection.restartIce();
-        } catch (error) {
-          console.error('🔴 WEBRTC - Failed to restart ICE for:', peerId, error);
-        }
+
+      if (peerConnection.iceConnectionState === 'disconnected') {
+        this.scheduleIceRestart(peerConnection, peerId);
+      } else if (peerConnection.iceConnectionState === 'failed') {
+        this.handleIceFailure(peerId);
+      } else if (
+        peerConnection.iceConnectionState === 'connected' ||
+        peerConnection.iceConnectionState === 'completed'
+      ) {
+        this.clearIceRestartTimer(peerId);
       }
     };
 
-    // Store the peer connection
-    this.peerConnections.set(peerId, {
-      peerId,
-      connection: peerConnection
-    });
+    void this.applyVideoBitrateCap(peerConnection);
 
     return peerConnection;
   }
@@ -301,6 +351,8 @@ export class WebRTCService implements VideoProvider {
           this.peerConnections.delete(participantId);
           this.pendingIceCandidates.delete(participantId);
           this.makingOffer.delete(participantId);
+          this.clearIceRestartTimer(participantId);
+          this.iceRestartAttempts.delete(participantId);
         }
       }
       
@@ -348,6 +400,8 @@ export class WebRTCService implements VideoProvider {
         this.pendingIceCandidates.delete(participantId);
         this.makingOffer.delete(participantId);
         this.stopConnectionQualityMonitoring(participantId);
+        this.clearIceRestartTimer(participantId);
+        this.iceRestartAttempts.delete(participantId);
         this.onParticipantLeft?.(participantId);
         console.log('🟢 WEBRTC - Closed peer connection for participant:', participantId);
       } catch (error) {
@@ -490,12 +544,16 @@ export class WebRTCService implements VideoProvider {
 
   private closeAllPeerConnections() {
     this.clearAllQualityMonitoring();
+    this.clearAllIceRestartTimers();
     this.peerConnections.forEach(({ connection }) => {
       connection.close();
     });
     this.peerConnections.clear();
     this.pendingIceCandidates.clear();
     this.makingOffer.clear();
+    this.iceRestartAttempts.clear();
+    this.iceRestartInFlight.clear();
+    this.lastInboundVideoStats.clear();
   }
 
   // Leave the session (keeps signalling channel unless disconnect() is called)
@@ -567,6 +625,129 @@ export class WebRTCService implements VideoProvider {
     }
   }
 
+  private reemitRemoteStream(peerId: string) {
+    const stream = this.peerConnections.get(peerId)?.stream;
+    if (stream?.active && stream.getTracks().length > 0) {
+      this.onStreamReceived?.(peerId, stream);
+    }
+  }
+
+  private scheduleIceRestart(peerConnection: RTCPeerConnection, peerId: string) {
+    if (this.iceRestartTimers.has(peerId)) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      this.iceRestartTimers.delete(peerId);
+      const stillDown =
+        peerConnection.connectionState === 'disconnected' ||
+        peerConnection.connectionState === 'failed' ||
+        peerConnection.iceConnectionState === 'disconnected' ||
+        peerConnection.iceConnectionState === 'failed';
+
+      if (stillDown) {
+        void this.restartIceForPeer(peerId);
+      }
+    }, ICE_DISCONNECT_GRACE_MS);
+
+    this.iceRestartTimers.set(peerId, timer);
+  }
+
+  private clearIceRestartTimer(peerId: string) {
+    const timer = this.iceRestartTimers.get(peerId);
+    if (timer) {
+      clearTimeout(timer);
+      this.iceRestartTimers.delete(peerId);
+    }
+  }
+
+  private clearAllIceRestartTimers() {
+    this.iceRestartTimers.forEach((timer) => clearTimeout(timer));
+    this.iceRestartTimers.clear();
+  }
+
+  private handleIceFailure(peerId: string) {
+    this.clearIceRestartTimer(peerId);
+    const attempts = this.iceRestartAttempts.get(peerId) || 0;
+    if (attempts >= MAX_ICE_RESTARTS) {
+      console.error('🔴 WEBRTC - ICE restart exhausted for:', peerId);
+      this.onConnectionStateChange?.('disconnected');
+      this.onParticipantLeft?.(peerId);
+      this.stopConnectionQualityMonitoring(peerId);
+      return;
+    }
+
+    this.onConnectionStateChange?.('connecting');
+    void this.restartIceForPeer(peerId);
+  }
+
+  private async restartIceForPeer(peerId: string) {
+    const peer = this.peerConnections.get(peerId);
+    if (!peer || peer.connection.signalingState === 'closed') {
+      return;
+    }
+
+    if (this.makingOffer.get(peerId) || this.iceRestartInFlight.has(peerId)) {
+      return;
+    }
+
+    this.iceRestartInFlight.add(peerId);
+
+    const attempts = (this.iceRestartAttempts.get(peerId) || 0) + 1;
+    this.iceRestartAttempts.set(peerId, attempts);
+    console.warn('🟡 WEBRTC - Restarting ICE for:', peerId, 'attempt:', attempts);
+
+    try {
+      try {
+        peer.connection.restartIce();
+      } catch (error) {
+        console.error('🔴 WEBRTC - restartIce() failed for:', peerId, error);
+      }
+
+      if (!this.shouldOfferTo(peerId) || !this.signalingService) {
+        return;
+      }
+
+      if (peer.connection.signalingState !== 'stable') {
+        console.warn('🟡 WEBRTC - Skipping ICE restart offer; signaling state is', peer.connection.signalingState);
+        return;
+      }
+
+      this.makingOffer.set(peerId, true);
+      try {
+        const offer = await peer.connection.createOffer({ iceRestart: true });
+        await peer.connection.setLocalDescription(offer);
+        await this.signalingService.sendOffer(peerId, offer);
+      } catch (error) {
+        console.error('🔴 WEBRTC - Failed to send ICE restart offer for:', peerId, error);
+      } finally {
+        this.makingOffer.set(peerId, false);
+      }
+    } finally {
+      this.iceRestartInFlight.delete(peerId);
+    }
+  }
+
+  private async applyVideoBitrateCap(peerConnection: RTCPeerConnection) {
+    const sender = peerConnection.getSenders?.().find(s => s.track?.kind === 'video');
+    if (!sender?.getParameters) {
+      return;
+    }
+
+    try {
+      const params = sender.getParameters();
+      if (!params.encodings || params.encodings.length === 0) {
+        params.encodings = [{}];
+      }
+      params.encodings.forEach(encoding => {
+        encoding.maxBitrate = VIDEO_MAX_BITRATE_BPS;
+      });
+      await sender.setParameters(params);
+    } catch (error) {
+      console.warn('🟡 WEBRTC - Could not cap video bitrate:', error);
+    }
+  }
+
   // Start monitoring connection quality for a peer
   private startConnectionQualityMonitoring(peerConnection: RTCPeerConnection, peerId: string) {
     // Clear any existing monitoring
@@ -578,11 +759,19 @@ export class WebRTCService implements VideoProvider {
         peerConnection.getStats().then(stats => {
           stats.forEach(report => {
             if (report.type === 'inbound-rtp' && report.mediaType === 'video') {
-              const packetsLost = report.packetsLost || 0;
-              const packetsReceived = report.packetsReceived || 0;
-              const lossRate = packetsReceived > 0 ? packetsLost / packetsReceived : 0;
-              
-              if (lossRate > 0.1) { // More than 10% packet loss
+              const current: RtpPacketCounters = {
+                packetsLost: report.packetsLost || 0,
+                packetsReceived: report.packetsReceived || 0
+              };
+              const previous = this.lastInboundVideoStats.get(peerId);
+              this.lastInboundVideoStats.set(peerId, current);
+
+              if (!previous) {
+                return;
+              }
+
+              const { lossRate, sampleSize } = computeIntervalPacketLoss(previous, current);
+              if (sampleSize >= PACKET_LOSS_MIN_PACKETS && lossRate > PACKET_LOSS_WARN_RATE) {
                 console.warn('🟡 WEBRTC - High packet loss detected for:', peerId, 'loss rate:', lossRate);
               }
             }
@@ -605,10 +794,12 @@ export class WebRTCService implements VideoProvider {
       clearInterval(interval);
       this.qualityMonitoringIntervals.delete(peerId);
     }
+    this.lastInboundVideoStats.delete(peerId);
   }
 
   private clearAllQualityMonitoring() {
     this.qualityMonitoringIntervals.forEach((interval) => clearInterval(interval));
     this.qualityMonitoringIntervals.clear();
+    this.lastInboundVideoStats.clear();
   }
 }
