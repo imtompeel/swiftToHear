@@ -73,6 +73,9 @@ const TopicSuggestions: React.FC<TopicSuggestionsProps> = ({
       <h3 className="text-lg font-medium text-primary-900 dark:text-primary-100">
         {t('shared.common.topicSuggestions')}
       </h3>
+      <p className="text-sm text-secondary-600 dark:text-secondary-400">
+        {t('dialectic.lobby.topicSuggestions.description')}
+      </p>
       
       <div className="bg-white dark:bg-secondary-800 rounded-lg border border-secondary-200 dark:border-secondary-600 p-4 space-y-4">
         {/* Add new topic suggestion */}

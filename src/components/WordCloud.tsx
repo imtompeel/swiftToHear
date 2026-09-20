@@ -6,17 +6,19 @@ interface WordCloudProps {
   suggestions: TopicSuggestion[];
   onTopicSelect?: (topic: string) => void;
   maxWords?: number;
+  currentTopic?: string;
 }
 
 const WordCloud: React.FC<WordCloudProps> = ({
   suggestions,
   onTopicSelect,
-  maxWords = 15
+  maxWords = 15,
+  currentTopic
 }) => {
   const { t } = useTranslation();
+  const canSelect = Boolean(onTopicSelect);
 
-  // Get the most popular topics
-  const popularTopics = suggestions
+  const popularTopics = [...suggestions]
     .sort((a, b) => b.votes - a.votes)
     .slice(0, maxWords);
 
@@ -30,58 +32,81 @@ const WordCloud: React.FC<WordCloudProps> = ({
     );
   }
 
-  // Calculate font sizes based on vote count
-  const maxVotes = Math.max(...popularTopics.map(s => s.votes));
-  const minVotes = Math.min(...popularTopics.map(s => s.votes));
-  const voteRange = maxVotes - minVotes;
-
-  const getFontSize = (votes: number) => {
-    if (voteRange === 0) return 'text-lg';
-    
-    const normalizedVotes = (votes - minVotes) / voteRange;
-    if (normalizedVotes >= 0.8) return 'text-3xl font-bold';
-    if (normalizedVotes >= 0.6) return 'text-2xl font-semibold';
-    if (normalizedVotes >= 0.4) return 'text-xl font-medium';
-    if (normalizedVotes >= 0.2) return 'text-lg';
-    return 'text-base';
-  };
-
-  const getColor = (votes: number) => {
-    const normalizedVotes = voteRange === 0 ? 0 : (votes - minVotes) / voteRange;
-    if (normalizedVotes >= 0.8) return 'text-accent-600 dark:text-accent-400';
-    if (normalizedVotes >= 0.6) return 'text-accent-500 dark:text-accent-300';
-    if (normalizedVotes >= 0.4) return 'text-secondary-700 dark:text-secondary-300';
-    if (normalizedVotes >= 0.2) return 'text-secondary-600 dark:text-secondary-400';
-    return 'text-secondary-500 dark:text-secondary-500';
-  };
-
   return (
-    <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-6">
-      <h3 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-4 text-center">
+    <div data-testid="host-topic-picker">
+      <h3 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-2 text-center">
         {t('dialectic.wordCloud.title')}
       </h3>
       
       <p className="text-sm text-secondary-600 dark:text-secondary-400 mb-6 text-center">
-        {t('dialectic.wordCloud.description')}
+        {t(canSelect ? 'dialectic.wordCloud.description' : 'dialectic.wordCloud.waitingForHost')}
       </p>
 
-      <div className="flex flex-wrap justify-center gap-4 p-4 min-h-[200px] items-center">
-        {popularTopics.map((suggestion) => (
-          <button
-            key={suggestion.id}
-            onClick={() => onTopicSelect?.(suggestion.topic)}
-            className={`
-              ${getFontSize(suggestion.votes)}
-              ${getColor(suggestion.votes)}
-              px-3 py-2 rounded-lg hover:bg-secondary-100 dark:hover:bg-secondary-700 
-              transition-all duration-200 transform hover:scale-105
-              ${onTopicSelect ? 'cursor-pointer' : 'cursor-default'}
-            `}
-            title={`${suggestion.topic} (${suggestion.votes} votes)`}
-          >
-            {suggestion.topic}
-          </button>
-        ))}
+      <div className="space-y-2">
+        {popularTopics.map((suggestion, index) => {
+          const isCurrent = Boolean(currentTopic) && suggestion.topic === currentTopic;
+          const voteLabel = `${suggestion.votes} ${t('dialectic.lobby.topicSuggestions.votes')}`;
+
+          const content = (
+            <>
+              <div className="flex items-start gap-3 min-w-0">
+                <span className="text-sm font-medium text-secondary-400 dark:text-secondary-500 w-5 shrink-0 pt-0.5">
+                  {index + 1}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-secondary-900 dark:text-secondary-100 font-medium">
+                    {suggestion.topic}
+                  </p>
+                  {isCurrent && (
+                    <p className="text-xs text-accent-600 dark:text-accent-400 mt-1">
+                      {t('dialectic.wordCloud.currentTopic')}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <span
+                className={`shrink-0 text-sm font-semibold px-2.5 py-1 rounded-full ${
+                  suggestion.votes > 0
+                    ? 'bg-accent-100 text-accent-800 dark:bg-accent-900/40 dark:text-accent-200'
+                    : 'bg-secondary-100 text-secondary-600 dark:bg-secondary-700 dark:text-secondary-300'
+                }`}
+                title={voteLabel}
+              >
+                {voteLabel}
+              </span>
+            </>
+          );
+
+          if (canSelect) {
+            return (
+              <button
+                key={suggestion.id}
+                type="button"
+                onClick={() => onTopicSelect?.(suggestion.topic)}
+                className={`w-full flex items-center justify-between gap-4 p-3 rounded-lg border text-left transition-colors ${
+                  isCurrent
+                    ? 'border-accent-400 bg-accent-50 dark:bg-accent-900/20'
+                    : 'border-secondary-200 dark:border-secondary-600 hover:border-accent-400 hover:bg-secondary-50 dark:hover:bg-secondary-700'
+                }`}
+              >
+                {content}
+              </button>
+            );
+          }
+
+          return (
+            <div
+              key={suggestion.id}
+              className={`w-full flex items-center justify-between gap-4 p-3 rounded-lg border ${
+                isCurrent
+                  ? 'border-accent-400 bg-accent-50 dark:bg-accent-900/20'
+                  : 'border-secondary-200 dark:border-secondary-600'
+              }`}
+            >
+              {content}
+            </div>
+          );
+        })}
       </div>
 
       <div className="mt-4 text-center">
@@ -96,4 +121,4 @@ const WordCloud: React.FC<WordCloudProps> = ({
   );
 };
 
-export default WordCloud; 
+export default WordCloud;

@@ -1,90 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { useTranslation } from '../hooks/useTranslation';
 import { VolumeUp, VolumeOff } from '@mui/icons-material';
-
-// Audio player for singing bowl chime
-class ChimePlayer {
-  private audio: HTMLAudioElement | null = null;
-  private isLoaded = false;
-  private hasUserInteracted = false;
-
-  constructor() {
-    this.loadAudio();
-    this.setupUserInteraction();
-  }
-
-  private loadAudio() {
-    this.audio = new Audio('/48325__monkay__singingbowl.wav');
-    this.audio.preload = 'auto';
-    this.audio.volume = 0.6;
-    
-    // Mobile-specific audio settings
-    // Start muted to avoid audible blip during unlock
-    this.audio.muted = true;
-    this.audio.autoplay = false;
-    
-    this.audio.addEventListener('canplaythrough', () => {
-      this.isLoaded = true;
-    });
-    
-    this.audio.addEventListener('error', (e) => {
-      console.error('Failed to load audio file:', e);
-    });
-  }
-
-  private setupUserInteraction() {
-    // Listen for any user interaction to enable audio
-    const enableAudio = () => {
-      this.hasUserInteracted = true;
-      // Try to play and immediately pause to unlock audio context
-      if (this.audio) {
-        const previousVolume = this.audio.volume;
-        this.audio.volume = 0;
-        this.audio.play().then(() => {
-          this.audio!.pause();
-          this.audio!.currentTime = 0;
-          this.audio!.volume = previousVolume;
-          this.audio!.muted = false;
-        }).catch(() => {
-          // Ignore errors, just trying to unlock audio
-        });
-      }
-      // Remove listeners after first interaction
-      document.removeEventListener('touchstart', enableAudio);
-      document.removeEventListener('click', enableAudio);
-    };
-
-    document.addEventListener('touchstart', enableAudio, { once: true });
-    document.addEventListener('click', enableAudio, { once: true });
-  }
-
-  play() {
-    if (this.audio && this.isLoaded && this.hasUserInteracted) {
-      // Reset to beginning and play
-      this.audio.currentTime = 0;
-      this.audio.play().catch(error => {
-        console.log('Audio play failed:', error);
-      });
-    }
-  }
-
-  playMultiple(count: number = 1, delay: number = 300) {
-    if (count === 1) {
-      this.play();
-      return;
-    }
-
-    for (let i = 0; i < count; i++) {
-      setTimeout(() => {
-        this.play();
-      }, i * delay);
-    }
-  }
-}
-
-// Create a single instance to reuse
-const chimePlayer = new ChimePlayer();
+import { playTimerChime, unlockTimerChime, armTimerChimes } from '../services/chimePlayer';
+import { useTimerChimes } from '../hooks/useTimerChimes';
 
 interface QuickTimerProps {
   initialDuration?: number; // in minutes
@@ -95,7 +13,6 @@ export const QuickTimer: React.FC<QuickTimerProps> = ({
   initialDuration = 2,
   customDuration 
 }) => {
-  const { t } = useTranslation();
   const { duration } = useParams<{ duration: string }>();
   
   // Use URL parameter if available, otherwise use props
@@ -105,10 +22,16 @@ export const QuickTimer: React.FC<QuickTimerProps> = ({
   const [isPaused, setIsPaused] = useState(false);
   const [totalDuration, setTotalDuration] = useState(0);
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [hasPlayedWarning, setHasPlayedWarning] = useState(false);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const startTimeRef = useRef<number | null>(null);
+
+  useTimerChimes({
+    timeRemaining,
+    phaseDuration: totalDuration,
+    isActive: isRunning && !isPaused,
+    isMuted: !soundEnabled,
+    skipStart: true,
+  });
 
   // Set initial duration based on props or URL parameter
   useEffect(() => {
@@ -119,39 +42,32 @@ export const QuickTimer: React.FC<QuickTimerProps> = ({
 
   // Timer logic
   useEffect(() => {
-    if (isRunning && !isPaused && timeRemaining > 0) {
-      intervalRef.current = setInterval(() => {
-        setTimeRemaining(prev => {
-          const newTime = prev - 1000;
-          
-          // Check for 30-second warning
-          if (newTime <= 30000 && newTime > 29000 && !hasPlayedWarning) {
-            playWarningSound();
-          }
-          
-          // Check for timer end
-          if (newTime <= 0) {
-            setIsRunning(false);
-            playEndSound();
-            return 0;
-          }
-          
-          return newTime;
-        });
-      }, 1000);
-    } else {
+    if (!(isRunning && !isPaused)) {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
+      return;
     }
+
+    intervalRef.current = setInterval(() => {
+      setTimeRemaining(prev => {
+        const newTime = prev - 1000;
+        if (newTime <= 0) {
+          setIsRunning(false);
+          return 0;
+        }
+        return newTime;
+      });
+    }, 1000);
 
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
-  }, [isRunning, isPaused, timeRemaining, hasPlayedWarning]);
+  }, [isRunning, isPaused]);
 
   const startTimer = () => {
     if (timeRemaining === 0) {
@@ -162,10 +78,12 @@ export const QuickTimer: React.FC<QuickTimerProps> = ({
     }
     setIsRunning(true);
     setIsPaused(false);
-    setHasPlayedWarning(false); // Reset warning flag
-    setHasUserInteracted(true); // Mark that user has interacted
-    startTimeRef.current = Date.now();
-    playStartSound(); // Play start sound
+    setHasUserInteracted(true);
+    unlockTimerChime();
+    armTimerChimes();
+    if (soundEnabled) {
+      void playTimerChime();
+    }
   };
 
   const pauseTimer = () => {
@@ -204,26 +122,6 @@ export const QuickTimer: React.FC<QuickTimerProps> = ({
     if (percentage > 80) return 'text-red-500';
     if (percentage > 60) return 'text-orange-500';
     return 'text-green-500';
-  };
-
-  // Sound functions using singing bowl chime
-  const playStartSound = () => {
-    if (soundEnabled) {
-      chimePlayer.play(); // Single chime for start
-    }
-  };
-
-  const playWarningSound = () => {
-    if (soundEnabled && !hasPlayedWarning) {
-      chimePlayer.play(); // Single chime for warning
-      setHasPlayedWarning(true);
-    }
-  };
-
-  const playEndSound = () => {
-    if (soundEnabled) {
-      chimePlayer.play(); // Single chime for end
-    }
   };
 
   return (

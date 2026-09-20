@@ -18,6 +18,7 @@ describe('HoverTimer Component', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.removeItem('timerMuted');
   });
 
   it('should render the timer toggle button', () => {
@@ -48,5 +49,6 @@ describe('HoverTimer Component', () => {
     const muteButton = screen.getByTitle('Mute timer bells');
     fireEvent.click(muteButton);
     expect(screen.getByTitle('Unmute timer bells')).toBeInTheDocument();
+    expect(localStorage.getItem('timerMuted')).toBe('true');
   });
 });

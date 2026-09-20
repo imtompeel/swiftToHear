@@ -450,4 +450,83 @@ describe('FirestoreGroupSessionService', () => {
       expect(mockUpdateDoc).toHaveBeenCalled();
     });
   });
+
+  describe('scribe feedback after the final speaker', () => {
+    const threePersonGroup: GroupData = {
+      groupId: 'group-1',
+      participants: [
+        { id: 'user1', name: 'User 1', role: 'speaker', status: 'ready' },
+        { id: 'user2', name: 'User 2', role: 'listener', status: 'ready' },
+        { id: 'user3', name: 'User 3', role: 'scribe', status: 'ready' }
+      ],
+      status: 'active',
+      currentPhase: 'listening',
+      roundNumber: 3,
+      scribeNotes: { 3: 'Final round notes' }
+    };
+
+    function makeGroupSession(group: GroupData): GroupSessionData {
+      return {
+        sessionId: 'test-session',
+        sessionName: 'Test Session',
+        duration: 30,
+        topic: 'Test Topic',
+        hostId: 'host123',
+        hostName: 'Host User',
+        createdAt: { toDate: () => new Date() } as any,
+        participants: group.participants,
+        status: 'active',
+        minParticipants: 3,
+        maxParticipants: 12,
+        topicSuggestions: [],
+        groupMode: 'single',
+        groups: [group],
+        groupConfiguration: {
+          groupSize: 4,
+          autoAssignRoles: true,
+          groupRotation: 'balanced',
+          observerStrategy: 'distribute'
+        }
+      };
+    }
+
+    it('opens scribe feedback after the final speaker', async () => {
+      mockGetDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => makeGroupSession({ ...threePersonGroup })
+      });
+      mockUpdateDoc.mockResolvedValue(undefined);
+
+      const result = await FirestoreGroupSessionService.completeGroupRound('test-session', 'group-1');
+
+      expect(result?.currentPhase).toBe('transition');
+      expect(result?.roundNumber).toBe(3);
+    });
+
+    it('moves to completion after the final scribe feedback', async () => {
+      mockGetDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => makeGroupSession({ ...threePersonGroup, currentPhase: 'transition' })
+      });
+      mockUpdateDoc.mockResolvedValue(undefined);
+
+      const result = await FirestoreGroupSessionService.completeGroupScribeFeedback('test-session', 'group-1');
+
+      expect(result?.currentPhase).toBe('completion');
+      expect(result?.roundNumber).toBe(3);
+    });
+
+    it('starts the next listening round after mid-session scribe feedback', async () => {
+      mockGetDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => makeGroupSession({ ...threePersonGroup, roundNumber: 1, currentPhase: 'transition' })
+      });
+      mockUpdateDoc.mockResolvedValue(undefined);
+
+      const result = await FirestoreGroupSessionService.completeGroupScribeFeedback('test-session', 'group-1');
+
+      expect(result?.currentPhase).toBe('listening');
+      expect(result?.roundNumber).toBe(2);
+    });
+  });
 });

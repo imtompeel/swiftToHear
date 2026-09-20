@@ -34,6 +34,7 @@ vi.mock('../../services/firestoreGroupSessionService', () => ({
     getGroupSession: vi.fn().mockResolvedValue(null),
     updateGroupPhase: vi.fn(),
     completeGroupRound: vi.fn(),
+    completeGroupScribeFeedback: vi.fn(),
     updateGroupScribeNotes: vi.fn()
   }
 }));

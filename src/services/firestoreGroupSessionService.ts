@@ -267,15 +267,21 @@ export class FirestoreGroupSessionService {
       }
 
       const group = session.groups[groupIndex];
-      const totalRounds = group.participants.length === 3 ? 3 : 4;
+      const participantCount = group.participants.length;
+      const totalRounds = participantCount === 2 ? 2 : participantCount === 3 ? 3 : 4;
+      const isFinalRound = group.roundNumber >= totalRounds;
+      const hasScribe = participantCount >= 3;
 
-      if (group.roundNumber >= totalRounds) {
-        // Group has completed all rounds
-        group.status = 'completed';
-        group.currentPhase = 'completed';
+      if (!hasScribe) {
+        if (isFinalRound) {
+          group.status = 'completed';
+          group.currentPhase = 'completion';
+        } else {
+          group.roundNumber += 1;
+          group.currentPhase = 'listening';
+        }
       } else {
-        // Move to next round
-        group.roundNumber += 1;
+        // Keep the current scribe and round so they can feed back after the final speaker too
         group.currentPhase = 'transition';
       }
 
@@ -286,6 +292,42 @@ export class FirestoreGroupSessionService {
       return group;
     } catch (error) {
       console.error('Error completing group round:', error);
+      throw error;
+    }
+  }
+
+  // Complete scribe feedback and either start the next round or finish the group
+  static async completeGroupScribeFeedback(sessionId: string, groupId: string): Promise<GroupData | null> {
+    try {
+      const session = await this.getGroupSession(sessionId);
+      if (!session) {
+        throw new Error('Session not found');
+      }
+
+      const groupIndex = session.groups.findIndex(g => g.groupId === groupId);
+      if (groupIndex === -1) {
+        throw new Error('Group not found');
+      }
+
+      const group = session.groups[groupIndex];
+      const participantCount = group.participants.length;
+      const totalRounds = participantCount === 2 ? 2 : participantCount === 3 ? 3 : 4;
+
+      if (group.roundNumber >= totalRounds) {
+        group.status = 'completed';
+        group.currentPhase = 'completion';
+      } else {
+        group.roundNumber += 1;
+        group.currentPhase = 'listening';
+      }
+
+      await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
+        groups: session.groups
+      });
+
+      return group;
+    } catch (error) {
+      console.error('Error completing group scribe feedback:', error);
       throw error;
     }
   }

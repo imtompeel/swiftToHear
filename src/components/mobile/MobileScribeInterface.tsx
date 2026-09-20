@@ -54,6 +54,7 @@ export const MobileScribeInterface: React.FC<MobileScribeInterfaceProps> = ({
               <HoverTimer 
                 timeRemaining={timeRemaining}
                 phaseDuration={phaseDuration}
+                isActive={session.currentPhase === 'listening' || session.currentPhase === 'round'}
                 className="text-gray-600 dark:text-gray-300"
               />
             )}
@@ -125,18 +126,12 @@ export const MobileScribeInterface: React.FC<MobileScribeInterfaceProps> = ({
             </div>
           )}
           
-          <div className="space-y-2">
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder={initialNotes && roundNumber > 1 && (session.currentPhase === 'round' || session.currentPhase === 'scribe-feedback') ? t('dialectic.assistance.scribe.tools.previousNotesPlaceholder') : t('dialectic.assistance.scribe.tools.notesPlaceholder')}
-              className="w-full h-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white resize-none text-sm"
-            />
-            
-            <div className="text-xs text-gray-500 dark:text-gray-400">
-              {notes.length} characters captured
-            </div>
-          </div>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder={initialNotes && roundNumber > 1 && (session.currentPhase === 'round' || session.currentPhase === 'scribe-feedback') ? t('dialectic.assistance.scribe.tools.previousNotesPlaceholder') : t('dialectic.assistance.scribe.tools.notesPlaceholder')}
+            className="w-full h-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white resize-none text-sm"
+          />
         </div>
 
         {/* Scribe Guidance - Stacked for mobile */}

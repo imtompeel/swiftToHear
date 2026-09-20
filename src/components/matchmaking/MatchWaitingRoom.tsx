@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from '../../hooks/useTranslation';
 import { TechCheck } from '../TechCheck';
 import { PracticeDemoVideo } from '../PracticeDemoVideo';
+import { stopTimerChimes } from '../../services/chimePlayer';
 import type { AudiencePreference } from '../../services/audiencePreference';
 import type { MatchMode, MatchRoom } from '../../types/matchmaking';
 import { MATCH_TARGET_SIZE } from '../../types/matchmaking';
@@ -27,6 +28,10 @@ export const MatchWaitingRoom: React.FC<MatchWaitingRoomProps> = ({
 }) => {
   const { t } = useTranslation();
   const count = room?.participants?.length ?? 1;
+
+  useEffect(() => {
+    stopTimerChimes();
+  }, []);
 
   return (
     <div className="max-w-2xl mx-auto p-6 sm:p-10" data-testid="match-waiting-room">

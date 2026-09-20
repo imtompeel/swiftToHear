@@ -175,6 +175,11 @@
       "passwordPlaceholder": "Enter your password",
       "switchToSignUp": "Don't have an account? Sign up"
     },
+    "google": {
+      "continue": "Continue with Google",
+      "signingIn": "Signing in with Google...",
+      "or": "or"
+    },
     "errors": {
       "signUpFailed": "Failed to sign up",
       "signInFailed": "Failed to sign in",
@@ -636,7 +641,7 @@
       "transitionMessage": "Preparing for the next round... Take a moment to transition into your new role.",
       "sessionComplete": "Session Complete",
       "reflectionPrompt": "Take a moment to reflect on your practice together.",
-      "completeRound": "Round",
+      "completeRound": "Next Round",
       "loading": "Initialising session...",
       "waitingForRoleAssignment": "Waiting for Role Assignment",
       "sessionError": "Session Error",
@@ -647,6 +652,19 @@
         "title": "Hello & Check-in",
         "description": "Take a moment to introduce yourselves and share what's alive in you right now.",
         "complete": "Complete Check-in",
+        "chooseRoleDescription": "Select your role for this session. Each participant needs a different role.",
+        "roleSelected": "Role Selected",
+        "youAreThe": "You are the {{role}}",
+        "waitingForNamedRoles": "Waiting for {{names}} to select their roles...",
+        "selectingRole": "Selecting role...",
+        "noRole": "No role",
+        "mobileTabs": {
+          "video": "Video",
+          "guidance": "Guidance",
+          "chooseRole": "Choose role"
+        },
+        "chooseRoleBanner": "Choose your role to continue",
+        "chooseRoleAction": "Choose role",
         "guidelines": {
           "title": "Check-in Guidelines",
           "introduce": "Introduce yourself briefly",
@@ -677,6 +695,29 @@
           "respect": "Respect the scribe's perspective and insights"
         }
       },
+      "roundChange": {
+        "round": {
+          "firstTitle": "The first round is beginning",
+          "laterTitle": "Roles have rotated",
+          "youAre": "You are the {{role}}",
+          "youAreNow": "You are now the {{role}}",
+          "speaker": "Begin with what is alive in you. Pauses are welcome — the listener is with you.",
+          "listener": "Offer your full presence. You don't need to fix or add. Reflect back what you hear.",
+          "scribe": "Capture themes and insights, not a transcript. Notice what is said and what is left unsaid.",
+          "observer": "Watch with care. You'll step into an active role in a later round.",
+          "observerPermanent": "You'll remain an observer for this session. Hold the space as the group rotates."
+        },
+        "scribeFeedback": {
+          "title": "The speaking round has ended",
+          "scribeHeadline": "It's your turn to share",
+          "scribeBody": "Offer the key insights you captured — themes, what felt alive, and what was left unsaid.",
+          "otherHeadline": "{{scribe}} will now share what they heard",
+          "otherBody": "Listen without defending or explaining. Let the notes land before the next round begins.",
+          "nextRole": "After this, you will become the {{role}}.",
+          "lastRound": "After this, the structured rounds will be complete.",
+          "stayingObserver": "You'll continue as observer for the next round."
+        }
+      },
       "completion": {
         "title": "Session Completion",
         "completedRounds": "You've completed {{current}} of {{total}} rounds",
@@ -692,7 +733,7 @@
           "button": "Start Free Dialogue"
         },
         "endSession": {
-          "description": "Complete the session and move to reflection"
+          "description": "Complete the session."
         }
       },
       "freeDialogue": {
@@ -805,8 +846,11 @@
       "hostControl": "The host will control when to end this phase"
     },
     "wordCloud": {
-      "title": "Popular Topics",
-      "description": "Here are the most suggested topics for today's session (all anonymous). Click on any topic to select it, or continue to start the session.",
+      "title": "Choose the session topic",
+      "description": "These are the lobby suggestions with their votes. Choose one for the group to explore.",
+      "waitingForHost": "The host is choosing a topic from the lobby votes.",
+      "currentTopic": "Currently selected",
+      "skip": "Continue without choosing",
       "noTopics": "No topics were suggested for this session.",
       "legend": "Showing {{displayed}} of {{total}} suggested topics"
     },
@@ -1060,7 +1104,15 @@
       "title": "Session Lobby",
       "waitingForParticipants": "Waiting for participants to join",
       "markAsReady": "I'm ready to begin",
+      "readyConfirmed": "You're ready",
+      "savingReady": "Saving…",
+      "youAreReady": "You are ready",
+      "youAreNotReady": "You are not ready yet",
+      "readyStatus": "Ready",
+      "notReadyStatus": "Not ready",
+      "hostLabel": "host",
       "waitingForAllReady": "Waiting for all participants to be ready",
+      "waitingForNamedReady": "Waiting for {{names}} to mark themselves ready",
       "hostLeaveWarning": "If you leave, the session will be cancelled for all participants",
       "speakerTips": "As the speaker, you'll share what's alive in you around the topic",
       "listenerTips": "As the listener, you'll practice deep, attentive listening",
@@ -1078,7 +1130,7 @@
         "format": "Each participant will experience all roles"
       },
       "topicSuggestions": {
-        "description": "Add topics you'd like to explore together. All suggestions are anonymous and will appear in the word cloud when the session starts.",
+        "description": "Add topics you'd like to explore together. Suggestions are anonymous. Vote to show the host what you'd like to discuss — they will choose when the session starts.",
         "placeholder": "Suggest a topic to discuss...",
         "add": "Add Suggestion",
         "adding": "Adding...",

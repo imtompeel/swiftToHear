@@ -16,7 +16,6 @@ import { createSessionContext } from '../types/sessionContext';
 import { SessionCompletion } from './SessionCompletion';
 import { FreeDialoguePhase } from './FreeDialoguePhase';
 import { PostMatchPrompt } from './matchmaking/PostMatchPrompt';
-import { HoverTimer } from './HoverTimer';
 import type { MatchMode } from '../types/matchmaking';
 import WordCloud from './WordCloud';
 import { SafetyTimeoutGuidance } from './SafetyTimeoutGuidance';
@@ -27,27 +26,16 @@ import { SessionControls } from './SessionControls';
 import { SessionVideo } from './SessionVideo';
 import { RoleInterface } from './RoleInterface';
 import { SessionErrorDisplay } from './SessionErrorDisplay';
+import { RoundChangePopup } from './RoundChangePopup';
 import { WebRTCService } from '../services/webrtcService';
+import { useRoundChangeNotice } from '../hooks/useRoundChangeNotice';
+import { getNextRole, getTotalRounds } from '../utils/nextRole';
 // MUI Icons
 import { 
   DragIndicator
 } from '@mui/icons-material';
 
 
-
-
-
-// Separate timer display component that only re-renders when time changes
-const TimerDisplay = React.memo<{ timeRemaining: number }>(({ timeRemaining }) => {
-  return (
-    <HoverTimer 
-      timeRemaining={timeRemaining}
-      className="text-white"
-    />
-  );
-});
-
-TimerDisplay.displayName = 'TimerDisplay';
 
 
 
@@ -165,27 +153,35 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
   // Session duration from session data
   const sessionDuration = session?.duration || 15 * 60 * 1000;
   
-  // Use isolated timer hook to prevent re-renders
-  const [showWordCloud, setShowWordCloud] = React.useState(true); // Show word cloud when session starts
+  // Host topic picker: shown after the lobby so they can choose from lobby votes
+  const [showHostTopicPicker, setShowHostTopicPicker] = React.useState(true);
   const [sessionStartTime, setSessionStartTime] = React.useState<number | null>(null);
   
-  // Mobile video/guidance toggle state
-  const [showVideoOnMobile, setShowVideoOnMobile] = React.useState(true);
+  const currentUserNeedsRole =
+    session?.currentPhase === 'hello-checkin' &&
+    Boolean(currentUser) &&
+    !Boolean(currentUser?.role && currentUser.role.trim() !== '');
+
+  // Mobile video/guidance toggle. Role selection lives in the guidance pane,
+  // so open that first when the current user still needs a role.
+  const [showVideoOnMobile, setShowVideoOnMobile] = React.useState(!currentUserNeedsRole);
+
+  React.useEffect(() => {
+    setShowVideoOnMobile(!currentUserNeedsRole);
+  }, [currentUserNeedsRole]);
   
   // Self video visibility toggle state
   const [showSelfVideo, setShowSelfVideo] = React.useState(true);
   
-  // Initialise timer when session becomes active
+  // Fresh countdown (and bells) for each listening round
   React.useEffect(() => {
-    if (session?.currentPhase === 'listening' && !sessionStartTime) {
-      // Session just started, record the start time
-      setSessionStartTime(Date.now());
-      console.log('Session started, recording start time:', Date.now());
-    } else if (session?.currentPhase === 'completion' || session?.currentPhase === 'reflection') {
-      // Session ended, reset timer
-      setSessionStartTime(null);
+    if (session?.currentPhase === 'listening') {
+      setSessionStartTime((current) => current ?? Date.now());
+      return;
     }
-  }, [session?.currentPhase, sessionStartTime]);
+
+    setSessionStartTime(null);
+  }, [session?.currentPhase]);
 
   // Custom hooks for state management and role rotation
   const sessionState = useSessionState({
@@ -236,7 +232,7 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
       
       await completeRound();
       console.log('Round completed, new phase:', session?.currentPhase);
-      // The completeRound function now sets the phase to 'transition' which triggers scribe feedback
+      // The completeRound function sets the phase to 'transition' so the current scribe can feed back
     } catch (error) {
       console.error('Failed to complete round:', error);
     }
@@ -307,46 +303,61 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
     return participant?.name || 'A participant';
   }, [session?.participants]);
 
-  // Effect to handle video state changes based on safety timeout
-  React.useEffect(() => {
-    // Only control video if this user requested the timeout
-    if (safetyTimeout.timeoutState.requestedBy === currentUser?.id) {
-      const shouldVideoBeDisabled = safetyTimeout.timeoutState.isVideoDisabled;
-      const isVideoCurrentlyEnabled = videoCall.isVideoEnabled;
-      
-      console.log('Safety timeout effect:', {
-        shouldVideoBeDisabled,
-        isVideoCurrentlyEnabled,
-        timeoutState: safetyTimeout.timeoutState,
-        videoCallConnected: videoCall.isConnected,
-        hasToggleVideo: !!videoCall.toggleVideo
-      });
-      
-      // Try to use video call hook first
-      if (videoCall.toggleVideo && videoCall.isConnected) {
-        if (shouldVideoBeDisabled && isVideoCurrentlyEnabled) {
-          // Disable video when timeout starts
-          console.log('Safety timeout: Disabling video for requesting user via video call hook');
-          videoCall.toggleVideo();
-        } else if (!shouldVideoBeDisabled && !isVideoCurrentlyEnabled) {
-          // Re-enable video when timeout ends
-          console.log('Safety timeout: Re-enabling video for requesting user via video call hook');
-          videoCall.toggleVideo();
-        }
-      } else {
-        // Fallback: try to access WebRTC service directly
-        try {
-          const webrtcService = WebRTCService.getInstance();
-          if (webrtcService) {
-            console.log('Safety timeout: Using direct WebRTC service access');
-            webrtcService.toggleVideo(!shouldVideoBeDisabled);
-          }
-        } catch (error) {
-          console.error('Safety timeout: Failed to access WebRTC service directly:', error);
-        }
-      }
+  const handleHostTopicSelect = React.useCallback(async (topic: string) => {
+    try {
+      await selectTopic(topic);
+    } catch (error) {
+      console.error('Failed to select topic:', error);
+    } finally {
+      setShowHostTopicPicker(false);
     }
-  }, [safetyTimeout.timeoutState.isVideoDisabled, safetyTimeout.timeoutState.requestedBy, videoCall.isVideoEnabled, videoCall.toggleVideo, videoCall.isConnected, currentUser?.id]);
+  }, [selectTopic]);
+
+  const showTopicPicker =
+    isHost &&
+    showHostTopicPicker &&
+    (session?.currentPhase === 'hello-checkin' || session?.currentPhase === 'listening') &&
+    (session?.topicSuggestions?.length || 0) > 0;
+
+  // Silence the requester's camera and microphone for the duration of a safety timeout
+  const timeoutMediaAppliedRef = React.useRef(false);
+  React.useEffect(() => {
+    const isOwnTimeout =
+      safetyTimeout.isTimeoutActive &&
+      safetyTimeout.timeoutState.requestedBy === currentUser?.id;
+
+    if (!isOwnTimeout && !timeoutMediaAppliedRef.current) {
+      return;
+    }
+
+    const shouldSilence = isOwnTimeout;
+    timeoutMediaAppliedRef.current = shouldSilence;
+
+    if (videoCall.isConnected && videoCall.setVideoEnabled && videoCall.setMuted) {
+      videoCall.setVideoEnabled(!shouldSilence);
+      videoCall.setMuted(shouldSilence);
+      return;
+    }
+
+    try {
+      const webrtcService = WebRTCService.getInstance();
+      if (webrtcService) {
+        webrtcService.toggleVideo(!shouldSilence);
+        webrtcService.toggleAudio(!shouldSilence);
+      }
+    } catch (error) {
+      console.error('Safety timeout: Failed to update media via WebRTC service:', error);
+    }
+  }, [
+    safetyTimeout.isTimeoutActive,
+    safetyTimeout.timeoutState.requestedBy,
+    videoCall.isConnected,
+    videoCall.isMuted,
+    videoCall.isVideoEnabled,
+    videoCall.setMuted,
+    videoCall.setVideoEnabled,
+    currentUser?.id
+  ]);
 
   // Use the isolated timer hook
   const currentTimeRemaining = useIsolatedTimer(
@@ -359,10 +370,35 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
   // Use resizable panels hook
   const { videoWidth, isDragging, startResize, containerRef } = useResizablePanels(60);
 
+  const participantCount = session?.participants?.length || 0;
+  const roundChange = useRoundChangeNotice(
+    session?.currentPhase,
+    session?.currentRound,
+    { hasScribe: participantCount >= 3 }
+  );
+  const nextRole = getNextRole(
+    currentUserRole,
+    participantCount,
+    currentUserRole === 'observer-permanent'
+  );
+  const scribeName = session?.participants.find(p => p.role === 'scribe')?.name;
+
   // Main session container with persistent video
   if (session?.currentPhase === 'hello-checkin' || session?.currentPhase === 'listening' || session?.currentPhase === 'transition' || session?.currentPhase === 'completion' || session?.currentPhase === 'free-dialogue') {
     return (
       <div data-testid="dialectic-session" className="w-full max-w-none mx-auto p-2 sm:p-3 lg:p-6 xl:px-12 2xl:px-16">
+        {roundChange.notice && currentUserRole && !safetyTimeout.isTimeoutActive && (
+          <RoundChangePopup
+            key={`${roundChange.notice}-${session?.currentRound || 1}`}
+            notice={roundChange.notice}
+            roundNumber={session?.currentRound || 1}
+            totalRounds={getTotalRounds(participantCount)}
+            currentRole={currentUserRole}
+            nextRole={nextRole}
+            scribeName={scribeName}
+            onDismiss={roundChange.dismiss}
+          />
+        )}
         <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg overflow-hidden">
           
           {/* Session Header */}
@@ -371,15 +407,20 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
             roleRotation={roleRotation}
             videoCall={videoCall}
             currentTimeRemaining={currentTimeRemaining}
+            phaseDuration={sessionDuration}
             t={t}
             safetyTimeout={safetyTimeout}
             sessionPhase={session?.currentPhase}
+            timerChimesActive={
+              session?.currentPhase === 'listening' && !showTopicPicker
+            }
           />
 
           {/* Mobile Toggle Controls - Only visible on small screens */}
-          <div className="lg:hidden bg-white dark:bg-secondary-800 border-b border-secondary-200 dark:border-secondary-600 p-3">
+          <div className="lg:hidden bg-white dark:bg-secondary-800 border-b border-secondary-200 dark:border-secondary-600 p-3" data-testid="mobile-session-tabs">
             <div className="flex items-center justify-center space-x-1">
               <button
+                type="button"
                 onClick={() => setShowVideoOnMobile(true)}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   showVideoOnMobile 
@@ -388,21 +429,32 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
                 }`}
               >
                 <span>📹</span>
-                <span>Video</span>
+                <span>{t('dialectic.session.helloCheckIn.mobileTabs.video')}</span>
                 {!showVideoOnMobile && (
                   <div className={`w-2 h-2 rounded-full ${videoCall.isConnected ? 'bg-green-400' : videoCall.isConnecting ? 'bg-yellow-400' : 'bg-red-400'}`}></div>
                 )}
               </button>
               <button
+                type="button"
                 onClick={() => setShowVideoOnMobile(false)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                data-testid="mobile-tab-guidance"
+                className={`relative flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   !showVideoOnMobile 
                     ? 'bg-accent-600 text-white' 
-                    : 'bg-secondary-100 dark:bg-secondary-700 text-secondary-600 dark:text-secondary-400 hover:bg-secondary-200 dark:hover:bg-secondary-600'
+                    : currentUserNeedsRole
+                      ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 ring-2 ring-amber-400'
+                      : 'bg-secondary-100 dark:bg-secondary-700 text-secondary-600 dark:text-secondary-400 hover:bg-secondary-200 dark:hover:bg-secondary-600'
                 }`}
               >
-                <span>💬</span>
-                <span>Guidance</span>
+                <span>{currentUserNeedsRole ? '🎭' : '💬'}</span>
+                <span>
+                  {currentUserNeedsRole
+                    ? t('dialectic.session.helloCheckIn.mobileTabs.chooseRole')
+                    : t('dialectic.session.helloCheckIn.mobileTabs.guidance')}
+                </span>
+                {currentUserNeedsRole && showVideoOnMobile && (
+                  <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-amber-500 animate-pulse" aria-hidden="true" />
+                )}
               </button>
             </div>
           </div>
@@ -421,6 +473,23 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
               }}
             >
               <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-3 sm:p-4 lg:p-6 xl:p-8 overflow-hidden h-full">
+                {currentUserNeedsRole && (
+                  <div
+                    className="lg:hidden mb-3 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-900/30 dark:border-amber-700 p-3"
+                    data-testid="mobile-choose-role-banner"
+                  >
+                    <p className="text-sm font-medium text-amber-900 dark:text-amber-100 mb-2">
+                      {t('dialectic.session.helloCheckIn.chooseRoleBanner')}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setShowVideoOnMobile(false)}
+                      className="w-full px-4 py-2 bg-accent-600 text-white rounded-lg hover:bg-accent-700 text-sm font-medium"
+                    >
+                      {t('dialectic.session.helloCheckIn.chooseRoleAction')}
+                    </button>
+                  </div>
+                )}
                 <h2 className="text-lg sm:text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-3 sm:mb-4">
                   {t('shared.common.videoCall')}
                 </h2>
@@ -483,6 +552,26 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
             
 
               
+              {!safetyTimeout.isTimeoutActive && showTopicPicker && (
+                <div className="bg-white dark:bg-secondary-800 rounded-lg border border-secondary-200 dark:border-secondary-600 p-3 sm:p-4 lg:p-6 mb-3 sm:mb-4 lg:mb-6">
+                  <WordCloud
+                    suggestions={session?.topicSuggestions || []}
+                    currentTopic={session?.topic}
+                    onTopicSelect={handleHostTopicSelect}
+                    maxWords={10}
+                  />
+                  <div className="text-center mt-3 sm:mt-4">
+                    <button
+                      type="button"
+                      onClick={() => setShowHostTopicPicker(false)}
+                      className="px-4 py-2 bg-secondary-200 dark:bg-secondary-600 text-secondary-700 dark:text-secondary-300 rounded-lg hover:bg-secondary-300 dark:hover:bg-secondary-500 transition-colors"
+                    >
+                      {t('dialectic.wordCloud.skip')}
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {!safetyTimeout.isTimeoutActive && session?.currentPhase === 'hello-checkin' && (
                 <HelloCheckIn
                   session={sessionContext!}
@@ -492,39 +581,15 @@ export const DialecticSession: React.FC<DialecticSessionProps> = ({
                   isHost={isHost}
                   onComplete={completeHelloCheckIn}
                   hideVideo={true} // Hide video since it's now in the persistent area
-                  onUpdateParticipantRole={(role) => updateParticipantRole(role)}
+                  onUpdateParticipantRole={(role) => {
+                    void updateParticipantRole(role);
+                    setShowVideoOnMobile(true);
+                  }}
                 />
               )}
 
               {!safetyTimeout.isTimeoutActive && session?.currentPhase === 'listening' && (
                 <div className="space-y-3 sm:space-y-4 lg:space-y-6">
-                  {/* Word Cloud - Show when session starts and there are topic suggestions */}
-                  {showWordCloud && session?.topicSuggestions && session.topicSuggestions.length > 0 && (
-                    <div className="bg-white dark:bg-secondary-800 rounded-lg border border-secondary-200 dark:border-secondary-600 p-3 sm:p-4 lg:p-6">
-                      <WordCloud
-                        suggestions={session.topicSuggestions}
-                        onTopicSelect={async (topic) => {
-                          try {
-                            await selectTopic(topic);
-                          } catch (error) {
-                            console.error('Failed to select topic:', error);
-                          } finally {
-                            setShowWordCloud(false);
-                          }
-                        }}
-                        maxWords={10}
-                      />
-                      <div className="text-center mt-3 sm:mt-4">
-                        <button
-                          onClick={() => setShowWordCloud(false)}
-                          className="px-4 py-2 bg-secondary-200 dark:bg-secondary-600 text-secondary-700 dark:text-secondary-300 rounded-lg hover:bg-secondary-300 dark:hover:bg-secondary-500 transition-colors"
-                        >
-                          {t('shared.actions.continueToSession')}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
                   {/* Role-Specific Interface */}
                   <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-3 sm:p-4 lg:p-6 min-h-[300px] sm:min-h-[400px]">
                     <RoleInterface

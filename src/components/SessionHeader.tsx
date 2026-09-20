@@ -7,16 +7,23 @@ interface SessionHeaderProps {
   roleRotation: any;
   videoCall: any;
   currentTimeRemaining: number;
+  phaseDuration: number;
   t: (key: string, params?: any) => string;
   safetyTimeout: any;
   sessionPhase?: string;
+  timerChimesActive?: boolean;
 }
 
-// Separate timer display component that only re-renders when time changes
-const TimerDisplay = React.memo<{ timeRemaining: number }>(({ timeRemaining }) => {
+const TimerDisplay = React.memo<{
+  timeRemaining: number;
+  phaseDuration: number;
+  isActive: boolean;
+}>(({ timeRemaining, phaseDuration, isActive }) => {
   return (
     <HoverTimer 
       timeRemaining={timeRemaining}
+      phaseDuration={phaseDuration}
+      isActive={isActive}
       className="text-white"
     />
   );
@@ -28,10 +35,12 @@ export const SessionHeader: React.FC<SessionHeaderProps> = React.memo(({
   sessionState, 
   roleRotation, 
   videoCall, 
-  currentTimeRemaining, 
+  currentTimeRemaining,
+  phaseDuration, 
   t, 
   safetyTimeout, 
-  sessionPhase 
+  sessionPhase,
+  timerChimesActive = false,
 }) => {
   return (
     <div className="bg-accent-600 text-white p-4">
@@ -56,7 +65,8 @@ export const SessionHeader: React.FC<SessionHeaderProps> = React.memo(({
               isTimeoutActive={safetyTimeout.isTimeoutActive}
               canEndTimeout={safetyTimeout.canEndTimeout}
               className="text-white"
-              onToggleVideo={videoCall.toggleVideo}
+              onToggleVideo={() => videoCall.setVideoEnabled(false)}
+              onMute={() => videoCall.setMuted(true)}
             />
             
             {/* Video Connection Status */}
@@ -66,10 +76,14 @@ export const SessionHeader: React.FC<SessionHeaderProps> = React.memo(({
                 {videoCall.isConnected ? 'Video Connected' : videoCall.isConnecting ? 'Connecting...' : 'Video Disconnected'}
               </span>
             </div>
-            {/* Hide main timer during check-in and transition (scribe feedback) phases */}
-            {sessionPhase !== 'hello-checkin' && sessionPhase !== 'transition' && (
-              <TimerDisplay timeRemaining={currentTimeRemaining} />
-            )}
+            {/* Keep the listening timer mounted so an early host end can still ring the bowl. */}
+            <div className={sessionPhase === 'listening' ? undefined : 'hidden'}>
+              <TimerDisplay
+                timeRemaining={currentTimeRemaining}
+                phaseDuration={phaseDuration}
+                isActive={timerChimesActive}
+              />
+            </div>
           </div>
         </div>
       </div>

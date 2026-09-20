@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { useAuth } from '../contexts/AuthContext';
+import { GoogleSignInButton } from './GoogleSignInButton';
+import { AuthDivider } from './AuthDivider';
 
 interface SignInProps {
   onSuccess?: () => void;
@@ -47,13 +49,17 @@ const SignIn: React.FC<SignInProps> = ({ onSuccess, onSwitchToSignUp }) => {
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-xl p-4">
-              <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
-            </div>
-          )}
+        {error && (
+          <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-xl p-4">
+            <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
+          </div>
+        )}
 
+        <GoogleSignInButton onSuccess={onSuccess} disabled={isLoading} />
+
+        <AuthDivider />
+
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-secondary-700 dark:text-secondary-300">

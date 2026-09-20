@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { HoverTimer } from './HoverTimer';
 import RoleSelection from './lobby/RoleSelection';
@@ -16,6 +16,8 @@ interface HelloCheckInProps {
   onUpdateParticipantRole?: (role: string) => void;
 }
 
+const hasAssignedRole = (role?: string | null) => Boolean(role && role.trim() !== '');
+
 export const HelloCheckIn: React.FC<HelloCheckInProps> = ({
   session,
   participants,
@@ -28,19 +30,19 @@ export const HelloCheckIn: React.FC<HelloCheckInProps> = ({
   const duration = 2 * 60 * 1000; // 2 minutes default
   const [timeRemaining, setTimeRemaining] = useState(duration);
   const [, setIsComplete] = useState(false);
-  const [showRoleSelection, setShowRoleSelection] = useState(true);
+  const completedRef = useRef(false);
 
   // Get current participant
   const currentParticipant = participants.find(p => p.id === currentUserId);
-  const hasRole = currentParticipant?.role && currentParticipant.role !== '';
-
-  // Check if all participants have roles
-  const allParticipantsHaveRoles = participants.every(p => p.role && p.role !== '');
+  const hasRole = hasAssignedRole(currentParticipant?.role);
+  const participantsWithoutRoles = participants.filter(p => !hasAssignedRole(p.role));
+  const allParticipantsHaveRoles = participantsWithoutRoles.length === 0 && participants.length > 0;
+  const waitingRoleNames = participantsWithoutRoles.map(p => p.name).join(', ');
 
   // Get available roles based on actual participant count and session type
   const getAvailableRoles = () => {
     const participantCount = participants.length;
-    let baseRoles = [];
+    let baseRoles: string[] = [];
     
     // Use the same logic as FirestoreSessionService but simplified
     if ((session as any).sessionType === 'in-person') {
@@ -63,8 +65,18 @@ export const HelloCheckIn: React.FC<HelloCheckInProps> = ({
       }
     }
 
-    // Filter out roles that are already taken
-    return baseRoles.filter(role => !participants.some(p => p.role === role));
+    const taken = new Set(participants.map(p => p.role).filter(role => hasAssignedRole(role)));
+    const available = baseRoles.filter(role => !taken.has(role));
+    const observerRole = (session as any).sessionType === 'in-person' ? 'observer-temporary' : 'observer';
+    if (
+      participantsWithoutRoles.length > 0 &&
+      participantCount > baseRoles.length &&
+      !available.includes(observerRole)
+    ) {
+      available.push(observerRole);
+    }
+
+    return available;
   };
 
   const availableRoles = getAvailableRoles();
@@ -76,18 +88,24 @@ export const HelloCheckIn: React.FC<HelloCheckInProps> = ({
     }
   };
 
-  // Auto-hide role selection when all participants have roles
-  useEffect(() => {
-    if (allParticipantsHaveRoles) {
-      setShowRoleSelection(false);
+  const completeCheckIn = useCallback(() => {
+    if (!allParticipantsHaveRoles || completedRef.current) {
+      return;
     }
-  }, [allParticipantsHaveRoles]);
 
-  // Countdown timer
+    completedRef.current = true;
+    setIsComplete(true);
+    onComplete();
+  }, [allParticipantsHaveRoles, onComplete]);
+
+  // Countdown starts only after every participant has a role
   useEffect(() => {
+    if (!allParticipantsHaveRoles) {
+      return;
+    }
+
     if (timeRemaining <= 0) {
-      setIsComplete(true);
-      onComplete();
+      completeCheckIn();
       return;
     }
 
@@ -96,11 +114,11 @@ export const HelloCheckIn: React.FC<HelloCheckInProps> = ({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timeRemaining, onComplete]);
+  }, [timeRemaining, allParticipantsHaveRoles, completeCheckIn]);
 
 
-  // Show role selection if not all participants have roles
-  if (showRoleSelection && !allParticipantsHaveRoles) {
+  // Stay on role selection until every participant has chosen
+  if (!allParticipantsHaveRoles) {
     return (
       <div 
         data-testid="role-selection-phase"
@@ -112,8 +130,15 @@ export const HelloCheckIn: React.FC<HelloCheckInProps> = ({
               {t('shared.common.chooseRole')}
             </h1>
             <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300">
-              Select your role for this session. Each participant needs a different role.
+              {t('dialectic.session.helloCheckIn.chooseRoleDescription')}
             </p>
+            {waitingRoleNames && (
+              <p className="text-sm text-amber-700 dark:text-amber-300 mt-3" data-testid="waiting-for-roles">
+                {t('dialectic.session.helloCheckIn.waitingForNamedRoles', {
+                  names: waitingRoleNames
+                })}
+              </p>
+            )}
           </div>
 
           {!hasRole ? (
@@ -130,13 +155,14 @@ export const HelloCheckIn: React.FC<HelloCheckInProps> = ({
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 sm:p-8 mb-6 text-center">
               <div className="text-green-600 dark:text-green-400 text-4xl mb-4">✓</div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Role Selected
+                {t('dialectic.session.helloCheckIn.roleSelected')}
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                You are the <strong>{currentParticipant?.role === 'observer' ? t('shared.roles.observer') : t(`dialectic.roles.${currentParticipant?.role}.title`)}</strong>
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Waiting for other participants to select their roles...
+                {t('dialectic.session.helloCheckIn.youAreThe', {
+                  role: currentParticipant?.role === 'observer'
+                    ? t('shared.roles.observer')
+                    : t(`dialectic.roles.${currentParticipant?.role}.title`)
+                })}
               </p>
             </div>
           )}
@@ -152,13 +178,15 @@ export const HelloCheckIn: React.FC<HelloCheckInProps> = ({
                   key={participant.id}
                   className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 sm:p-4 flex items-center space-x-3"
                 >
-                  <div className={`w-3 h-3 rounded-full ${participant.role ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+                  <div className={`w-3 h-3 rounded-full ${hasAssignedRole(participant.role) ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
                   <div className="min-w-0 flex-1">
                     <div className="font-medium text-gray-900 dark:text-white text-sm sm:text-base truncate">
                       {participant.name}
                     </div>
                     <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">
-                      {participant.role ? (participant.role === 'observer' ? t('shared.roles.observer') : t(`dialectic.roles.${participant.role}.title`)) : 'Selecting role...'}
+                      {hasAssignedRole(participant.role)
+                        ? (participant.role === 'observer' ? t('shared.roles.observer') : t(`dialectic.roles.${participant.role}.title`))
+                        : t('dialectic.session.helloCheckIn.selectingRole')}
                     </div>
                   </div>
                 </div>
@@ -216,7 +244,7 @@ export const HelloCheckIn: React.FC<HelloCheckInProps> = ({
                     {participant.name}
                   </div>
                   <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">
-                    {participant.role ? (participant.role === 'observer' ? t('shared.roles.observer') : t(`dialectic.roles.${participant.role}.title`)) : 'No Role'}
+                    {participant.role ? (participant.role === 'observer' ? t('shared.roles.observer') : t(`dialectic.roles.${participant.role}.title`)) : t('dialectic.session.helloCheckIn.noRole')}
                   </div>
                 </div>
               </div>
@@ -239,15 +267,13 @@ export const HelloCheckIn: React.FC<HelloCheckInProps> = ({
           </div>
         </div>
 
-        {/* Complete button - only for host */}
+        {/* Complete button - only for host, and only once everyone has a role */}
         {isHost && (
           <div className="text-center">
             <button
-              onClick={() => {
-                setIsComplete(true);
-                onComplete();
-              }}
-              className="px-6 py-3 bg-accent-600 text-white rounded-lg hover:bg-accent-700 transition-colors text-sm sm:text-base font-medium"
+              onClick={completeCheckIn}
+              disabled={!allParticipantsHaveRoles}
+              className="px-6 py-3 bg-accent-600 text-white rounded-lg hover:bg-accent-700 disabled:bg-secondary-300 disabled:cursor-not-allowed transition-colors text-sm sm:text-base font-medium"
             >
               {t('dialectic.session.helloCheckIn.complete')}
             </button>
@@ -256,4 +282,4 @@ export const HelloCheckIn: React.FC<HelloCheckInProps> = ({
       </div>
     </div>
   );
-}; 
+};

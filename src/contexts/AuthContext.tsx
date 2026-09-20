@@ -6,15 +6,23 @@ import {
   signOut, 
   onAuthStateChanged,
   updateProfile,
-  signInAnonymously
+  signInAnonymously,
+  getRedirectResult
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
+import {
+  getAuthErrorCode,
+  getGoogleAuthErrorMessage,
+  isGoogleSignInCancelled,
+  signInWithGoogleAccount,
+} from '../services/googleAuthService';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<User | null>;
   signOut: () => Promise<void>;
   /** Ensure there is an auth user (anonymous if needed) for session join / signalling */
   ensureSignedIn: (displayName?: string) => Promise<User>;
@@ -42,6 +50,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    getRedirectResult(auth).catch((err) => {
+      const code = getAuthErrorCode(err);
+      if (!isGoogleSignInCancelled(code)) {
+        setError(getGoogleAuthErrorMessage(code, err instanceof Error ? err.message : undefined));
+      }
+    });
+
     const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
       setUser(nextUser);
       setLoading(false);
@@ -73,6 +88,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to sign in';
+      setError(errorMessage);
+      throw err;
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      setError(null);
+      return await signInWithGoogleAccount();
+    } catch (err) {
+      const code = getAuthErrorCode(err);
+      const errorMessage = getGoogleAuthErrorMessage(
+        code,
+        err instanceof Error ? err.message : undefined
+      );
       setError(errorMessage);
       throw err;
     }
@@ -115,6 +145,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loading,
     signUp,
     signIn,
+    signInWithGoogle,
     signOut: signOutUser,
     ensureSignedIn,
     error,

@@ -1,8 +1,9 @@
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { SessionLobby } from './SessionLobby';
 import { useSession } from '../hooks/useSession';
 import { useAuth } from '../contexts/AuthContext';
+import { stopTimerChimes } from '../services/chimePlayer';
 
 
 const SessionLobbyWrapper: React.FC = () => {
@@ -11,7 +12,7 @@ const SessionLobbyWrapper: React.FC = () => {
   const { 
     session, 
     loadSession, 
-    pollSession,
+    setupRealTimeListener,
     startSession, 
     leaveSession, 
     updateReadyState, 
@@ -26,7 +27,10 @@ const SessionLobbyWrapper: React.FC = () => {
   } = useSession();
   const { user, loading: authLoading } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    stopTimerChimes();
+  }, []);
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -63,42 +67,11 @@ const SessionLobbyWrapper: React.FC = () => {
     }
   }, [session, currentUserId, loading, navigate, sessionId]);
 
-  // Poll for session status changes and redirect when session becomes active
+  // Live session updates so ready flags appear as soon as they are written
   useEffect(() => {
-    // Clear any existing interval
-    if (pollIntervalRef.current) {
-      clearInterval(pollIntervalRef.current);
-      pollIntervalRef.current = null;
-    }
-
-    if (!sessionId || !session) return;
-
-    // Only poll if session is still waiting to start
-    if (session.status !== 'waiting') return;
-
-    // Don't poll if a modal is open (prevents flashing during user interactions)
-    if (isModalOpen) {
-      console.log('Polling paused - modal is open');
-      return;
-    }
-
-    console.log('Starting polling for session updates');
-    pollIntervalRef.current = setInterval(async () => {
-      // Don't set loading state for background polling to prevent flickering
-      try {
-        await pollSession(sessionId);
-      } catch (error) {
-        console.error('Background polling failed:', error);
-      }
-    }, 5000); // Check every 5 seconds instead of 2
-
-    return () => {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
-        pollIntervalRef.current = null;
-      }
-    };
-  }, [sessionId, session, pollSession, isModalOpen]);
+    if (!sessionId || !user || authLoading) return;
+    return setupRealTimeListener(sessionId);
+  }, [sessionId, user, authLoading, setupRealTimeListener]);
 
   // Redirect to practice session when session becomes active
   useEffect(() => {
@@ -129,11 +102,7 @@ const SessionLobbyWrapper: React.FC = () => {
   };
 
   const handleUpdateReadyState = async (_userId: string, isReady: boolean) => {
-    try {
-      await updateReadyState(isReady);
-    } catch (err) {
-      console.error('Failed to update ready state:', err);
-    }
+    await updateReadyState(isReady);
   };
 
   const handleUpdateParticipantRole = async (_userId: string, role: string) => {

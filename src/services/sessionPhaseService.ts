@@ -1,9 +1,33 @@
 import { SessionCrudService } from './sessionCrudService';
-import { SessionData } from '../types/sessionTypes';
+import { SessionData, Participant } from '../types/sessionTypes';
 import { serverTimestamp } from 'firebase/firestore';
 
 export class SessionPhaseService {
   private static crudService = new SessionCrudService();
+
+  private static rotateParticipantRoles(participants: Participant[]): Participant[] {
+    const participantCount = participants.length;
+
+    if (participantCount === 2) {
+      return participants.map(participant => ({
+        ...participant,
+        role: participant.role === 'speaker' ? 'listener' : 'speaker'
+      }));
+    }
+
+    const roleOrder = participantCount === 3
+      ? ['speaker', 'listener', 'scribe']
+      : ['speaker', 'listener', 'scribe', 'observer'];
+
+    return participants.map(participant => {
+      const currentRoleIndex = roleOrder.indexOf(participant.role);
+      const nextRoleIndex = (currentRoleIndex + 1) % roleOrder.length;
+      return {
+        ...participant,
+        role: roleOrder[nextRoleIndex]
+      };
+    });
+  }
 
 
 
@@ -82,11 +106,23 @@ export class SessionPhaseService {
         throw new Error('Only the host can complete phases');
       }
 
-      // Advance to the next round (listening phase)
-      await this.crudService.update(sessionId, {
-        currentPhase: 'listening',
-        phaseStartTime: serverTimestamp()
-      });
+      const currentRound = session.currentRound || 1;
+      const participantCount = session.participants.length;
+      const totalRounds = participantCount === 2 ? 2 : participantCount === 3 ? 3 : 4;
+
+      if (currentRound >= totalRounds) {
+        await this.crudService.update(sessionId, {
+          currentPhase: 'completion',
+          phaseStartTime: serverTimestamp()
+        });
+      } else {
+        await this.crudService.update(sessionId, {
+          participants: this.rotateParticipantRoles(session.participants),
+          currentPhase: 'listening',
+          currentRound: currentRound + 1,
+          phaseStartTime: serverTimestamp()
+        });
+      }
 
       return await this.crudService.get(sessionId);
     } catch (error) {
@@ -106,65 +142,20 @@ export class SessionPhaseService {
         throw new Error('Only the host can complete rounds');
       }
 
-      // Get current round (default to 1 if not set)
       const currentRound = session.currentRound || 1;
-      
-      // Check if this was the final round (calculate based on participant count)
       const participantCount = session.participants.length;
-      let totalRounds: number;
-      
-      if (participantCount === 2) {
-        totalRounds = 2; // 2-person sessions: speaker ↔ listener
-      } else if (participantCount === 3) {
-        totalRounds = 3; // 3-person sessions: speaker → listener → scribe
-      } else {
-        totalRounds = 4; // 4+ person sessions: speaker → listener → scribe → observer
-      }
-      
-      if (currentRound >= totalRounds) {
-        // Move to completion phase instead of transition
+      const totalRounds = participantCount === 2 ? 2 : participantCount === 3 ? 3 : 4;
+      const isFinalRound = currentRound >= totalRounds;
+      const hasScribe = participantCount >= 3;
+
+      if (isFinalRound && !hasScribe) {
         await this.crudService.update(sessionId, {
           currentPhase: 'completion',
           phaseStartTime: serverTimestamp()
         });
       } else {
-        // Rotate roles for all participants based on participant count
-        let updatedParticipants;
-        
-        if (participantCount === 2) {
-          // 2-person rotation: speaker ↔ listener
-          updatedParticipants = session.participants.map(participant => ({
-            ...participant,
-            role: participant.role === 'speaker' ? 'listener' : 'speaker'
-          }));
-        } else if (participantCount === 3) {
-          // 3-person rotation: speaker → listener → scribe
-          const roleOrder = ['speaker', 'listener', 'scribe'];
-          updatedParticipants = session.participants.map(participant => {
-            const currentRoleIndex = roleOrder.indexOf(participant.role);
-            const nextRoleIndex = (currentRoleIndex + 1) % roleOrder.length;
-            return {
-              ...participant,
-              role: roleOrder[nextRoleIndex]
-            };
-          });
-        } else {
-          // 4+ person rotation: speaker → listener → scribe → observer
-          const roleOrder = ['speaker', 'listener', 'scribe', 'observer'];
-          updatedParticipants = session.participants.map(participant => {
-            const currentRoleIndex = roleOrder.indexOf(participant.role);
-            const nextRoleIndex = (currentRoleIndex + 1) % roleOrder.length;
-            return {
-              ...participant,
-              role: roleOrder[nextRoleIndex]
-            };
-          });
-        }
-
         await this.crudService.update(sessionId, {
-          participants: updatedParticipants,
           currentPhase: 'transition',
-          currentRound: currentRound + 1,
           phaseStartTime: serverTimestamp()
         });
       }

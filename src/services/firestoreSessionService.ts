@@ -10,7 +10,8 @@ import {
   getDocs,
   serverTimestamp,
   Timestamp,
-  onSnapshot
+  onSnapshot,
+  runTransaction
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { SessionData, TopicSuggestion, Participant, JoinData } from '../types/sessionTypes';
@@ -23,6 +24,63 @@ export class FirestoreSessionService {
       participants,
       participantIds: participants.map(p => p.id)
     };
+  }
+
+  private static getTotalRounds(participantCount: number): number {
+    if (participantCount === 2) return 2;
+    if (participantCount === 3) return 3;
+    return 4;
+  }
+
+  private static rotateParticipantRoles(participants: Participant[]): Participant[] {
+    const participantCount = participants.length;
+
+    if (participantCount === 2) {
+      return participants.map(participant => ({
+        ...participant,
+        role: participant.role === 'speaker' ? 'listener' : 'speaker'
+      }));
+    }
+
+    const roleOrder = participantCount === 3
+      ? ['speaker', 'listener', 'scribe']
+      : ['speaker', 'listener', 'scribe', 'observer'];
+
+    return participants.map(participant => {
+      const currentRoleIndex = roleOrder.indexOf(participant.role);
+      const nextRoleIndex = (currentRoleIndex + 1) % roleOrder.length;
+      return {
+        ...participant,
+        role: roleOrder[nextRoleIndex]
+      };
+    });
+  }
+
+  /**
+   * Read-modify-write the participants array inside a transaction so concurrent
+   * ready/role/join updates cannot overwrite each other (last-write-wins).
+   */
+  private static async mutateParticipants(
+    sessionId: string,
+    mutator: (participants: Participant[], session: SessionData) => Participant[]
+  ): Promise<SessionData | null> {
+    const docRef = doc(db, this.COLLECTION_NAME, sessionId);
+
+    return runTransaction(db, async (transaction) => {
+      const snap = await transaction.get(docRef);
+      if (!snap.exists()) {
+        return null;
+      }
+
+      const session = snap.data() as SessionData;
+      const updatedParticipants = mutator(session.participants || [], session);
+      const payload = this.withParticipantIds(updatedParticipants);
+      transaction.update(docRef, payload);
+      return {
+        ...session,
+        ...payload
+      };
+    });
   }
 
   // Create a new session
@@ -106,66 +164,30 @@ export class FirestoreSessionService {
   // Join a session
   static async joinSession(joinData: JoinData): Promise<SessionData | null> {
     try {
-      const session = await this.getSession(joinData.sessionId);
-      if (!session) return null;
+      return await this.mutateParticipants(joinData.sessionId, (participants, session) => {
+        if (participants.some(p => p.id === joinData.userId)) {
+          return participants;
+        }
 
-      // Check if session is full
-      if (session.sessionType === 'in-person') {
-        // For in-person sessions, exclude the host from participant count
-        const mobileParticipants = session.participants.filter(p => p.id !== session.hostId);
-        if (mobileParticipants.length >= session.maxParticipants) {
+        if (session.sessionType === 'in-person') {
+          const mobileParticipants = participants.filter(p => p.id !== session.hostId);
+          if (mobileParticipants.length >= session.maxParticipants) {
+            throw new Error('Session is full');
+          }
+        } else if (participants.length >= session.maxParticipants) {
           throw new Error('Session is full');
         }
-      } else {
-        // For video/hybrid sessions, include host in participant count
-        if (session.participants.length >= session.maxParticipants) {
-          throw new Error('Session is full');
-        }
-      }
 
-      // For in-person sessions, allow joining without a role (participants will choose later)
-      if (session.sessionType === 'in-person') {
-        
-        // For in-person sessions, always join without a role initially
-        // Participants will choose their role after joining
-        const participant: Participant = {
-          id: joinData.userId,
-          name: joinData.userName,
-          role: '', // Empty role - will be chosen later
-          status: 'not-ready'
-        };
-
-        const updatedParticipants = [...session.participants, participant];
-        
-        await updateDoc(doc(db, this.COLLECTION_NAME, joinData.sessionId), {
-          ...this.withParticipantIds(updatedParticipants)
-        });
-
-        return {
-          ...session,
-          ...this.withParticipantIds(updatedParticipants)
-        };
-      }
-
-      // For video/hybrid sessions, allow joining without a role (participants will choose in lobby)
-      // This matches the simplified in-person approach
-      const participant: Participant = {
-        id: joinData.userId,
-        name: joinData.userName,
-        role: joinData.role || '', // Allow empty role - will be chosen in lobby
-        status: 'not-ready'
-      };
-
-      const updatedParticipants = [...session.participants, participant];
-      
-      await updateDoc(doc(db, this.COLLECTION_NAME, joinData.sessionId), {
-        ...this.withParticipantIds(updatedParticipants)
+        return [
+          ...participants,
+          {
+            id: joinData.userId,
+            name: joinData.userName,
+            role: session.sessionType === 'in-person' ? '' : (joinData.role || ''),
+            status: 'not-ready'
+          }
+        ];
       });
-
-      return {
-        ...session,
-        ...this.withParticipantIds(updatedParticipants)
-      };
     } catch (error) {
       console.error('Error joining session:', error);
       throw error;
@@ -175,24 +197,14 @@ export class FirestoreSessionService {
   // Update participant ready state
   static async updateReadyState(sessionId: string, userId: string, isReady: boolean): Promise<SessionData | null> {
     try {
-      const session = await this.getSession(sessionId);
-      if (!session) return null;
-
-      const updatedParticipants: Participant[] = session.participants.map(p => 
-        p.id === userId ? { ...p, status: isReady ? 'ready' : 'not-ready' } : p
+      return await this.mutateParticipants(sessionId, (participants) =>
+        participants.map(p =>
+          p.id === userId ? { ...p, status: isReady ? 'ready' : 'not-ready' } : p
+        )
       );
-
-      await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
-        participants: updatedParticipants
-      });
-
-      return {
-        ...session,
-        participants: updatedParticipants
-      };
     } catch (error) {
       console.error('Error updating ready state:', error);
-      return null;
+      throw error;
     }
   }
 
@@ -201,43 +213,19 @@ export class FirestoreSessionService {
     console.log('FirestoreSessionService.updateParticipantRole called:', { sessionId, userId, role });
     
     try {
-      const session = await this.getSession(sessionId);
-      if (!session) {
-        console.error('updateParticipantRole: Session not found');
-        return null;
-      }
+      return await this.mutateParticipants(sessionId, (participants, session) => {
+        const availableRoles = this.getAvailableRoles({ ...session, participants }) || [];
+        if (role !== '' && !availableRoles.includes(role)) {
+          throw new Error('Role not available');
+        }
 
-      console.log('Current session participants:', session.participants);
-
-      // Check if role is available (allow empty string for clearing roles)
-      const availableRoles = this.getAvailableRoles(session) || [];
-      console.log('Available roles:', availableRoles);
-      
-      if (role !== '' && !availableRoles.includes(role)) {
-        console.error('updateParticipantRole: Role not available:', role);
-        throw new Error('Role not available');
-      }
-
-      const updatedParticipants = session.participants.map(p => 
-        p.id === userId ? { ...p, role } : p
-      );
-
-      console.log('Updated participants:', updatedParticipants);
-
-      await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
-        participants: updatedParticipants
+        return participants.map(p =>
+          p.id === userId ? { ...p, role } : p
+        );
       });
-
-      const result = {
-        ...session,
-        participants: updatedParticipants
-      };
-      
-      console.log('updateParticipantRole: Success, returning:', result);
-      return result;
     } catch (error) {
       console.error('Error updating participant role:', error);
-      return null;
+      throw error;
     }
   }
 
@@ -283,6 +271,14 @@ export class FirestoreSessionService {
 
 
 
+  static hasAssignedRole(role?: string | null): boolean {
+    return Boolean(role && role.trim() !== '');
+  }
+
+  static getParticipantsWithoutRoles(participants: Participant[] = []): Participant[] {
+    return participants.filter(p => !this.hasAssignedRole(p.role));
+  }
+
   // Complete hello check-in phase (only host can call this)
   static async completeHelloCheckIn(sessionId: string, hostId: string): Promise<SessionData | null> {
     try {
@@ -294,6 +290,11 @@ export class FirestoreSessionService {
         throw new Error('Only the host can complete phases');
       }
 
+      const participantsWithoutRoles = this.getParticipantsWithoutRoles(session.participants);
+      if (participantsWithoutRoles.length > 0) {
+        throw new Error('All participants must choose a role before continuing');
+      }
+
       await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
         currentPhase: 'listening',
         phaseStartTime: serverTimestamp()
@@ -303,7 +304,7 @@ export class FirestoreSessionService {
       return updatedSession;
     } catch (error) {
       console.error('Error completing hello check-in:', error);
-      return null;
+      throw error;
     }
   }
 
@@ -318,11 +319,22 @@ export class FirestoreSessionService {
         throw new Error('Only the host can complete phases');
       }
 
-      // Advance to the next round (listening phase)
-      await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
-        currentPhase: 'listening',
-        phaseStartTime: serverTimestamp()
-      });
+      const currentRound = session.currentRound || 1;
+      const totalRounds = this.getTotalRounds(session.participants.length);
+
+      if (currentRound >= totalRounds) {
+        await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
+          currentPhase: 'completion',
+          phaseStartTime: serverTimestamp()
+        });
+      } else {
+        await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
+          participants: this.rotateParticipantRoles(session.participants),
+          currentPhase: 'listening',
+          currentRound: currentRound + 1,
+          phaseStartTime: serverTimestamp()
+        });
+      }
 
       const updatedSession = await this.getSession(sessionId);
       return updatedSession;
@@ -343,65 +355,22 @@ export class FirestoreSessionService {
         throw new Error('Only the host can complete rounds');
       }
 
-      // Get current round (default to 1 if not set)
       const currentRound = session.currentRound || 1;
-      
-      // Check if this was the final round (calculate based on participant count)
       const participantCount = session.participants.length;
-      let totalRounds: number;
-      
-      if (participantCount === 2) {
-        totalRounds = 2; // 2-person sessions: speaker ↔ listener
-      } else if (participantCount === 3) {
-        totalRounds = 3; // 3-person sessions: speaker → listener → scribe
-      } else {
-        totalRounds = 4; // 4+ person sessions: speaker → listener → scribe → observer
-      }
-      
-      if (currentRound >= totalRounds) {
-        // Move to completion phase instead of transition
+      const totalRounds = this.getTotalRounds(participantCount);
+      const isFinalRound = currentRound >= totalRounds;
+      const hasScribe = participantCount >= 3;
+
+      if (isFinalRound && !hasScribe) {
+        // 2-person sessions have no scribe, so skip feedback after the last speaker
         await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
           currentPhase: 'completion',
           phaseStartTime: serverTimestamp()
         });
       } else {
-        // Rotate roles for all participants based on participant count
-        let updatedParticipants;
-        
-        if (participantCount === 2) {
-          // 2-person rotation: speaker ↔ listener
-          updatedParticipants = session.participants.map(participant => ({
-            ...participant,
-            role: participant.role === 'speaker' ? 'listener' : 'speaker'
-          }));
-        } else if (participantCount === 3) {
-          // 3-person rotation: speaker → listener → scribe
-          const roleOrder = ['speaker', 'listener', 'scribe'];
-          updatedParticipants = session.participants.map(participant => {
-            const currentRoleIndex = roleOrder.indexOf(participant.role);
-            const nextRoleIndex = (currentRoleIndex + 1) % roleOrder.length;
-            return {
-              ...participant,
-              role: roleOrder[nextRoleIndex]
-            };
-          });
-        } else {
-          // 4+ person rotation: speaker → listener → scribe → observer
-          const roleOrder = ['speaker', 'listener', 'scribe', 'observer'];
-          updatedParticipants = session.participants.map(participant => {
-            const currentRoleIndex = roleOrder.indexOf(participant.role);
-            const nextRoleIndex = (currentRoleIndex + 1) % roleOrder.length;
-            return {
-              ...participant,
-              role: roleOrder[nextRoleIndex]
-            };
-          });
-        }
-
+        // Keep the current scribe and round so they can feed back on the speaker who just finished
         await updateDoc(doc(db, this.COLLECTION_NAME, sessionId), {
-          participants: updatedParticipants,
           currentPhase: 'transition',
-          currentRound: currentRound + 1,
           phaseStartTime: serverTimestamp()
         });
       }
@@ -571,17 +540,29 @@ export class FirestoreSessionService {
     // Filter out empty, null, or undefined roles
     const takenRoles = relevantParticipants
       .map(p => p.role)
-      .filter(role => role && role !== '' && role !== null && role !== undefined);
+      .filter(role => this.hasAssignedRole(role));
+    const availableRoles = allRoles.filter(role => !takenRoles.includes(role));
+
+    // Extra people beyond unique roles can share observer so nobody is left without a choice
+    const observerRole = session.sessionType === 'in-person' ? 'observer-temporary' : 'observer';
+    const unassignedCount = this.getParticipantsWithoutRoles(relevantParticipants).length;
+    if (
+      unassignedCount > 0 &&
+      relevantParticipants.length > allRoles.length &&
+      !availableRoles.includes(observerRole)
+    ) {
+      availableRoles.push(observerRole);
+    }
     
     console.log('getAvailableRoles:', {
       sessionType: session.sessionType,
       allRoles,
       participants: relevantParticipants.map(p => ({ id: p.id, name: p.name, role: p.role })),
       takenRoles,
-      availableRoles: allRoles.filter(role => !takenRoles.includes(role))
+      availableRoles
     });
     
-    return allRoles.filter(role => !takenRoles.includes(role));
+    return availableRoles;
   }
 
   // Auto-assign roles to participants
@@ -734,7 +715,7 @@ export class FirestoreSessionService {
     }
   }
 
-  // Set the active discussion topic (e.g. from WordCloud selection)
+  // Set the active discussion topic (host chooses from lobby votes)
   static async updateSessionTopic(sessionId: string, topic: string): Promise<SessionData | null> {
     try {
       const trimmed = topic.trim();

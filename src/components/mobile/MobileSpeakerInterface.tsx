@@ -60,6 +60,7 @@ export const MobileSpeakerInterface: React.FC<MobileSpeakerInterfaceProps> = ({
               <HoverTimer 
                 timeRemaining={timeRemaining}
                 phaseDuration={phaseDuration}
+                isActive={session.currentPhase === 'listening' || session.currentPhase === 'round'}
                 className="text-gray-600 dark:text-gray-300"
               />
             )}

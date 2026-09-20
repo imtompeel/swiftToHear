@@ -73,18 +73,12 @@ export const ScribeInterface: React.FC<ScribeInterfaceProps> = ({
             </span>
           </div>
           
-          <div className="space-y-2 sm:space-y-3">
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder={t('dialectic.assistance.scribe.tools.notesPlaceholder')}
-              className="w-full h-20 sm:h-24 px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white resize-none text-sm sm:text-base"
-            />
-            
-            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-              {notes.length} characters captured
-            </div>
-          </div>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder={t('dialectic.assistance.scribe.tools.notesPlaceholder')}
+            className="w-full h-20 sm:h-24 px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white resize-none text-sm sm:text-base"
+          />
         </div>
 
         {/* Scribe Guidance - Two Columns */}

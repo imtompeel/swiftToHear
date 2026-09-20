@@ -1,7 +1,7 @@
 // ===== CENTRALIZED TEST SETUP =====
 import { vi } from 'vitest';
 
-// jsdom does not implement HTMLMediaElement.play (used by HoverTimer module init)
+// jsdom does not implement HTMLMediaElement.play
 HTMLMediaElement.prototype.play = vi.fn().mockResolvedValue(undefined);
 HTMLMediaElement.prototype.pause = vi.fn();
 

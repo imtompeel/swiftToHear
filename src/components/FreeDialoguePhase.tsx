@@ -77,7 +77,12 @@ export const FreeDialoguePhase: React.FC<FreeDialoguePhaseProps> = ({
                   time: formatMs(timeRemaining),
                 })}
               </p>
-              <HoverTimer timeRemaining={timeRemaining} className="justify-center" />
+              <HoverTimer
+                timeRemaining={timeRemaining}
+                phaseDuration={MATCH_FREE_DIALOGUE_MS}
+                isActive={isMatchmaking}
+                className="justify-center"
+              />
             </div>
           )}
         </div>

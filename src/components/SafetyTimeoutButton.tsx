@@ -8,6 +8,7 @@ interface SafetyTimeoutButtonProps {
   canEndTimeout?: boolean;
   className?: string;
   onToggleVideo?: () => void; // Optional video toggle function
+  onMute?: () => void; // Optional mute so others stop hearing the requester immediately
 }
 
 export const SafetyTimeoutButton: React.FC<SafetyTimeoutButtonProps> = ({
@@ -16,7 +17,8 @@ export const SafetyTimeoutButton: React.FC<SafetyTimeoutButtonProps> = ({
   isTimeoutActive,
   canEndTimeout = false,
   className = '',
-  onToggleVideo
+  onToggleVideo,
+  onMute
 }) => {
   const { t } = useTranslation();
 
@@ -47,12 +49,12 @@ export const SafetyTimeoutButton: React.FC<SafetyTimeoutButtonProps> = ({
   }
 
   const handleRequestTimeout = () => {
-    // First toggle video off if function is provided
     if (onToggleVideo) {
-      console.log('Safety timeout button: Toggling video off');
       onToggleVideo();
     }
-    // Then request the timeout
+    if (onMute) {
+      onMute();
+    }
     onRequestTimeout();
   };
 

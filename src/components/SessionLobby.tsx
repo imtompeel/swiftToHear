@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { useTheme } from '../contexts/ThemeContext';
 import { SessionData } from '../types/sessionTypes';
@@ -13,7 +13,7 @@ interface SessionLobbyProps {
   isHost: boolean;
   onStartSession: (sessionId: string, fivePersonChoice?: 'split' | 'together') => void;
   onLeaveSession: (userId: string) => void;
-  onUpdateReadyState: (userId: string, isReady: boolean) => void;
+  onUpdateReadyState: (userId: string, isReady: boolean) => void | Promise<void>;
   onUpdateParticipantRole: (userId: string, role: string) => void;
   onModalStateChange?: (isModalOpen: boolean) => void;
   onAddTopicSuggestion?: (topic: string) => void;
@@ -36,13 +36,23 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
 }) => {
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const [isReady, setIsReady] = useState(false);
+  const [pendingReady, setPendingReady] = useState<boolean | null>(null);
+  const [readyBusy, setReadyBusy] = useState(false);
   const [showStartConfirmation, setShowStartConfirmation] = useState(false);
   const [showHostLeaveConfirmation, setShowHostLeaveConfirmation] = useState(false);
   const [showFivePersonChoice, setShowFivePersonChoice] = useState(false);
 
   // Get current participant
   const currentParticipant = session.participants.find(p => p.id === currentUserId);
+  const serverReady = currentParticipant?.status === 'ready';
+  const isReady = pendingReady ?? serverReady;
+
+  useEffect(() => {
+    if (pendingReady !== null && serverReady === pendingReady) {
+      setPendingReady(null);
+      setReadyBusy(false);
+    }
+  }, [serverReady, pendingReady]);
 
 
 
@@ -50,8 +60,8 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
   // For hosts, we only count non-host participants as ready
   const readyNonHostParticipants = session.participants.filter(p => p.status === 'ready' && p.id !== session.hostId);
   const nonHostParticipants = session.participants.filter(p => p.id !== session.hostId);
-  // Host can start session if all non-host participants are ready, or if they're the only participant
-  const allNonHostParticipantsReady = readyNonHostParticipants.length === nonHostParticipants.length && nonHostParticipants.length > 0;
+  const notReadyGuests = nonHostParticipants.filter(p => p.status !== 'ready');
+  const allNonHostParticipantsReady = notReadyGuests.length === 0 && nonHostParticipants.length > 0;
   
   const canStartSession = isHost && (allNonHostParticipantsReady || session.participants.length === 1);
 
@@ -73,10 +83,18 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
 
 
 
-  const handleReadyToggle = () => {
+  const handleReadyToggle = async () => {
+    if (readyBusy) return;
     const newReadyState = !isReady;
-    setIsReady(newReadyState);
-    onUpdateReadyState(currentUserId, newReadyState);
+    setPendingReady(newReadyState);
+    setReadyBusy(true);
+    try {
+      await onUpdateReadyState(currentUserId, newReadyState);
+    } catch (error) {
+      console.error('Failed to update ready state:', error);
+      setPendingReady(null);
+      setReadyBusy(false);
+    }
   };
 
   const handleStartSession = () => {
@@ -226,9 +244,12 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
               {t('shared.actions.startSession')}
             </button>
             
-            {!allNonHostParticipantsReady && nonHostParticipants.length > 0 && (
-              <p className="text-sm text-secondary-600 dark:text-secondary-400 mt-2">
-                Waiting for {nonHostParticipants.length - readyNonHostParticipants.length} more participant{nonHostParticipants.length - readyNonHostParticipants.length === 1 ? '' : 's'} to be ready
+            {!allNonHostParticipantsReady && notReadyGuests.length > 0 && (
+              <p className="text-sm text-secondary-600 dark:text-secondary-400 mt-2" data-testid="waiting-for-ready">
+                {t('dialectic.lobby.waitingForNamedReady', {
+                  names: notReadyGuests.map(p => p.name).join(', '),
+                  count: notReadyGuests.length
+                })}
               </p>
             )}
           </div>
@@ -271,20 +292,51 @@ const SessionLobby: React.FC<SessionLobbyProps> = ({
         <div className="text-center space-y-4" data-testid="ready-state-toggle">
           <button
             onClick={handleReadyToggle}
-            className={`px-6 py-2 rounded-lg transition-colors ${
+            disabled={readyBusy}
+            className={`px-6 py-2 rounded-lg transition-colors disabled:opacity-60 disabled:cursor-wait ${
               isReady 
                 ? 'bg-green-500 text-white hover:bg-green-600' 
                 : 'bg-secondary-200 text-secondary-700 hover:bg-secondary-300'
             }`}
           >
-            {isReady ? '✓ Ready' : t('dialectic.lobby.markAsReady')}
+            {readyBusy
+              ? t('dialectic.lobby.savingReady')
+              : isReady ? t('dialectic.lobby.readyConfirmed') : t('dialectic.lobby.markAsReady')}
           </button>
           
           <div className="text-sm text-secondary-600 dark:text-secondary-400" data-testid="your-ready-status">
-            {isReady ? 'You are ready' : 'You are not ready'}
+            {isReady ? t('dialectic.lobby.youAreReady') : t('dialectic.lobby.youAreNotReady')}
           </div>
         </div>
       )}
+
+      <div className="bg-secondary-50 dark:bg-secondary-800 rounded-lg p-4" data-testid="participant-ready-list">
+        <h3 className="font-medium text-primary-900 dark:text-primary-100 mb-3">
+          {t('dialectic.lobby.participantStatus.title')}
+        </h3>
+        <p className="text-sm text-secondary-600 dark:text-secondary-400 mb-3">
+          {t('dialectic.lobby.participantStatus.ready', {
+            count: readyParticipants.length,
+            total: session.participants.length
+          })}
+        </p>
+        <ul className="space-y-2">
+          {session.participants.map((participant) => (
+            <li key={participant.id} className="flex items-center justify-between text-sm">
+              <span className="text-primary-800 dark:text-primary-200">
+                {participant.name}
+                {participant.id === currentUserId ? ` (${t('dialectic.lobby.you')})` : ''}
+                {participant.id === session.hostId ? ` · ${t('dialectic.lobby.hostLabel')}` : ''}
+              </span>
+              <span className={participant.status === 'ready' ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}>
+                {participant.id === session.hostId || participant.status === 'ready'
+                  ? t('dialectic.lobby.readyStatus')
+                  : t('dialectic.lobby.notReadyStatus')}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
 
 
 

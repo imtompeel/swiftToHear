@@ -10,6 +10,7 @@ export const useSession = (externalUserId?: string, externalUserName?: string) =
   const [error, setError] = useState<string | null>(null);
   const [isHost, setIsHost] = useState(false);
   const previousSessionRef = useRef<string>('');
+  const mutationInFlightRef = useRef(0);
 
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -69,18 +70,18 @@ export const useSession = (externalUserId?: string, externalUserName?: string) =
       
       // Only update if there are actual changes
       if (sessionHash !== previousSessionRef.current) {
+        if (mutationInFlightRef.current > 0) {
+          return;
+        }
+
         console.log('Session data changed, updating...');
         previousSessionRef.current = sessionHash;
+        setSession(sessionData);
         
-        // Use a small delay to batch updates and prevent rapid re-renders
-        setTimeout(() => {
-          setSession(sessionData);
-          
-          // Check if current user is host (only if we have a currentUserId)
-          if (currentUserId) {
-            setIsHost(sessionData.hostId === currentUserId);
-          }
-        }, 100);
+        // Check if current user is host (only if we have a currentUserId)
+        if (currentUserId) {
+          setIsHost(sessionData.hostId === currentUserId);
+        }
       }
       
     } catch (err) {
@@ -95,6 +96,10 @@ export const useSession = (externalUserId?: string, externalUserName?: string) =
     
     const unsubscribe = FirestoreSessionService.listenToSession(sessionId, (updatedSession) => {
       if (updatedSession) {
+        if (mutationInFlightRef.current > 0) {
+          return;
+        }
+
         console.log('useSession: Received real-time session update:', {
           currentPhase: updatedSession.currentPhase,
           currentRound: updatedSession.currentRound,
@@ -182,14 +187,35 @@ export const useSession = (externalUserId?: string, externalUserName?: string) =
   // Update ready state
   const updateReadyState = useCallback(async (isReady: boolean) => {
     if (!session) return;
+
+    const previousSession = session;
+    mutationInFlightRef.current += 1;
+    setSession(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        participants: prev.participants.map(p =>
+          p.id === currentUserId
+            ? { ...p, status: isReady ? 'ready' : 'not-ready' }
+            : p
+        )
+      };
+    });
     
     try {
       const updatedSession = await FirestoreSessionService.updateReadyState(session.sessionId, currentUserId, isReady);
       if (updatedSession) {
         setSession(updatedSession);
+      } else {
+        setSession(previousSession);
+        throw new Error('Failed to update ready state');
       }
     } catch (err) {
+      setSession(previousSession);
       setError(err instanceof Error ? err.message : 'Failed to update ready state');
+      throw err;
+    } finally {
+      mutationInFlightRef.current = Math.max(0, mutationInFlightRef.current - 1);
     }
   }, [session, currentUserId]);
 

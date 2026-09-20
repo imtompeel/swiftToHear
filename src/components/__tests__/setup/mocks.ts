@@ -37,17 +37,31 @@ vi.mock('firebase/app', () => ({
   initializeApp: vi.fn(() => ({ name: 'test-app' })),
 }));
 
-vi.mock('firebase/auth', () => ({
-  getAuth: vi.fn(() => ({ currentUser: mockAuthUser })),
-  onAuthStateChanged: vi.fn((_auth: unknown, callback: (user: typeof mockAuthUser) => void) => {
-    callback(mockAuthUser);
-    return vi.fn();
-  }),
-  signInWithEmailAndPassword: vi.fn(() => Promise.resolve({ user: mockAuthUser })),
-  signOut: vi.fn(() => Promise.resolve()),
-  createUserWithEmailAndPassword: vi.fn(() => Promise.resolve({ user: mockAuthUser })),
-  updateProfile: vi.fn(() => Promise.resolve()),
-}));
+vi.mock('firebase/auth', () => {
+  class MockGoogleAuthProvider {
+    setCustomParameters = vi.fn();
+    static credentialFromError = vi.fn(() => null);
+  }
+
+  return {
+    getAuth: vi.fn(() => ({ currentUser: mockAuthUser })),
+    onAuthStateChanged: vi.fn((_auth: unknown, callback: (user: typeof mockAuthUser) => void) => {
+      callback(mockAuthUser);
+      return vi.fn();
+    }),
+    signInWithEmailAndPassword: vi.fn(() => Promise.resolve({ user: mockAuthUser })),
+    signInAnonymously: vi.fn(() => Promise.resolve({ user: mockAuthUser })),
+    signInWithPopup: vi.fn(() => Promise.resolve({ user: mockAuthUser })),
+    signInWithRedirect: vi.fn(() => Promise.resolve()),
+    signInWithCredential: vi.fn(() => Promise.resolve({ user: mockAuthUser })),
+    linkWithPopup: vi.fn(() => Promise.resolve({ user: mockAuthUser })),
+    getRedirectResult: vi.fn(() => Promise.resolve(null)),
+    GoogleAuthProvider: MockGoogleAuthProvider,
+    signOut: vi.fn(() => Promise.resolve()),
+    createUserWithEmailAndPassword: vi.fn(() => Promise.resolve({ user: mockAuthUser })),
+    updateProfile: vi.fn(() => Promise.resolve()),
+  };
+});
 
 vi.mock('firebase/firestore', () => ({
   getFirestore: vi.fn(() => mockFirestoreDb),
@@ -116,6 +130,7 @@ vi.mock('../../../contexts/AuthContext', () => ({
     loading: false,
     signUp: vi.fn(),
     signIn: vi.fn(),
+    signInWithGoogle: vi.fn(),
     signOut: vi.fn(),
     ensureSignedIn: vi.fn(async () => mockAuthUser),
     error: null,
@@ -163,6 +178,8 @@ vi.mock('../../../hooks/useVideoCall', () => ({
     localStreamRef: { current: null },
     toggleMute: vi.fn(),
     toggleVideo: vi.fn(),
+    setMuted: vi.fn(),
+    setVideoEnabled: vi.fn(),
     leaveCall: vi.fn(),
     reconnectCall: vi.fn(),
     updateParticipants: vi.fn(),

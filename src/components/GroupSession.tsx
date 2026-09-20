@@ -14,6 +14,9 @@ import { SessionCompletion } from './SessionCompletion';
 import { FreeDialoguePhase } from './FreeDialoguePhase';
 import { ReflectionPhase } from './ReflectionPhase';
 import { GroupManagementDashboard } from './GroupManagementDashboard';
+import { RoundChangePopup } from './RoundChangePopup';
+import { useRoundChangeNotice } from '../hooks/useRoundChangeNotice';
+import { getNextRole, getTotalRounds } from '../utils/nextRole';
 
 interface GroupSessionProps {
   sessionId: string;
@@ -61,6 +64,19 @@ export const GroupSession: React.FC<GroupSessionProps> = ({
   const isHost = useMemo(() => {
     return session?.hostId === currentUserId;
   }, [session, currentUserId]);
+
+  const participantCount = currentGroup?.participants.length || 0;
+  const roundChange = useRoundChangeNotice(
+    currentGroup?.currentPhase,
+    currentGroup?.roundNumber,
+    { hasScribe: participantCount >= 3 }
+  );
+  const nextRole = getNextRole(
+    currentUserRole,
+    participantCount,
+    currentUserRole === 'observer-permanent'
+  );
+  const scribeName = currentGroup?.participants.find(p => p.role === 'scribe')?.name;
 
   // Always call the hook (Rules of Hooks). Disable WebRTC in test harness.
   const isTestHarness = !!(initialSession && initialCurrentGroup);
@@ -465,7 +481,6 @@ export const GroupSession: React.FC<GroupSessionProps> = ({
           // For 2-person groups, transition directly to next round or completion
           const totalRounds = 2;
           if (currentGroup.roundNumber >= totalRounds) {
-            // Session complete
             if (isHost) {
               FirestoreGroupSessionService.updateGroupPhase(sessionId, groupId, 'completion');
             }
@@ -478,21 +493,20 @@ export const GroupSession: React.FC<GroupSessionProps> = ({
                 </div>
               </div>
             );
-          } else {
-            // Continue to next round
-            if (isHost) {
-              FirestoreGroupSessionService.updateGroupPhase(sessionId, groupId, 'listening');
-            }
-            return (
-              <div className="min-h-screen bg-secondary-50 dark:bg-secondary-900 flex items-center justify-center">
-                <div className="text-center">
-                  <p className="text-secondary-600 dark:text-secondary-400">
-                    Moving to next round...
-                  </p>
-                </div>
-              </div>
-            );
           }
+
+          if (isHost) {
+            FirestoreGroupSessionService.updateGroupPhase(sessionId, groupId, 'listening');
+          }
+          return (
+            <div className="min-h-screen bg-secondary-50 dark:bg-secondary-900 flex items-center justify-center">
+              <div className="text-center">
+                <p className="text-secondary-600 dark:text-secondary-400">
+                  Moving to next round...
+                </p>
+              </div>
+            </div>
+          );
         }
         
         // For 3+ person groups, show scribe feedback
@@ -504,7 +518,7 @@ export const GroupSession: React.FC<GroupSessionProps> = ({
             currentUserName={currentUserName}
             onComplete={() => {
               if (isHost) {
-                FirestoreGroupSessionService.updateGroupPhase(sessionId, groupId, 'listening');
+                FirestoreGroupSessionService.completeGroupScribeFeedback(sessionId, groupId);
               }
             }}
             isHost={isHost}
@@ -579,6 +593,18 @@ export const GroupSession: React.FC<GroupSessionProps> = ({
 
   return (
     <div className="min-h-screen bg-secondary-50 dark:bg-secondary-900">
+      {roundChange.notice && currentUserRole && (
+        <RoundChangePopup
+          key={`${roundChange.notice}-${currentGroup.roundNumber}`}
+          notice={roundChange.notice}
+          roundNumber={currentGroup.roundNumber}
+          totalRounds={getTotalRounds(participantCount)}
+          currentRole={currentUserRole}
+          nextRole={nextRole}
+          scribeName={scribeName}
+          onDismiss={roundChange.dismiss}
+        />
+      )}
       {/* Header */}
       <div className="bg-white dark:bg-secondary-800 shadow-sm border-b border-secondary-200 dark:border-secondary-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

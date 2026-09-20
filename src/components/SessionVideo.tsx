@@ -156,7 +156,7 @@ export const SessionVideo: React.FC<SessionVideoProps> = React.memo(({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                     </svg>
                     <div className="text-lg font-semibold mb-1">Safety Timeout</div>
-                    <div className="text-sm">Your video is paused</div>
+                    <div className="text-sm">Your video and microphone are paused</div>
                     <div className="text-xs mt-2">Take care of yourself</div>
                   </div>
                 </div>
@@ -170,12 +170,17 @@ export const SessionVideo: React.FC<SessionVideoProps> = React.memo(({
                 {/* Microphone Toggle */}
                 <button
                   onClick={videoCall.toggleMute}
+                  disabled={safetyTimeout?.isTimeoutActive && safetyTimeout?.requestedByMe}
                   className={`p-1 sm:p-2 lg:p-3 rounded transition-all duration-200 flex items-center justify-center ${
                     videoCall.isMuted 
                       ? 'bg-red-500 hover:bg-red-600 text-white' 
                       : 'bg-black bg-opacity-50 hover:bg-opacity-70 text-white'
-                  }`}
-                  title={videoCall.isMuted ? "Unmute microphone" : "Mute microphone"}
+                  } ${safetyTimeout?.isTimeoutActive && safetyTimeout?.requestedByMe ? 'opacity-60 cursor-not-allowed' : ''}`}
+                  title={
+                    safetyTimeout?.isTimeoutActive && safetyTimeout?.requestedByMe
+                      ? 'Microphone is paused during timeout'
+                      : videoCall.isMuted ? "Unmute microphone" : "Mute microphone"
+                  }
                 >
                   {videoCall.isMuted ? (
                     <MicOff className="text-sm sm:text-base lg:text-lg" />
@@ -187,12 +192,17 @@ export const SessionVideo: React.FC<SessionVideoProps> = React.memo(({
                 {/* Camera Toggle */}
                 <button
                   onClick={videoCall.toggleVideo}
+                  disabled={safetyTimeout?.isTimeoutActive && safetyTimeout?.requestedByMe}
                   className={`p-1 sm:p-2 lg:p-3 rounded transition-all duration-200 flex items-center justify-center ${
                     !videoCall.isVideoEnabled 
                       ? 'bg-red-500 hover:bg-red-600 text-white' 
                       : 'bg-black bg-opacity-50 hover:bg-opacity-70 text-white'
-                  }`}
-                  title={videoCall.isVideoEnabled ? "Turn off camera" : "Turn on camera"}
+                  } ${safetyTimeout?.isTimeoutActive && safetyTimeout?.requestedByMe ? 'opacity-60 cursor-not-allowed' : ''}`}
+                  title={
+                    safetyTimeout?.isTimeoutActive && safetyTimeout?.requestedByMe
+                      ? 'Camera is paused during timeout'
+                      : videoCall.isVideoEnabled ? "Turn off camera" : "Turn on camera"
+                  }
                 >
                   {videoCall.isVideoEnabled ? (
                     <Videocam className="text-sm sm:text-base lg:text-lg" />
@@ -231,17 +241,28 @@ export const SessionVideo: React.FC<SessionVideoProps> = React.memo(({
             {/* Peer Videos - Show actual videos when available */}
             {peerStreams.map(([participantId, stream]: [string, MediaStream]) => {
               const participant = session.participants.find((p: any) => p.id === participantId);
+              const isPeerInTimeout =
+                Boolean(safetyTimeout?.isTimeoutActive) &&
+                safetyTimeout?.timeoutState?.requestedBy === participantId;
               return (
                 <div key={participantId} className="relative min-w-0 min-h-0 aspect-video lg:aspect-[4/3]">
                   <video
+                    data-testid={`peer-video-${participantId}`}
                     autoPlay
                     playsInline
+                    muted={isPeerInTimeout}
                     className="w-full h-full object-cover rounded-lg bg-gray-200 dark:bg-gray-700 max-w-full"
                     ref={(el) => {
                       if (el && el.srcObject !== stream) {
                         console.log('🟢 VIDEO - Setting stream for peer:', participantId, 'stream active:', stream.active, 'tracks:', stream.getTracks().length);
                         el.srcObject = stream;
                       }
+                      if (el) {
+                        el.muted = isPeerInTimeout;
+                      }
+                      stream.getAudioTracks().forEach((track) => {
+                        track.enabled = !isPeerInTimeout;
+                      });
                     }}
                     onError={(e) => {
                       console.error('Peer video error:', e);

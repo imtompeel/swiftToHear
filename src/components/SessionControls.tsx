@@ -26,7 +26,7 @@ export const SessionControls: React.FC<SessionControlsProps> = React.memo(({
         </button>
         
         <div className="flex space-x-2">
-          {isHost && session?.currentPhase !== 'transition' && session?.currentPhase !== 'hello-checkin' && (
+          {isHost && session?.currentPhase === 'listening' && (
             <button
               onClick={onCompleteRound}
               className="px-6 py-2 bg-accent-600 text-white rounded-md hover:bg-accent-700"

@@ -313,21 +313,25 @@ export const useVideoCall = ({
     };
   }, []);
 
+  const setMuted = useCallback((muted: boolean) => {
+    if (!webrtcService.current) return;
+    webrtcService.current.toggleAudio(!muted);
+    setState(prev => (prev.isMuted === muted ? prev : { ...prev, isMuted: muted }));
+  }, []);
+
+  const setVideoEnabled = useCallback((enabled: boolean) => {
+    if (!webrtcService.current) return;
+    webrtcService.current.toggleVideo(enabled);
+    setState(prev => (prev.isVideoEnabled === enabled ? prev : { ...prev, isVideoEnabled: enabled }));
+  }, []);
+
   const toggleMute = useCallback(() => {
-    if (webrtcService.current) {
-      const newMutedState = !state.isMuted;
-      webrtcService.current.toggleAudio(!newMutedState);
-      setState(prev => ({ ...prev, isMuted: newMutedState }));
-    }
-  }, [state.isMuted]);
+    setMuted(!state.isMuted);
+  }, [setMuted, state.isMuted]);
 
   const toggleVideo = useCallback(() => {
-    if (webrtcService.current) {
-      const newVideoState = !state.isVideoEnabled;
-      webrtcService.current.toggleVideo(newVideoState);
-      setState(prev => ({ ...prev, isVideoEnabled: newVideoState }));
-    }
-  }, [state.isVideoEnabled]);
+    setVideoEnabled(!state.isVideoEnabled);
+  }, [setVideoEnabled, state.isVideoEnabled]);
 
   const leaveCall = useCallback(async () => {
     if (webrtcService.current) {
@@ -412,6 +416,8 @@ export const useVideoCall = ({
     // Actions
     toggleMute,
     toggleVideo,
+    setMuted,
+    setVideoEnabled,
     leaveCall,
     reconnectCall,
     updateParticipants,

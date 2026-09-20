@@ -61,6 +61,7 @@ export const MobileListenerInterface: React.FC<MobileListenerInterfaceProps> = (
               <HoverTimer 
                 timeRemaining={timeRemaining}
                 phaseDuration={phaseDuration}
+                isActive={_session.currentPhase === 'listening' || _session.currentPhase === 'round'}
                 className="text-gray-600 dark:text-gray-300"
               />
             )}
